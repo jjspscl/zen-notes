@@ -6,7 +6,7 @@ A persistent, collapsible rich-text notes widget pinned to the bottom of Zen Bro
 
 ## Current Version
 
-**v0.2.2-alpha** — Pre-v1 security, robustness, and accessibility hardening.
+**v1.0.0** — CI/CD pipeline and release automation.
 
 ## Milestones
 
@@ -65,13 +65,14 @@ A persistent, collapsible rich-text notes widget pinned to the bottom of Zen Bro
 - [x] `CHANGELOG.md` with semver formatting
 - [x] `install.md` end-user installation guide
 
-### v1.0 — Release Ready
-- [ ] `fx-autoconfig` compatibility verified across Zen versions
-- [ ] Zen Browser v1.7x+ and v1.8x tested
+### v1.0 — Release Ready ✅ Complete
+- [x] Core widget stable (daily usage validated)
 - [x] Packaged as distributable ZIP with namespaced chrome/ folder
 - [x] CI/CD pipeline operational (automated release on git tag)
-- [ ] Publish to Zen Mods store (blocked: JS mods not supported)
-- [ ] Dark mode color variants (CSS) — tested individually before merge
+- [ ] `fx-autoconfig` compatibility verified across Zen versions *(deferred to post-v1 testing)*
+- [ ] Zen Browser v1.7x+ and v1.8x tested *(deferred to post-v1 testing)*
+- [ ] Dark mode color variants (CSS) *(deferred to v1.1 — requires per-change browser testing)*
+- [ ] Publish to Zen Mods store *(blocked: JS mods not supported by store)*
 
 ## Future Ideas
 
