@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         0.2.1-alpha
+// @version         0.2.2-alpha
 // @description     Persistent sticky-note widget in Zen Browser sidebar
 // @author          jjspscl
 // @include         main

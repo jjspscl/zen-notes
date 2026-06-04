@@ -19,33 +19,23 @@ A persistent, colorful sticky-note widget for [Zen Browser](https://zen-browser.
 
 ## Installation
 
+> **Quick start**: See [install.md](./install.md) for detailed step-by-step instructions including troubleshooting.
+
 ### Prerequisites
 
 You need a `userChrome.js` loader installed in Zen Browser. If you don't have one:
 
 1. Install [fx-autoconfig](https://github.com/MrOtherGuy/fx-autoconfig) or [zen-autoconfig-script](https://github.com/RayZ3R0/zen-autoconfig-script)
-2. Follow their setup instructions (usually involves copying files into your Zen profile `chrome/` folder)
+2. Follow their setup instructions
 3. Restart Zen Browser
 
-### Install the Mod
+### Quick Install
 
-1. Locate your Zen profile folder:
-   - Go to `about:support` in the address bar
-   - Click **"Open Folder"** next to **Profile Folder**
-
-2. Inside your profile, ensure there is a `chrome/` folder. Create it if missing.
-
-3. Inside `chrome/`, ensure there is a `JS/` folder. Create it if missing.
-
-4. Copy the mod files:
-   - `style.css` → `chrome/userChrome.css` (or add `@import url("zen-notes/style.css");` to your existing `userChrome.css`)
-   - `notes-widget.uc.js` → `chrome/JS/`
-
-5. Clear the startup cache:
-   - Go to `about:support` in the address bar
-   - Click **"Clear startup cache"** in the top-right corner, then confirm
-
-6. The widget should appear at the bottom of your sidebar, above the workspace indicators.
+1. Download the latest release ZIP from [GitHub Releases](https://github.com/jjspscl/zen-notes/releases)
+2. Extract and copy `zen-notes/chrome/` contents into your Zen profile `chrome/` folder
+3. Copy `zen-notes/userChrome.css` into `chrome/userChrome.css` (or append to existing)
+4. Clear startup cache: `about:support` → **"Clear startup cache"**
+5. Restart Zen Browser
 
 ## Usage
 
@@ -70,7 +60,15 @@ To also clear your saved note, go to `about:config`, search for `zen.notes.conte
 
 ## Roadmap
 
-See [ROADMAP.md](./ROADMAP.md) for upcoming features (resizable height, Zen Mod Store export).
+See [ROADMAP.md](./ROADMAP.md) for milestones and current status.
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup, conventional commits, and testing guidelines.
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for version history.
 
 ## License
 

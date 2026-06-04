@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    name: Build and Release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Extract version from tag
+        id: version
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate version matches tag
+        run: |
+          MOD_VERSION=$(node -p "require('./mod.json').version")
+          TAG="${{ steps.version.outputs.tag }}"
+          if [ "v$MOD_VERSION" != "$TAG" ]; then
+            echo "❌ Tag $TAG does not match mod.json version $MOD_VERSION"
+            exit 1
+          fi
+          echo "✅ Tag matches mod.json version ($MOD_VERSION)"
+
+      - name: Validate all checks
+        run: |
+          node scripts/validate-version.js
+          node scripts/validate-header.js
+          node scripts/validate-css.js
+          node --check notes-widget.uc.js
+
+      - name: Build release package
+        run: node scripts/build-release.js
+
+      - name: Generate changelog from commits
+        id: changelog
+        run: |
+          # Get commits since last tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          if [ -z "$$PREV_TAG" ]; then
+            RANGE=""
+          else
+            RANGE="${PREV_TAG}..HEAD"
+          fi
+          echo "changes<<EOF" >> "$GITHUB_OUTPUT"
+          git log --pretty=format:"- %s" $RANGE >> "$GITHUB_OUTPUT"
+          echo "" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: zen-notes-*.zip
+          body: |
+            ## Zen Notes Widget ${{ steps.version.outputs.tag }}
+
+            ### Changes
+            ${{ steps.changelog.outputs.changes }}
+
+            ### Installation
+            See [install.md](./install.md) for detailed setup instructions.
+
+            > **Requires**: Zen Browser 1.7+ and `fx-autoconfig` loader.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -6,7 +6,7 @@ A persistent, collapsible rich-text notes widget pinned to the bottom of Zen Bro
 
 ## Current Version
 
-**v0.2.2 Alpha** — Pre-v1 security, robustness, and accessibility hardening.
+**v0.2.2-alpha** — Pre-v1 security, robustness, and accessibility hardening.
 
 ## Milestones
 
@@ -42,17 +42,36 @@ A persistent, collapsible rich-text notes widget pinned to the bottom of Zen Bro
 - [x] Auto-focus editor on expand
 - [x] Escape key collapses widget
 
-### v0.3 — Polish & Config 🚧 Partially Done
-- [ ] Resizable height (drag handle)
-- [x] `preferences.json` integration: default height, collapsed state, color, last edited
-- [x] Smooth CSS transitions
-- [ ] Zen Mod JSON export for one-click install
+### v0.2.2 — Security & Robustness Hardening ✅ Complete
+- [x] Added periodic crash-safe auto-save (5s interval)
+- [x] Added top-level error boundary (`createWidgetSafe`)
+- [x] Fixed ResizeObserver feedback loop during drag
+- [x] Fixed global event listener leaks on unload
+- [x] Fixed hardcoded en-US locale in date formatting
+- [x] Added graceful DOM degradation warning
+- [x] Added accessibility attributes (aria-expanded, aria-pressed, aria-label)
+- [x] Extracted magic numbers to named constants
+- [x] Added startup console banner for debugging
+- [x] Added `sanitizeHTML()` placeholder (DOMParser approach deferred post-v1)
+- [x] Added MIT `LICENSE` and `.editorconfig`
+
+### v0.3 — CI/CD & Distribution ✅ Complete
+- [x] GitHub Actions CI workflow (version sync, header, CSS, syntax checks)
+- [x] GitHub Actions release workflow (ZIP + GitHub Release on tag push)
+- [x] Automated version bump script (`scripts/bump.js`)
+- [x] Validation scripts (version, header, CSS)
+- [x] Build script for namespaced release ZIP
+- [x] `CONTRIBUTING.md` with conventional commits guide
+- [x] `CHANGELOG.md` with semver formatting
+- [x] `install.md` end-user installation guide
 
 ### v1.0 — Release Ready
 - [ ] `fx-autoconfig` compatibility verified across Zen versions
 - [ ] Zen Browser v1.7x+ and v1.8x tested
-- [ ] Packaged as importable Zen Mod
-- [ ] Publish to Zen Mods store (if JS mods accepted)
+- [x] Packaged as distributable ZIP with namespaced chrome/ folder
+- [x] CI/CD pipeline operational (automated release on git tag)
+- [ ] Publish to Zen Mods store (blocked: JS mods not supported)
+- [ ] Dark mode color variants (CSS) — tested individually before merge
 
 ## Future Ideas
 

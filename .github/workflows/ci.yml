@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validate
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate version sync
+        run: node scripts/validate-version.js
+
+      - name: Validate UserScript header
+        run: node scripts/validate-header.js
+
+      - name: Validate CSS syntax
+        run: node scripts/validate-css.js
+
+      - name: Check JS syntax
+        run: node --check notes-widget.uc.js
+
+      - name: Ensure no uncommitted changes after bump
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "❌ Uncommitted changes detected:" 
+            git status --short
+            exit 1
+          fi
