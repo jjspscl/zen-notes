@@ -6,7 +6,7 @@ A persistent, collapsible rich-text notes widget pinned to the bottom of Zen Bro
 
 ## Current Version
 
-**v0.1.1 Alpha** — Plain text widget with persistence, theme matching, and layout fixes.
+**v0.2.0 Alpha** — Sticky note redesign with rich text, pastel colors, and toolbar.
 
 ## Milestones
 
@@ -23,17 +23,20 @@ A persistent, collapsible rich-text notes widget pinned to the bottom of Zen Bro
 **v0.1.1 Fixes:**
 - [x] Fixed text wrapping — long text no longer expands sidebar width
 - [x] Fixed collapsed header visibility — full header bar with chevron remains visible
-- [x] Corrected DOM insertion point — widget now sits between tabs and bottom toolbar
+- [x] Corrected DOM injection point — widget now sits between tabs and bottom toolbar
 
-### v0.2 — Rich Text Toolbar 🚧 Planned
-- [ ] Bold, italic, bullet list buttons
-- [ ] Toolbar positioned above text area
-- [ ] Keyboard shortcuts (Ctrl+B, Ctrl+I)
-- [x] Placeholder text when empty *(already done in v0.1)*
+### v0.2 — Sticky Note Redesign ✅ Complete
+- [x] Pastel card colors (yellow, orange, purple, green, blue) with color picker dot
+- [x] Bold, italic toolbar buttons above text area
+- [x] Keyboard shortcuts (`Ctrl+B`, `Ctrl+I`)
+- [x] HTML persistence instead of plain text
+- [x] Last edited date display
+- [x] Card styling with border-radius, shadow, and border
+- [x] Fixed body clipping and unbroken-string overflow
 
 ### v0.3 — Polish & Config 🚧 Partially Done
 - [ ] Resizable height (drag handle)
-- [x] `preferences.json` integration: default height, collapsed state
+- [x] `preferences.json` integration: default height, collapsed state, color, last edited
 - [x] Smooth CSS transitions
 - [ ] Zen Mod JSON export for one-click install
 

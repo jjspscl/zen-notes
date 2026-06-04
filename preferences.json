@@ -12,6 +12,16 @@
   "zen.notes.content": {
     "type": "string",
     "default": "",
-    "description": "Persisted note content"
+    "description": "Persisted note content (HTML)"
+  },
+  "zen.notes.color": {
+    "type": "string",
+    "default": "yellow",
+    "description": "Sticky note card color (yellow, orange, purple, green, blue)"
+  },
+  "zen.notes.lastEdited": {
+    "type": "string",
+    "default": "",
+    "description": "Date of last edit (formatted string)"
   }
 }

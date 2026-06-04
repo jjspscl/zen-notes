@@ -1,17 +1,20 @@
 {
   "name": "zen-notes-widget",
   "displayName": "Zen Notes Widget",
-  "version": "0.1.1-alpha",
-  "description": "A persistent, collapsible notes widget pinned to the bottom of the Zen Browser sidebar",
+  "version": "0.2.0-alpha",
+  "description": "A persistent, colorful sticky-note widget pinned to the bottom of the Zen Browser sidebar",
   "author": "jjspscl",
   "license": "MIT",
   "compatibility": {
     "zen": ">=1.7.0"
   },
   "features": [
-    "Persistent plain-text notes in sidebar",
+    "Persistent rich-text notes in sidebar (HTML storage)",
     "Collapsible widget above workspace indicators",
+    "5 pastel card colors (yellow, orange, purple, green, blue)",
+    "Bold / Italic toolbar with keyboard shortcuts",
     "Auto-save via Firefox preferences",
+    "Last edited date display",
     "Dark/light theme matching"
   ],
   "files": {
@@ -22,14 +25,16 @@
     "enabled": true,
     "configurable": [
       "zen.notes.collapsed",
-      "zen.notes.height"
+      "zen.notes.height",
+      "zen.notes.color"
     ]
   },
   "tags": [
     "sidebar",
     "notes",
     "productivity",
-    "widget"
+    "widget",
+    "sticky-note"
   ],
   "marketplace": {
     "submission_ready": false,

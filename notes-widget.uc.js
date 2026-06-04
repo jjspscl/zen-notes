@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         0.1.1-alpha
-// @description     Persistent notes widget in Zen Browser sidebar
+// @version         0.2.0-alpha
+// @description     Persistent sticky-note widget in Zen Browser sidebar
 // @author          jjspscl
 // @include         main
 // @run-at          document-end
@@ -13,10 +13,14 @@
   const PREF_CONTENT = "zen.notes.content";
   const PREF_COLLAPSED = "zen.notes.collapsed";
   const PREF_HEIGHT = "zen.notes.height";
+  const PREF_COLOR = "zen.notes.color";
+  const PREF_LAST_EDITED = "zen.notes.lastEdited";
 
   const DEFAULT_HEIGHT = 200;
   const MIN_HEIGHT = 100;
   const MAX_HEIGHT = 400;
+  const DEFAULT_COLOR = "yellow";
+  const COLORS = ["yellow", "orange", "purple", "green", "blue"];
 
   function getPrefString(key, defaultValue = "") {
     try {
@@ -30,7 +34,7 @@
     try {
       Services.prefs.setStringPref(key, value);
     } catch (e) {
-      console.error("ZenNotes: failed to save pref", key, e);
+      console.error("[ZenNotes] failed to save pref", key, e);
     }
   }
 
@@ -46,7 +50,7 @@
     try {
       Services.prefs.setBoolPref(key, value);
     } catch (e) {
-      console.error("ZenNotes: failed to save pref", key, e);
+      console.error("[ZenNotes] failed to save pref", key, e);
     }
   }
 
@@ -62,8 +66,13 @@
     try {
       Services.prefs.setIntPref(key, value);
     } catch (e) {
-      console.error("ZenNotes: failed to save pref", key, e);
+      console.error("[ZenNotes] failed to save pref", key, e);
     }
+  }
+
+  function getFormattedDate() {
+    const d = new Date();
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   }
 
   let saveTimeout = null;
@@ -74,6 +83,7 @@
     }
     saveTimeout = setTimeout(() => {
       setPrefString(PREF_CONTENT, value);
+      setPrefString(PREF_LAST_EDITED, getFormattedDate());
     }, 300);
   }
 
@@ -92,15 +102,19 @@
     const isCollapsed = getPrefBool(PREF_COLLAPSED, false);
     const savedHeight = getPrefInt(PREF_HEIGHT, DEFAULT_HEIGHT);
     const clampedHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, savedHeight));
+    const savedColor = getPrefString(PREF_COLOR, DEFAULT_COLOR);
+    const lastEdited = getPrefString(PREF_LAST_EDITED, "");
 
     const widget = document.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "vbox");
     widget.id = "zen-notes-widget";
+    widget.className = "zen-notes-" + savedColor;
     widget.setAttribute("flex", "0");
     widget.setAttribute("data-collapsed", isCollapsed ? "true" : "false");
     if (!isCollapsed) {
       widget.style.height = clampedHeight + "px";
     }
 
+    // Header
     const header = document.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "hbox");
     header.className = "zen-notes-header";
     header.setAttribute("align", "center");
@@ -109,31 +123,125 @@
     title.className = "zen-notes-title";
     title.textContent = "Notes";
 
+    const headerActions = document.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "hbox");
+    headerActions.className = "zen-notes-header-actions";
+
+    // Color dot
+    const colorDot = document.createElementNS("http://www.w3.org/1999/xhtml", "span");
+    colorDot.className = "zen-notes-color-dot";
+
+    // Color palette (inline, hidden by default)
+    const colorPalette = document.createElementNS("http://www.w3.org/1999/xhtml", "span");
+    colorPalette.className = "zen-notes-color-palette";
+    COLORS.forEach((color) => {
+      const swatch = document.createElementNS("http://www.w3.org/1999/xhtml", "span");
+      swatch.className = "zen-notes-color-swatch";
+      swatch.setAttribute("data-color", color);
+      swatch.addEventListener("click", (e) => {
+        e.stopPropagation();
+        widget.className = "zen-notes-" + color;
+        setPrefString(PREF_COLOR, color);
+        colorPalette.setAttribute("data-visible", "false");
+      });
+      colorPalette.appendChild(swatch);
+    });
+
+    colorDot.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const currentlyVisible = colorPalette.getAttribute("data-visible") === "true";
+      colorPalette.setAttribute("data-visible", currentlyVisible ? "false" : "true");
+    });
+
+    // Toggle chevron
     const toggle = document.createElementNS("http://www.w3.org/1999/xhtml", "span");
     toggle.className = "zen-notes-toggle";
 
-    header.appendChild(title);
-    header.appendChild(toggle);
+    headerActions.appendChild(colorDot);
+    headerActions.appendChild(colorPalette);
+    headerActions.appendChild(toggle);
 
+    header.appendChild(title);
+    header.appendChild(headerActions);
+
+    // Body
     const body = document.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "vbox");
     body.className = "zen-notes-body";
     body.setAttribute("flex", "1");
 
+    // Toolbar
+    const toolbar = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+    toolbar.className = "zen-notes-toolbar";
+
+    const boldBtn = document.createElementNS("http://www.w3.org/1999/xhtml", "button");
+    boldBtn.className = "zen-notes-toolbar-btn";
+    boldBtn.textContent = "B";
+    boldBtn.setAttribute("title", "Bold");
+
+    const italicBtn = document.createElementNS("http://www.w3.org/1999/xhtml", "button");
+    italicBtn.className = "zen-notes-toolbar-btn";
+    italicBtn.textContent = "I";
+    italicBtn.setAttribute("title", "Italic");
+    italicBtn.style.fontStyle = "italic";
+
+    boldBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      editor.focus();
+      document.execCommand("bold");
+      updateToolbarState();
+    });
+
+    italicBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      editor.focus();
+      document.execCommand("italic");
+      updateToolbarState();
+    });
+
+    toolbar.appendChild(boldBtn);
+    toolbar.appendChild(italicBtn);
+
+    // Editor
     const editor = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
     editor.className = "zen-notes-editor";
     editor.setAttribute("contenteditable", "true");
     editor.setAttribute("role", "textbox");
     editor.setAttribute("aria-multiline", "true");
-    editor.textContent = savedContent;
 
+    if (savedContent) {
+      editor.innerHTML = savedContent;
+    }
+
+    // Date
+    const dateLabel = document.createElementNS("http://www.w3.org/1999/xhtml", "span");
+    dateLabel.className = "zen-notes-date";
+    dateLabel.textContent = lastEdited ? "Last edited: " + lastEdited : "";
+
+    body.appendChild(toolbar);
     body.appendChild(editor);
+    body.appendChild(dateLabel);
     widget.appendChild(header);
     widget.appendChild(body);
 
     tabsToolbar.insertBefore(widget, footButtons);
 
+    // Toolbar state updater
+    function updateToolbarState() {
+      try {
+        const isBold = document.queryCommandState("bold");
+        const isItalic = document.queryCommandState("italic");
+        boldBtn.setAttribute("data-active", isBold ? "true" : "false");
+        italicBtn.setAttribute("data-active", isItalic ? "true" : "false");
+      } catch (e) {}
+    }
+
+    // Update toolbar on selection change
+    editor.addEventListener("keyup", updateToolbarState);
+    editor.addEventListener("mouseup", updateToolbarState);
+    editor.addEventListener("click", updateToolbarState);
+
+    // Collapse/expand
     header.addEventListener("click", (e) => {
-      if (e.target.closest(".zen-notes-editor")) return;
+      if (e.target.closest(".zen-notes-editor") || e.target.closest(".zen-notes-toolbar-btn") || e.target.closest(".zen-notes-color-swatch")) return;
 
       const currentlyCollapsed = widget.getAttribute("data-collapsed") === "true";
       const newCollapsed = !currentlyCollapsed;
@@ -148,8 +256,26 @@
       }
     });
 
+    // Keyboard shortcuts
+    editor.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey) {
+        if (e.key === "b" || e.key === "B") {
+          e.preventDefault();
+          document.execCommand("bold");
+          updateToolbarState();
+        } else if (e.key === "i" || e.key === "I") {
+          e.preventDefault();
+          document.execCommand("italic");
+          updateToolbarState();
+        }
+      }
+    });
+
+    // Save on input
     editor.addEventListener("input", () => {
-      debouncedSave(editor.textContent || "");
+      debouncedSave(editor.innerHTML || "");
+      const dateStr = getFormattedDate();
+      dateLabel.textContent = "Last edited: " + dateStr;
     });
 
     editor.addEventListener("blur", () => {
@@ -157,9 +283,19 @@
         clearTimeout(saveTimeout);
         saveTimeout = null;
       }
-      setPrefString(PREF_CONTENT, editor.textContent || "");
+      const html = editor.innerHTML || "";
+      setPrefString(PREF_CONTENT, html);
+      setPrefString(PREF_LAST_EDITED, getFormattedDate());
     });
 
+    // Close palette when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".zen-notes-color-dot") && !e.target.closest(".zen-notes-color-palette")) {
+        colorPalette.setAttribute("data-visible", "false");
+      }
+    });
+
+    // Resize observer
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const h = Math.round(entry.contentRect.height);
@@ -176,6 +312,9 @@
         clearTimeout(saveTimeout);
       }
     };
+
+    // Initial toolbar state
+    updateToolbarState();
   }
 
   function init() {
