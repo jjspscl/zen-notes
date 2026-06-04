@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         1.0.0
+// @version         1.0.1
 // @description     Persistent sticky-note widget in Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -199,6 +199,13 @@
     colorDot.addEventListener("click", (e) => {
       e.stopPropagation();
       const currentlyVisible = colorPalette.getAttribute("data-visible") === "true";
+      if (!currentlyVisible) {
+        const currentColor = getPrefString(PREF_COLOR, DEFAULT_COLOR);
+        const currentSwatch = colorPalette.querySelector(`[data-color="${currentColor}"]`);
+        if (currentSwatch) {
+          colorPalette.appendChild(currentSwatch);
+        }
+      }
       colorPalette.setAttribute("data-visible", currentlyVisible ? "false" : "true");
     });
 

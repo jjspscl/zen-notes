@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] — 2025-06-04
+
+### Fixed
+- Color picker palette now reorders swatches so the current color is always rightmost.
+- Mouse cursor stays in place when opening the picker, preventing accidental color changes.
+
+## [1.0.0] — 2025-06-04
+
+### Added
+- Stable v1.0 release with full CI/CD pipeline and namespaced ZIP distribution.
+- `install.md` end-user installation guide.
+- `CONTRIBUTING.md` with conventional commits guide.
+
+### Infrastructure
+- Automated version bump script (`scripts/bump.js`).
+- GitHub Actions CI workflow (version sync, header, CSS, syntax checks).
+- GitHub Actions release workflow (ZIP + GitHub Release on tag push).
+
 ## [0.2.2-alpha] — 2025-06-04
 
 ### Security
@@ -80,7 +98,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic height constraints (min 100px, default 200px, max 400px).
 - Manual install README.
 
-[Unreleased]: https://github.com/jjspscl/zen-notes/compare/v0.2.2-alpha...HEAD
+[Unreleased]: https://github.com/jjspscl/zen-notes/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/jjspscl/zen-notes/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/jjspscl/zen-notes/compare/v0.2.2-alpha...v1.0.0
 [0.2.2-alpha]: https://github.com/jjspscl/zen-notes/compare/v0.2.1-alpha...v0.2.2-alpha
 [0.2.1-alpha]: https://github.com/jjspscl/zen-notes/compare/v0.2.0-alpha...v0.2.1-alpha
 [0.2.0-alpha]: https://github.com/jjspscl/zen-notes/compare/v0.1.1-alpha...v0.2.0-alpha

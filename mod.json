@@ -1,7 +1,7 @@
 {
   "name": "zen-notes-widget",
   "displayName": "Zen Notes Widget",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A persistent, colorful sticky-note widget pinned to the bottom of the Zen Browser sidebar",
   "author": "jjspscl",
   "license": "MIT",

@@ -6,7 +6,7 @@ A persistent, collapsible rich-text notes widget pinned to the bottom of Zen Bro
 
 ## Current Version
 
-**v1.0.0** — CI/CD pipeline and release automation.
+**v1.0.1** — CI/CD pipeline and release automation.
 
 ## Milestones
 
@@ -73,6 +73,10 @@ A persistent, collapsible rich-text notes widget pinned to the bottom of Zen Bro
 - [ ] Zen Browser v1.7x+ and v1.8x tested *(deferred to post-v1 testing)*
 - [ ] Dark mode color variants (CSS) *(deferred to v1.1 — requires per-change browser testing)*
 - [ ] Publish to Zen Mods store *(blocked: JS mods not supported by store)*
+
+### v1.0.1 — Color Picker UX Fix ✅ Complete
+- [x] Color picker palette now reorders so current color is always rightmost
+- [x] Mouse position stays consistent when opening the picker
 
 ## Future Ideas
 
