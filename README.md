@@ -5,6 +5,8 @@ A persistent, colorful sticky-note widget for [Zen Browser](https://zen-browser.
 ![Version](https://img.shields.io/badge/version-1.0.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+![Zen Notes demo](./docs/demo.GIF)
+
 ## Features
 
 - **Persistent Notes** — Your note survives browser restarts (stored as rich text HTML)
