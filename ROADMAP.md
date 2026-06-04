@@ -6,7 +6,7 @@ A persistent, collapsible rich-text notes widget pinned to the bottom of Zen Bro
 
 ## Current Version
 
-**v0.2.0 Alpha** — Sticky note redesign with rich text, pastel colors, and toolbar.
+**v0.2.1 Alpha** — Sticky note redesign with toolbar fix, drag bar, and clipping fixes.
 
 ## Milestones
 
@@ -33,6 +33,14 @@ A persistent, collapsible rich-text notes widget pinned to the bottom of Zen Bro
 - [x] Last edited date display
 - [x] Card styling with border-radius, shadow, and border
 - [x] Fixed body clipping and unbroken-string overflow
+
+**v0.2.1 Fixes:**
+- [x] Fixed toolbar visibility — body converted from XUL vbox to HTML div
+- [x] Fixed right-side text clipping — added box-sizing: border-box
+- [x] Added external drag bar above widget for resizing
+- [x] Prevent image paste in editor
+- [x] Auto-focus editor on expand
+- [x] Escape key collapses widget
 
 ### v0.3 — Polish & Config 🚧 Partially Done
 - [ ] Resizable height (drag handle)

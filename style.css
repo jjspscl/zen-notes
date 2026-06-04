@@ -1,4 +1,4 @@
-/* Zen Notes Widget — v0.2.0 Alpha */
+/* Zen Notes Widget — v0.2.1 Alpha */
 /* Sticky Note Redesign */
 
 /* Root widget — card appearance */
@@ -6,8 +6,9 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  position: relative;
   min-width: 0;
-  width: 100%;
+  width: calc(100% - 16px);
   box-sizing: border-box;
   margin: 6px 8px;
   border-radius: 12px;
@@ -119,6 +120,8 @@
   height: 10px;
   border-radius: 50%;
   background: var(--zen-notes-text);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   opacity: 0.5;
   cursor: pointer;
   transition: opacity 0.2s ease, transform 0.15s ease;
@@ -146,7 +149,8 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 1.5px solid transparent;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: transform 0.15s ease, border-color 0.15s ease;
   flex-shrink: 0;
@@ -191,6 +195,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
   transition: opacity 0.2s ease, max-height 0.25s ease, padding 0.25s ease;
 }
 
@@ -243,7 +248,8 @@
   background: transparent;
   border: none;
   border-radius: 0;
-  padding: 0;
+  box-sizing: border-box;
+  padding: 0 8px 0 0;
   font-size: 12px;
   line-height: 1.6;
   color: var(--zen-notes-text);
@@ -255,9 +261,10 @@
   scrollbar-width: thin;
   scrollbar-color: var(--zen-notes-border) transparent;
   word-wrap: break-word;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
   word-break: break-all;
   white-space: pre-wrap;
+  max-width: 100%;
 }
 
 .zen-notes-editor:focus {
@@ -292,12 +299,49 @@
   font-style: italic;
 }
 
+/* External drag bar (above widget, hover-only) */
+.zen-notes-drag-bar {
+  height: 6px;
+  width: calc(100% - 16px);
+  margin: 0 8px;
+  cursor: ns-resize;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.zen-notes-drag-bar::before {
+  content: "";
+  display: block;
+  width: 32px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--zen-notes-border);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.zen-notes-drag-bar:hover {
+  background: var(--zen-notes-border);
+}
+
+.zen-notes-drag-bar:hover::before {
+  opacity: 1;
+}
+
 /* Date footer */
 .zen-notes-date {
   font-size: 10px;
   color: var(--zen-notes-text);
   opacity: 0.45;
   padding-top: 6px;
+  padding-right: 4px;
   flex-shrink: 0;
   text-align: right;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }

@@ -2,7 +2,7 @@
 
 A persistent, colorful sticky-note widget for [Zen Browser](https://zen-browser.app/), pinned to the bottom of the sidebar just above the workspace indicators.
 
-![Version](https://img.shields.io/badge/version-0.2.0--alpha-blue)
+![Version](https://img.shields.io/badge/version-0.2.1--alpha-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## Features
@@ -14,6 +14,7 @@ A persistent, colorful sticky-note widget for [Zen Browser](https://zen-browser.
 - **Zen Theme Match** — Automatically adapts to light and dark modes
 - **Auto-save** — Saves as you type (debounced)
 - **Last Edited** — Shows the date of your most recent edit
+- **Resizable** — Drag the bar above the widget to adjust height
 - **Text Wrapping** — Long text wraps inside the editor without expanding the sidebar
 
 ## Installation

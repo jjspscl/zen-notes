@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         0.2.0-alpha
+// @version         0.2.1-alpha
 // @description     Persistent sticky-note widget in Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -163,10 +163,9 @@
     header.appendChild(title);
     header.appendChild(headerActions);
 
-    // Body
-    const body = document.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "vbox");
+    // Body (HTML div for proper CSS flexbox behavior)
+    const body = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
     body.className = "zen-notes-body";
-    body.setAttribute("flex", "1");
 
     // Toolbar
     const toolbar = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
@@ -222,7 +221,56 @@
     widget.appendChild(header);
     widget.appendChild(body);
 
+    // External drag bar (above widget, hover-only)
+    const dragBar = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+    dragBar.className = "zen-notes-drag-bar";
+
     tabsToolbar.insertBefore(widget, footButtons);
+    tabsToolbar.insertBefore(dragBar, widget);
+
+    // Drag-to-resize logic (drag bar above widget)
+    let isDragging = false;
+    let dragStartY = 0;
+    let dragStartHeight = 0;
+
+    dragBar.addEventListener("mousedown", (e) => {
+      if (widget.getAttribute("data-collapsed") === "true") return;
+      isDragging = true;
+      dragStartY = e.clientY;
+      dragStartHeight = widget.getBoundingClientRect().height;
+      e.preventDefault();
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      const delta = dragStartY - e.clientY; // up = positive = taller
+      const newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, dragStartHeight + delta));
+      widget.style.height = newHeight + "px";
+    });
+
+    window.addEventListener("mouseup", () => {
+      if (!isDragging) return;
+      isDragging = false;
+      const h = Math.round(widget.getBoundingClientRect().height);
+      if (h >= MIN_HEIGHT && h <= MAX_HEIGHT) {
+        setPrefInt(PREF_HEIGHT, h);
+      }
+    });
+
+    // Runtime width enforcement: cap widget width to sidebar bounds
+    function enforceWidth() {
+      const sidebarWidth = tabsToolbar.getBoundingClientRect().width;
+      widget.style.width = Math.max(0, sidebarWidth - 16) + "px";
+    }
+    enforceWidth();
+
+    const sidebarObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const w = entry.contentRect.width;
+        widget.style.width = Math.max(0, w - 16) + "px";
+      }
+    });
+    sidebarObserver.observe(tabsToolbar);
 
     // Toolbar state updater
     function updateToolbarState() {
@@ -253,6 +301,8 @@
       } else {
         const h = getPrefInt(PREF_HEIGHT, DEFAULT_HEIGHT);
         widget.style.height = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, h)) + "px";
+        // Auto-focus editor when expanding
+        setTimeout(() => editor.focus(), 50);
       }
     });
 
@@ -269,6 +319,28 @@
           updateToolbarState();
         }
       }
+      // Escape to collapse widget
+      if (e.key === "Escape") {
+        widget.setAttribute("data-collapsed", "true");
+        setPrefBool(PREF_COLLAPSED, true);
+        widget.style.height = "";
+      }
+    });
+
+    // Prevent image paste — allow text and rich text only
+    editor.addEventListener("paste", (e) => {
+      const items = e.clipboardData && e.clipboardData.items;
+      if (items) {
+        for (const item of items) {
+          if (item.type && item.type.startsWith("image/")) {
+            e.preventDefault();
+            const text = e.clipboardData.getData("text/plain") || "";
+            document.execCommand("insertText", false, text);
+            return;
+          }
+        }
+      }
+      // No images found — allow normal paste (rich text preserved)
     });
 
     // Save on input
@@ -308,6 +380,7 @@
 
     widget._zenNotesCleanup = () => {
       resizeObserver.disconnect();
+      sidebarObserver.disconnect();
       if (saveTimeout) {
         clearTimeout(saveTimeout);
       }
