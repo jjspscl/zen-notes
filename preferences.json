@@ -1,0 +1,17 @@
+{
+  "zen.notes.collapsed": {
+    "type": "boolean",
+    "default": false,
+    "description": "Whether the notes widget is collapsed by default"
+  },
+  "zen.notes.height": {
+    "type": "integer",
+    "default": 200,
+    "description": "Default height of the notes widget in pixels"
+  },
+  "zen.notes.content": {
+    "type": "string",
+    "default": "",
+    "description": "Persisted note content"
+  }
+}

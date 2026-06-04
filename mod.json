@@ -1,0 +1,39 @@
+{
+  "name": "zen-notes-widget",
+  "displayName": "Zen Notes Widget",
+  "version": "0.1.1-alpha",
+  "description": "A persistent, collapsible notes widget pinned to the bottom of the Zen Browser sidebar",
+  "author": "jjspscl",
+  "license": "MIT",
+  "compatibility": {
+    "zen": ">=1.7.0"
+  },
+  "features": [
+    "Persistent plain-text notes in sidebar",
+    "Collapsible widget above workspace indicators",
+    "Auto-save via Firefox preferences",
+    "Dark/light theme matching"
+  ],
+  "files": {
+    "userChrome": "style.css",
+    "preferences": "preferences.json"
+  },
+  "preferences": {
+    "enabled": true,
+    "configurable": [
+      "zen.notes.collapsed",
+      "zen.notes.height"
+    ]
+  },
+  "tags": [
+    "sidebar",
+    "notes",
+    "productivity",
+    "widget"
+  ],
+  "marketplace": {
+    "submission_ready": false,
+    "zen_store_compatible": false,
+    "css_only": false
+  }
+}

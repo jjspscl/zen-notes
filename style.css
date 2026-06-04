@@ -1,0 +1,146 @@
+/* Zen Notes Widget — v0.1.1 Alpha */
+/* Injected by notes-widget.uc.js above #zen-workspaces-button */
+
+#zen-notes-widget {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  border-top: 1px solid var(--zen-colors-border, rgba(127, 127, 127, 0.2));
+  background: var(--zen-colors-tertiary, var(--toolbar-bgcolor, #f0f0f0));
+  min-height: 36px;
+  max-height: 400px;
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+  overflow: hidden;
+  -moz-user-select: none;
+}
+
+/* Collapsed state */
+#zen-notes-widget[data-collapsed="true"] {
+  height: 36px;
+  max-height: 36px;
+  min-height: 36px;
+  flex-shrink: 0;
+}
+
+#zen-notes-widget[data-collapsed="true"] .zen-notes-body {
+  opacity: 0;
+  pointer-events: none;
+  max-height: 0;
+  padding: 0 8px;
+}
+
+/* Header */
+.zen-notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  height: 36px;
+  box-sizing: border-box;
+  cursor: pointer;
+  -moz-user-select: none;
+  flex-shrink: 0;
+}
+
+.zen-notes-header:hover {
+  background: var(--tab-hover-background-color, rgba(127, 127, 127, 0.15));
+}
+
+.zen-notes-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: light-dark(#222, #eee);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zen-notes-title::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.7;
+}
+
+/* Toggle chevron */
+.zen-notes-toggle {
+  width: 16px;
+  height: 16px;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.5;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+#zen-notes-widget[data-collapsed="true"] .zen-notes-toggle {
+  transform: rotate(-90deg);
+}
+
+/* Body / Textarea */
+.zen-notes-body {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  min-height: 60px;
+  max-height: 364px;
+  padding: 0 8px 8px 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.2s ease, max-height 0.25s ease, padding 0.25s ease;
+}
+
+.zen-notes-editor {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 60px;
+  max-height: 100%;
+  background: var(--zen-colors-background, var(--toolbar-field-background-color, #fff));
+  border: 1px solid var(--zen-colors-border, rgba(127, 127, 127, 0.25));
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: light-dark(#333, #ddd);
+  outline: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  resize: none;
+  -moz-user-select: text;
+  scrollbar-width: thin;
+  scrollbar-color: var(--zen-colors-border, rgba(127,127,127,0.3)) transparent;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.zen-notes-editor:focus {
+  border-color: var(--zen-colors-primary, #0b57d0);
+  box-shadow: 0 0 0 2px rgba(11, 87, 208, 0.15);
+}
+
+.zen-notes-editor:empty::before {
+  content: "Type your note here...";
+  color: light-dark(#999, #777);
+  pointer-events: none;
+}
+
+/* Scrollbar styling for the editor */
+.zen-notes-editor::-webkit-scrollbar {
+  width: 4px;
+}
+
+.zen-notes-editor::-webkit-scrollbar-thumb {
+  background: var(--zen-colors-border, rgba(127,127,127,0.3));
+  border-radius: 2px;
+}
