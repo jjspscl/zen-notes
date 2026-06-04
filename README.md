@@ -2,7 +2,7 @@
 
 A persistent, colorful sticky-note widget for [Zen Browser](https://zen-browser.app/), pinned to the bottom of the sidebar just above the workspace indicators.
 
-![Version](https://img.shields.io/badge/version-0.2.1--alpha-blue)
+![Version](https://img.shields.io/badge/version-0.2.2--alpha-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## Features

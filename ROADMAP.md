@@ -6,7 +6,7 @@ A persistent, collapsible rich-text notes widget pinned to the bottom of Zen Bro
 
 ## Current Version
 
-**v0.2.1 Alpha** — Sticky note redesign with toolbar fix, drag bar, and clipping fixes.
+**v0.2.2 Alpha** — Pre-v1 security, robustness, and accessibility hardening.
 
 ## Milestones
 
