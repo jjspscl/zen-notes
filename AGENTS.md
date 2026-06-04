@@ -10,23 +10,62 @@ Zen Browser mod that injects a persistent, collapsible notes widget into the sid
 - **Loader Required**: `fx-autoconfig` (or compatible `userChrome.js` loader)
 - **Storage**: `Services.prefs` string preference (`zen.notes.content`)
 - **Target Browser**: Zen Browser v1.7x+
+- **Current Version**: v1.0.0
+- **License**: MIT
 
-## Roadmap
+## Quick Links
 
-See [ROADMAP.md](./ROADMAP.md) for milestones and current status.
+- [GitHub Repository](https://github.com/jjspscl/zen-notes)
+- [GitHub Releases](https://github.com/jjspscl/zen-notes/releases)
+- [CHANGELOG.md](./CHANGELOG.md) — version history
+- [ROADMAP.md](./ROADMAP.md) — milestones and status
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — development guide
+- [install.md](./install.md) — end-user installation guide
 
 ## Build Steps
 
-1. Edit `notes-widget.uc.js` or `style.css`
-2. Ensure `fx-autoconfig` loader is installed in Zen Browser (program + profile files)
-3. Copy files to Zen profile `chrome/` directory:
-   - `style.css` → `chrome/userChrome.css` (standard Firefox chrome stylesheet)
-   - `notes-widget.uc.js` → `chrome/JS/`
-   - `preferences.json` → `chrome/` (optional, for pref defaults)
-4. Clear startup cache (via `about:support` or delete `startupCache/` folder)
-5. Restart Zen Browser
-6. Verify widget appears between tabs and workspace indicators
-7. Test collapse/expand, text persistence, theme matching, text wrapping
+### Local Development (WSL)
+
+1. Edit `notes-widget.uc.js` or `style.css` in project directory
+2. Copy to Zen Browser profile:
+   ```bash
+   cp notes-widget.uc.js "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/JS/"
+   cp style.css "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/userChrome.css"
+   cp style.css "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/CSS/zen-notes.uc.css"
+   cp preferences.json "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/"
+   ```
+3. Clear startup cache (via `about:support` or delete `startupCache/` folder)
+4. Restart Zen Browser
+5. Verify widget appears between tabs and workspace indicators
+6. Test collapse/expand, text persistence, theme matching, text wrapping
+
+### Release Build
+
+```bash
+# Bump version
+node scripts/bump.js patch   # or minor/major/explicit version
+
+# Validate
+node scripts/validate-version.js
+node scripts/validate-header.js
+node scripts/validate-css.js
+node --check notes-widget.uc.js
+
+# Commit & tag
+git add -A && git commit -m "chore: bump version to vX.Y.Z"
+git tag vX.Y.Z
+git push origin vX.Y.Z
+```
+
+## Validation Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/validate-version.js` | Cross-file version sync (mod.json, JS header, README, ROADMAP) |
+| `scripts/validate-header.js` | UserScript block validation (required fields) |
+| `scripts/validate-css.js` | CSS syntax check (brace balance, block depth) |
+| `scripts/build-release.js` | Assembles namespaced release ZIP |
+| `scripts/bump.js` | Automated version bump across all files |
 
 ## Test Checklist
 
@@ -40,6 +79,11 @@ See [ROADMAP.md](./ROADMAP.md) for milestones and current status.
 - [ ] Workspace switching still works
 - [ ] Compact sidebar mode handles widget gracefully
 - [ ] Long text wraps inside editor without expanding sidebar width
+- [ ] Drag-to-resize works and height persists
+- [ ] Bold/italic formatting via toolbar and keyboard shortcuts
+- [ ] Color picker changes card color and persists
+- [ ] Auto-save interval flushes on crash (test with forced shutdown)
+- [ ] Browser console shows no errors or warnings
 
 ## Coding Conventions
 
@@ -47,14 +91,18 @@ See [ROADMAP.md](./ROADMAP.md) for milestones and current status.
 - Preference prefix: `zen.notes.*`
 - Use `Services.prefs` for storage, not file I/O
 - Wait for DOM ready before injection (`gBrowserInitialized` or `DOMContentLoaded`)
-- Clean up event listeners on window unload
+- Clean up event listeners on window unload (named references required)
 - No external dependencies — Zen chrome APIs only
+- Extract magic numbers to named constants with comments
+- Wrap init in try/catch error boundary
+- All global listeners must be removable in cleanup
 
 ### CSS (`style.css`)
 - Theme matching: `light-dark(black, white)` and `--zen-colors-*` vars
 - No inline styles — all widget styling in this file
 - Sidebar-safe: `flex-shrink: 0`, avoid `position: absolute` inside sidebar
 - Prefix all selectors with `#zen-notes-widget` to avoid collisions
+- Test CSS changes individually in browser before committing — full CSS changes can silently break rendering
 
 ### File Naming
 - JS: `*.uc.js` (required by `fx-autoconfig` loader)
@@ -79,10 +127,54 @@ This places the widget between the tab list and the bottom toolbar (workspace in
 ### Compatibility Risks
 - Zen sidebar DOM changes between versions may break injection selector
 - Other sidebar mods may conflict if they manipulate the same parent node
+- `DOMParser` for HTML sanitization strips XUL namespace info and breaks widget rendering in chrome context
+
+## Distribution
+
+### Release ZIP Structure (Namespaced)
+```
+zen-notes-1.0.0.zip
+├── zen-notes/
+│   ├── chrome/
+│   │   ├── JS/
+│   │   │   └── notes-widget.uc.js
+│   │   └── preferences.json
+│   ├── userChrome.css
+│   ├── mod.json
+│   └── install.md
+└── README.md
+```
+
+### GitHub Actions CI/CD
+- **CI** (`.github/workflows/ci.yml`): validates on every push/PR
+- **Release** (`.github/workflows/release.yml`): builds ZIP + creates GitHub Release on `v*` tag push
+
+### Zen Mod Store
+**Not supported.** The mod store only accepts CSS-only themes. JS execution requires `fx-autoconfig` which is outside the store sandbox.
 
 ## Release Process
 
-1. Update `mod.json` version
-2. Update `ROADMAP.md` status
-3. Tag release in git
-4. Provide manual install instructions (no Zen Mod Store publish planned for now)
+1. Run `node scripts/bump.js <patch|minor|major|version>`
+2. Validate: `node scripts/validate-version.js && node scripts/validate-header.js && node scripts/validate-css.js && node --check notes-widget.uc.js`
+3. Update `ROADMAP.md` status if needed
+4. Commit: `git add -A && git commit -m "chore: release vX.Y.Z"`
+5. Tag: `git tag vX.Y.Z && git push origin vX.Y.Z`
+6. CI auto-creates GitHub Release with ZIP
+7. Update local build if testing: copy files to Zen profile, clear cache, restart
+
+## Troubleshooting
+
+### Widget doesn't appear after restart
+1. Check `chrome/utils/boot.sys.mjs` exists (fx-autoconfig installed)
+2. Open Browser Console (`Ctrl+Shift+J`) for `[ZenNotes]` messages
+3. Clear startup cache (`about:support`)
+4. Verify files in correct locations
+
+### DOM changes break widget
+- Check `#TabsToolbar` and `#zen-sidebar-foot-buttons` still exist in Zen DOM
+- Update selectors in `notes-widget.uc.js` if Zen changed IDs
+
+### CSS changes silently break widget
+- Test CSS changes individually — do not batch large CSS refactors without browser testing
+- `mask-image`, `:root` vars, `@media` blocks all need validation in Zen context
+- CSS is loaded as AUTHOR_SHEET via fx-autoconfig — some properties behave differently than in content
