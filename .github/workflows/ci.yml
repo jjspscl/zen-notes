@@ -23,6 +23,9 @@ jobs:
       - name: Validate version sync
         run: node scripts/validate-version.js
 
+      - name: Validate Sine theme metadata
+        run: node scripts/validate-theme.js
+
       - name: Validate UserScript header
         run: node scripts/validate-header.js
 

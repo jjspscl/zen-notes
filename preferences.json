@@ -1,27 +1,62 @@
-{
-  "zen.notes.collapsed": {
-    "type": "boolean",
-    "default": false,
-    "description": "Whether the notes widget is collapsed by default"
+[
+  {
+    "type": "text",
+    "label": "Zen Notes",
+    "margin": "20px 0 8px 0",
+    "size": "20px"
   },
-  "zen.notes.height": {
-    "type": "integer",
-    "default": 200,
-    "description": "Default height of the notes widget in pixels"
+  {
+    "type": "text",
+    "label": "Sine-first multi-note workspace notes for Zen. Note creation, rename, delete, and ordering live in the in-browser manager.",
+    "margin": "0 0 18px 0"
   },
-  "zen.notes.content": {
+  {
+    "type": "separator",
+    "label": "Sidebar"
+  },
+  {
+    "type": "checkbox",
+    "property": "zen.notes.collapsed",
+    "label": "Start with the widget collapsed",
+    "defaultValue": false,
+    "margin": "12px 0"
+  },
+  {
     "type": "string",
-    "default": "",
-    "description": "Persisted note content (HTML)"
+    "property": "zen.notes.height",
+    "label": "Default expanded height",
+    "value": "number",
+    "defaultValue": 220,
+    "placeholder": "220"
   },
-  "zen.notes.color": {
-    "type": "string",
-    "default": "yellow",
-    "description": "Sticky note card color (yellow, orange, purple, green, blue)"
+  {
+    "type": "dropdown",
+    "property": "zen.notes.defaultColor",
+    "label": "Default note color",
+    "defaultValue": "yellow",
+    "placeholder": false,
+    "options": [
+      { "label": "Yellow", "value": "yellow" },
+      { "label": "Orange", "value": "orange" },
+      { "label": "Purple", "value": "purple" },
+      { "label": "Green", "value": "green" },
+      { "label": "Blue", "value": "blue" }
+    ]
   },
-  "zen.notes.lastEdited": {
-    "type": "string",
-    "default": "",
-    "description": "Date of last edit (formatted string)"
+  {
+    "type": "separator",
+    "label": "Workspace"
+  },
+  {
+    "type": "checkbox",
+    "property": "zen.notes.showWorkspaceKey",
+    "label": "Show current workspace key inside the manager",
+    "defaultValue": false,
+    "margin": "12px 0"
+  },
+  {
+    "type": "text",
+    "label": "Workspace note isolation depends on Zen exposing a stable active workspace identifier. This beta keeps migration data local and preserves legacy single-note prefs for recovery.",
+    "margin": "8px 0 0 0"
   }
-}
+]

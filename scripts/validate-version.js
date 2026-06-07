@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 /**
  * validate-version.js — Ensures version strings are synchronized
- * across mod.json, notes-widget.uc.js, README.md, and ROADMAP.md.
- *
- * Exits with code 1 if any mismatch is found.
+ * across theme.json, mod.json, notes-widget.uc.js, README.md, and ROADMAP.md.
  */
 
 const fs = require("fs");
@@ -15,52 +13,54 @@ function read(file) {
   return fs.readFileSync(path.join(ROOT, file), "utf8");
 }
 
-function extractModJsonVersion() {
-  const json = JSON.parse(read("mod.json"));
-  return json.version;
+function extractJsonVersion(file) {
+  return JSON.parse(read(file)).version;
 }
 
-function extractUserScriptVersion() {
-  const content = read("notes-widget.uc.js");
-  const m = content.match(/\/\/\s*@version\s+(.+)/);
-  return m ? m[1].trim() : null;
+function extractUserScriptHeaderVersion() {
+  const match = read("notes-widget.uc.js").match(/\/\/\s*@version\s+(.+)/);
+  return match ? match[1].trim() : null;
+}
+
+function extractRuntimeVersion() {
+  const match = read("notes-widget.uc.js").match(/const VERSION = "([^"]+)";/);
+  return match ? match[1] : null;
 }
 
 function extractReadmeVersion() {
-  const content = read("README.md");
-  const m = content.match(/version-([\d.]+(?:--[a-z]+)?)-blue/);
-  return m ? m[1].replace(/--/g, "-") : null;
+  const match = read("README.md").match(/version-([\dA-Za-z.]+(?:--[0-9A-Za-z.-]+)?)-blue/);
+  return match ? match[1].replace(/--/g, "-") : null;
 }
 
 function extractRoadmapVersion() {
-  const content = read("ROADMAP.md");
-  const m = content.match(/\*\*v([\d.]+(?:-[a-z]+)?)\s*(?:[A-Z][a-z]+)?\*\* —/);
-  return m ? m[1] : null;
+  const match = read("ROADMAP.md").match(/\*\*v([\dA-Za-z.-]+)\*\*/);
+  return match ? match[1] : null;
 }
 
 function main() {
   const versions = {
-    "mod.json": extractModJsonVersion(),
-    "notes-widget.uc.js (// @version)": extractUserScriptVersion(),
+    "theme.json": extractJsonVersion("theme.json"),
+    "mod.json": extractJsonVersion("mod.json"),
+    "notes-widget.uc.js (@version)": extractUserScriptHeaderVersion(),
+    "notes-widget.uc.js (VERSION)": extractRuntimeVersion(),
     "README.md (badge)": extractReadmeVersion(),
     "ROADMAP.md (header)": extractRoadmapVersion(),
   };
 
   const values = Object.values(versions);
-  const unique = [...new Set(values)];
+  const uniqueValues = [...new Set(values)];
 
   console.log("Version sync check:\n");
   for (const [file, version] of Object.entries(versions)) {
-    const status = version ? version : "NOT FOUND";
-    console.log(`  ${file.padEnd(35)} ${status}`);
+    console.log(`  ${file.padEnd(35)} ${version || "NOT FOUND"}`);
   }
 
-  if (unique.length !== 1 || !unique[0]) {
+  if (uniqueValues.length !== 1 || !uniqueValues[0]) {
     console.error("\n❌ Version mismatch detected!");
     process.exit(1);
   }
 
-  console.log(`\n✅ All versions synchronized at ${unique[0]}`);
+  console.log(`\n✅ All versions synchronized at ${uniqueValues[0]}`);
 }
 
 main();

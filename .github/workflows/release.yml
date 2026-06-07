@@ -28,17 +28,18 @@ jobs:
 
       - name: Validate version matches tag
         run: |
-          MOD_VERSION=$(node -p "require('./mod.json').version")
+          MOD_VERSION=$(node -p "require('./theme.json').version")
           TAG="${{ steps.version.outputs.tag }}"
           if [ "v$MOD_VERSION" != "$TAG" ]; then
-            echo "❌ Tag $TAG does not match mod.json version $MOD_VERSION"
+            echo "❌ Tag $TAG does not match theme.json version $MOD_VERSION"
             exit 1
           fi
-          echo "✅ Tag matches mod.json version ($MOD_VERSION)"
+          echo "✅ Tag matches theme.json version ($MOD_VERSION)"
 
       - name: Validate all checks
         run: |
           node scripts/validate-version.js
+          node scripts/validate-theme.js
           node scripts/validate-header.js
           node scripts/validate-css.js
           node --check notes-widget.uc.js
@@ -51,7 +52,7 @@ jobs:
         run: |
           # Get commits since last tag
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
-          if [ -z "$$PREV_TAG" ]; then
+          if [ -z "$PREV_TAG" ]; then
             RANGE=""
           else
             RANGE="${PREV_TAG}..HEAD"

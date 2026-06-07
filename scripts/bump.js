@@ -3,22 +3,17 @@
  * bump.js — Automated version bump for Zen Notes Widget
  *
  * Usage:
- *   node scripts/bump.js patch   # 0.2.2 → 0.2.3
- *   node scripts/bump.js minor   # 0.2.2 → 0.3.0
- *   node scripts/bump.js major   # 0.2.2 → 1.0.0
- *   node scripts/bump.js 1.0.0   # explicit version
- *
- * Updates:
- *   - mod.json → version
- *   - notes-widget.uc.js → // @version
- *   - README.md → badge
- *   - ROADMAP.md → current version line
+ *   node scripts/bump.js patch
+ *   node scripts/bump.js minor
+ *   node scripts/bump.js major
+ *   node scripts/bump.js 2.0.0-beta
  */
 
 const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
+const VERSION_PATTERN = /\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/;
 
 function read(file) {
   return fs.readFileSync(path.join(ROOT, file), "utf8");
@@ -28,108 +23,75 @@ function write(file, content) {
   fs.writeFileSync(path.join(ROOT, file), content, "utf8");
 }
 
-function parseVersion(v) {
-  const m = v.match(/^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$/);
-  if (!m) throw new Error("Invalid version format: " + v);
+function parseVersion(version) {
+  const match = version.match(/^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?$/);
+  if (!match) {
+    throw new Error(`Invalid version format: ${version}`);
+  }
+
   return {
-    major: parseInt(m[1], 10),
-    minor: parseInt(m[2], 10),
-    patch: parseInt(m[3], 10),
-    prerelease: m[4] || "",
-    raw: v,
+    major: Number(match[1]),
+    minor: Number(match[2]),
+    patch: Number(match[3]),
+    prerelease: match[4] || "",
   };
 }
 
 function bump(version, type) {
-  const v = parseVersion(version);
-  let next;
-  if (type === "major") {
-    next = `${v.major + 1}.0.0`;
-  } else if (type === "minor") {
-    next = `${v.major}.${v.minor + 1}.0`;
-  } else if (type === "patch") {
-    next = `${v.major}.${v.minor}.${v.patch + 1}`;
-  } else {
-    next = type; // explicit version string
-  }
-  // Preserve prerelease suffix if not explicitly overridden
-  if (type !== "major" && type !== "minor" && type !== "patch" && !type.includes("-")) {
-    // explicit version without suffix, keep existing suffix if any
-    if (v.prerelease) next += "-" + v.prerelease;
-  }
-  return next;
+  const current = parseVersion(version);
+  if (type === "major") return `${current.major + 1}.0.0`;
+  if (type === "minor") return `${current.major}.${current.minor + 1}.0`;
+  if (type === "patch") return `${current.major}.${current.minor}.${current.patch + 1}`;
+  return type;
 }
 
-function updateModJson(newVersion) {
-  const file = "mod.json";
+function updateJsonVersion(file, newVersion) {
   const content = read(file);
-  const updated = content.replace(
-    /"version":\s*"[^"]+"/,
-    `"version": "${newVersion}"`
-  );
-  write(file, updated);
+  write(file, content.replace(/"version":\s*"[^"]+"/, `"version": "${newVersion}"`));
   console.log(`  ${file}: ${newVersion}`);
 }
 
 function updateUserScriptHeader(newVersion) {
   const file = "notes-widget.uc.js";
-  const content = read(file);
-  const updated = content.replace(
-    /\/\/ @version\s+.+/,    
-    `// @version         ${newVersion}`
-  );
-  write(file, updated);
-  console.log(`  ${file}: // @version ${newVersion}`);
+  const content = read(file)
+    .replace(/\/\/ @version\s+.+/, `// @version         ${newVersion}`)
+    .replace(/const VERSION = "[^"]+";/, `const VERSION = "${newVersion}";`);
+  write(file, content);
+  console.log(`  ${file}: header + runtime version updated`);
 }
 
-function updateReadme(newVersion) {
+function updateReadmeBadge(newVersion) {
   const file = "README.md";
-  const content = read(file);
   const badgeVersion = newVersion.replace(/-/g, "--");
-  const updated = content.replace(
-    /version-\d+\.\d+\.\d+(?:--[a-z]+)?-blue/,
-    `version-${badgeVersion}-blue`
-  );
-  write(file, updated);
+  const content = read(file).replace(/version-[^-]+-blue/, `version-${badgeVersion}-blue`);
+  write(file, content);
   console.log(`  ${file}: badge updated`);
 }
 
-function updateRoadmap(newVersion) {
+function updateRoadmapVersion(newVersion) {
   const file = "ROADMAP.md";
-  const content = read(file);
-  // Update the "Current Version" line
-  const updated = content.replace(
-    /\*\*v[\d.]+(?:-[a-z]+)?\*\* — .+$/m,
-    `**v${newVersion}** — CI/CD pipeline and release automation.`
-  );
-  write(file, updated);
+  const content = read(file).replace(/\*\*v[\dA-Za-z.-]+\*\*/, `**v${newVersion}**`);
+  write(file, content);
   console.log(`  ${file}: current version updated`);
 }
 
 function main() {
-  const args = process.argv.slice(2);
-  const type = args[0];
-
-  if (!type || ["patch", "minor", "major"].includes(type) === false && !/^\d+\.\d+\.\d+/.test(type)) {
-    console.error(`Usage: node scripts/bump.js [patch|minor|major|x.y.z]`);
+  const type = process.argv[2];
+  if (!type || (!["patch", "minor", "major"].includes(type) && !VERSION_PATTERN.test(type))) {
+    console.error("Usage: node scripts/bump.js [patch|minor|major|x.y.z[-tag]]");
     process.exit(1);
   }
 
-  const modJson = JSON.parse(read("mod.json"));
-  const current = modJson.version;
-  const next = bump(current, type);
+  const currentVersion = JSON.parse(read("theme.json")).version;
+  const nextVersion = bump(currentVersion, type);
 
-  console.log(`Bumping ${current} → ${next}\n`);
-
-  updateModJson(next);
-  updateUserScriptHeader(next);
-  updateReadme(next);
-  updateRoadmap(next);
-
-  console.log(`\nDone. Review changes, then:`);
-  console.log(`  git add -A && git commit -m "chore: bump version to v${next}"`);
-  console.log(`  git tag v${next}`);
-  console.log(`  git push origin v${next}`);
+  console.log(`Bumping ${currentVersion} → ${nextVersion}\n`);
+  updateJsonVersion("theme.json", nextVersion);
+  updateJsonVersion("mod.json", nextVersion);
+  updateUserScriptHeader(nextVersion);
+  updateReadmeBadge(nextVersion);
+  updateRoadmapVersion(nextVersion);
+  console.log(`\nDone. Review changes before release.`);
 }
 
 main();

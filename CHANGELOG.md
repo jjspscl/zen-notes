@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Root `theme.json` and Sine-compatible preferences metadata for the v2 beta line.
+- Workspace-aware `zen.notes.data` storage with legacy single-note migration preservation.
+- Sidebar note switcher, quick new note flow, and central note manager overlay.
+- Bullet and numbered list formatting controls.
+
+### Changed
+- Version source of truth now includes `theme.json` plus runtime/header sync checks.
+- Release packaging and CI now validate Sine metadata alongside existing JS/CSS checks.
+
+### Notes
+- Final v2 release remains blocked on validating Zen workspace runtime contracts in-browser.
+
 ## [1.0.1] — 2025-06-04
 
 ### Fixed

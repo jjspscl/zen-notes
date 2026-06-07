@@ -1,0 +1,33 @@
+{
+  "id": "zen-notes",
+  "name": "Zen Notes",
+  "description": "Lean workspace-aware notes for the Zen Browser sidebar",
+  "author": "jjspscl",
+  "version": "2.0.0-beta",
+  "createdAt": "2025-06-02",
+  "updatedAt": "2026-06-07",
+  "homepage": "https://github.com/jjspscl/zen-notes",
+  "readme": "https://raw.githubusercontent.com/jjspscl/zen-notes/main/README.md",
+  "fork": ["zen"],
+  "ai": "yes",
+  "supportsUnload": true,
+  "tags": [
+    "Zen Browser",
+    "Notes",
+    "Sidebar",
+    "Productivity",
+    "Workspace"
+  ],
+  "style": {
+    "chrome": "style.css"
+  },
+  "scripts": {
+    "notes-widget.uc.js": {
+      "name": "Zen Notes Widget",
+      "description": "Injects a lean multi-note workspace widget into the Zen sidebar.",
+      "include": ["chrome://browser/content/browser.xhtml"],
+      "loadOrder": 10
+    }
+  },
+  "preferences": "preferences.json"
+}

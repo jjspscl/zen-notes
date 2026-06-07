@@ -1,76 +1,50 @@
 # Zen Notes Widget
 
-A persistent, colorful sticky-note widget for [Zen Browser](https://zen-browser.app/), pinned to the bottom of the sidebar just above the workspace indicators.
+A lean, workspace-aware notes widget for [Zen Browser](https://zen-browser.app/), pinned to the bottom of the sidebar above the workspace indicators.
 
-![Version](https://img.shields.io/badge/version-1.0.1-blue)
+![Version](https://img.shields.io/badge/version-2.0.0--beta-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-![Zen Notes demo](./docs/demo.GIF)
+## v2 Beta Highlights
 
-## Features
-
-- **Persistent Notes** — Your note survives browser restarts (stored as rich text HTML)
-- **Collapsible** — Click the header to hide/show the editor
-- **Pastel Card Colors** — Choose from 5 sticky-note colors (yellow, orange, purple, green, blue)
-- **Rich Text** — Bold and italic formatting with toolbar buttons and keyboard shortcuts (`Ctrl+B`, `Ctrl+I`)
-- **Zen Theme Match** — Automatically adapts to light and dark modes
-- **Auto-save** — Saves as you type (debounced)
-- **Last Edited** — Shows the date of your most recent edit
-- **Resizable** — Drag the bar above the widget to adjust height
-- **Text Wrapping** — Long text wraps inside the editor without expanding the sidebar
+- **Workspace-aware note sets** — each workspace can keep its own note collection
+- **Multi-note flow** — switch notes from the sidebar and quick-create a new active note
+- **Central manager** — rename, reorder, open, and hard-delete notes from a dedicated manager screen
+- **Lists** — bullet and numbered list formatting alongside bold and italic
+- **Legacy migration** — v1 single-note content migrates into the v2 data model without deleting old prefs
+- **Lean pinned UX** — compact card stays in the sidebar while management moves into a central overlay
 
 ## Installation
 
-> **Quick start**: See [install.md](./install.md) for detailed step-by-step instructions including troubleshooting.
+Zen Notes now includes root-level `theme.json` and Sine-compatible `preferences.json` metadata for Sine-first distribution.
 
-### Prerequisites
+### Preferred path
 
-You need a `userChrome.js` loader installed in Zen Browser. If you don't have one:
+Install through [Sine](https://github.com/CosmoCreeper/Sine) once this repo is published to `sineorg/store`.
 
-1. Install [fx-autoconfig](https://github.com/MrOtherGuy/fx-autoconfig) or [zen-autoconfig-script](https://github.com/RayZ3R0/zen-autoconfig-script)
-2. Follow their setup instructions
-3. Restart Zen Browser
+### Development / local testing
 
-### Quick Install
-
-1. Download the latest release ZIP from [GitHub Releases](https://github.com/jjspscl/zen-notes/releases)
-2. Extract and copy `zen-notes/chrome/` contents into your Zen profile `chrome/` folder
-3. Copy `zen-notes/userChrome.css` into `chrome/userChrome.css` (or append to existing)
-4. Clear startup cache: `about:support` → **"Clear startup cache"**
-5. Restart Zen Browser
+Until store publication is complete, local testing still uses a `userChrome.js` loader such as [fx-autoconfig](https://github.com/MrOtherGuy/fx-autoconfig). See [install.md](./install.md).
 
 ## Usage
 
-- **Type** in the editor — your note saves automatically as rich text
-- **Bold / Italic** — Use the toolbar buttons or `Ctrl+B` / `Ctrl+I`
-- **Change Color** — Click the colored dot in the header, then pick a swatch
-- **Click "Notes"** to collapse or expand the widget
-- Your note persists across browser sessions
+- **Switch notes** from the header dropdown
+- **Create note** with the `+` button; the new note becomes the active pinned note immediately
+- **Manage notes** with the `≡` button to rename, reorder, open, or hard-delete
+- **Format text** with bold, italic, bullet list, and numbered list controls
+- **Change color** with the header color dot
+- **Collapse or expand** by clicking the header
 
-## Uninstall
+## Release status
 
-1. Remove `chrome/JS/notes-widget.uc.js`
-2. Remove the `@import` or CSS rules from `chrome/userChrome.css`
-3. Restart Zen Browser
+`2.0.0-beta` starts the Sine migration and workspace-aware multi-note implementation. Final v2 release still depends on validating the Zen workspace contract in runtime.
 
-To also clear your saved note, go to `about:config`, search for `zen.notes.content`, and reset the preference.
+## Docs
 
-## Compatibility
-
-- **Zen Browser**: 1.7.0+
-- **Requires**: `fx-autoconfig` or compatible `userChrome.js` loader
-
-## Roadmap
-
-See [ROADMAP.md](./ROADMAP.md) for milestones and current status.
-
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup, conventional commits, and testing guidelines.
-
-## Changelog
-
-See [CHANGELOG.md](./CHANGELOG.md) for version history.
+- [install.md](./install.md)
+- [ROADMAP.md](./ROADMAP.md)
+- [CHANGELOG.md](./CHANGELOG.md)
+- [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ## License
 

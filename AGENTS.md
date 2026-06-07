@@ -6,11 +6,11 @@
 
 Zen Browser mod that injects a persistent, collapsible notes widget into the sidebar, pinned above the workspace indicators.
 
-- **Mechanism**: `userChrome.js` + `userChrome.css`
-- **Loader Required**: `fx-autoconfig` (or compatible `userChrome.js` loader)
-- **Storage**: `Services.prefs` string preference (`zen.notes.content`)
+- **Mechanism**: `userChrome.js` + `userChrome.css` with Sine-first repo metadata
+- **Loader Required for local beta testing**: `fx-autoconfig` (or compatible `userChrome.js` loader)
+- **Storage**: versioned `Services.prefs` JSON store (`zen.notes.data`) plus legacy v1 prefs preserved for migration
 - **Target Browser**: Zen Browser v1.7x+
-- **Current Version**: v1.0.0
+- **Current Version**: v2.0.0-beta
 - **License**: MIT
 
 ## Quick Links
@@ -32,7 +32,6 @@ Zen Browser mod that injects a persistent, collapsible notes widget into the sid
    cp notes-widget.uc.js "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/JS/"
    cp style.css "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/userChrome.css"
    cp style.css "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/CSS/zen-notes.uc.css"
-   cp preferences.json "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/"
    ```
 3. Clear startup cache (via `about:support` or delete `startupCache/` folder)
 4. Restart Zen Browser
@@ -47,6 +46,7 @@ node scripts/bump.js patch   # or minor/major/explicit version
 
 # Validate
 node scripts/validate-version.js
+node scripts/validate-theme.js
 node scripts/validate-header.js
 node scripts/validate-css.js
 node --check notes-widget.uc.js
@@ -61,7 +61,8 @@ git push origin vX.Y.Z
 
 | Script | Purpose |
 |--------|---------|
-| `scripts/validate-version.js` | Cross-file version sync (mod.json, JS header, README, ROADMAP) |
+| `scripts/validate-version.js` | Cross-file version sync (`theme.json`, `mod.json`, JS header/runtime, README, ROADMAP) |
+| `scripts/validate-theme.js` | Sine `theme.json` contract validation |
 | `scripts/validate-header.js` | UserScript block validation (required fields) |
 | `scripts/validate-css.js` | CSS syntax check (brace balance, block depth) |
 | `scripts/build-release.js` | Assembles namespaced release ZIP |
@@ -81,7 +82,11 @@ git push origin vX.Y.Z
 - [ ] Long text wraps inside editor without expanding sidebar width
 - [ ] Drag-to-resize works and height persists
 - [ ] Bold/italic formatting via toolbar and keyboard shortcuts
+- [ ] Bullet/numbered list formatting persists correctly
 - [ ] Color picker changes card color and persists
+- [ ] Workspace-specific note sets switch correctly
+- [ ] Quick new creates and pins a new active note
+- [ ] Manager screen can rename, reorder, and hard-delete notes
 - [ ] Auto-save interval flushes on crash (test with forced shutdown)
 - [ ] Browser console shows no errors or warnings
 
@@ -122,7 +127,7 @@ This places the widget between the tab list and the bottom toolbar (workspace in
 - `footButtons` = `document.getElementById("zen-sidebar-foot-buttons")`
 
 ### Storage Limits
-`Services.prefs` string prefs have a soft limit around 1MB. For a single note this is ample.
+`Services.prefs` string prefs have a soft limit around 1MB. This is still workable for a small workspace-keyed note library, but larger future features (search/export/history) should watch payload growth.
 
 ### Compatibility Risks
 - Zen sidebar DOM changes between versions may break injection selector
@@ -149,13 +154,15 @@ zen-notes-1.0.0.zip
 - **CI** (`.github/workflows/ci.yml`): validates on every push/PR
 - **Release** (`.github/workflows/release.yml`): builds ZIP + creates GitHub Release on `v*` tag push
 
-### Zen Mod Store
-**Not supported.** The mod store only accepts CSS-only themes. JS execution requires `fx-autoconfig` which is outside the store sandbox.
+### Sine / Store
+- Root `theme.json` is now part of the release contract.
+- Store publication should target Sine (`sineorg/store`), not the legacy Zen Mod Store.
+- Final v2 release remains blocked on validating Zen workspace runtime identity and switching contracts.
 
 ## Release Process
 
 1. Run `node scripts/bump.js <patch|minor|major|version>`
-2. Validate: `node scripts/validate-version.js && node scripts/validate-header.js && node scripts/validate-css.js && node --check notes-widget.uc.js`
+2. Validate: `node scripts/validate-version.js && node scripts/validate-theme.js && node scripts/validate-header.js && node scripts/validate-css.js && node --check notes-widget.uc.js`
 3. Update `ROADMAP.md` status if needed
 4. Commit: `git add -A && git commit -m "chore: release vX.Y.Z"`
 5. Tag: `git tag vX.Y.Z && git push origin vX.Y.Z`

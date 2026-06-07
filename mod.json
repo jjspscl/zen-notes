@@ -1,44 +1,47 @@
 {
   "name": "zen-notes-widget",
   "displayName": "Zen Notes Widget",
-  "version": "1.0.1",
-  "description": "A persistent, colorful sticky-note widget pinned to the bottom of the Zen Browser sidebar",
+  "version": "2.0.0-beta",
+  "description": "A lean multi-note sticky-note widget for the Zen Browser sidebar with workspace-aware storage",
   "author": "jjspscl",
   "license": "MIT",
   "compatibility": {
     "zen": ">=1.7.0"
   },
   "features": [
-    "Persistent rich-text notes in sidebar (HTML storage)",
-    "Collapsible widget above workspace indicators",
-    "5 pastel card colors (yellow, orange, purple, green, blue)",
-    "Bold / Italic toolbar with keyboard shortcuts",
-    "Auto-save via Firefox preferences",
-    "Last edited date display",
+    "Workspace-aware note collections with active note switching",
+    "Lean pinned sidebar widget above workspace indicators",
+    "Quick new note flow that replaces the pinned active note",
+    "Manager screen for rename, reorder, and hard delete",
+    "Bullet and numbered list formatting",
+    "Legacy single-note migration into the v2 data model",
     "Dark/light theme matching"
   ],
   "files": {
     "userChrome": "style.css",
-    "preferences": "preferences.json"
+    "preferences": "preferences.json",
+    "theme": "theme.json"
   },
   "preferences": {
     "enabled": true,
     "configurable": [
       "zen.notes.collapsed",
       "zen.notes.height",
-      "zen.notes.color"
+      "zen.notes.defaultColor",
+      "zen.notes.showWorkspaceKey"
     ]
   },
   "tags": [
     "sidebar",
     "notes",
     "productivity",
-    "widget",
+    "workspace",
     "sticky-note"
   ],
   "marketplace": {
     "submission_ready": false,
     "zen_store_compatible": false,
-    "css_only": false
+    "css_only": false,
+    "sine_primary": true
   }
 }

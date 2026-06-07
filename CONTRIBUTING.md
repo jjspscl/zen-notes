@@ -13,6 +13,7 @@ cd zen-notes
 
 # Test scripts
 node scripts/validate-version.js
+node scripts/validate-theme.js
 node scripts/validate-header.js
 node scripts/validate-css.js
 node --check notes-widget.uc.js
@@ -81,7 +82,7 @@ node scripts/bump.js minor   # 0.2.2 → 0.3.0
 node scripts/bump.js major   # 0.2.2 → 1.0.0
 ```
 
-This updates `mod.json`, `// @version`, README badge, and ROADMAP.
+This updates `theme.json`, `mod.json`, `// @version`, README badge, and ROADMAP.
 
 ## Testing in Zen Browser
 
@@ -104,6 +105,7 @@ This updates `mod.json`, `// @version`, README badge, and ROADMAP.
 ## Before Submitting a PR
 
 - [ ] `node scripts/validate-version.js` passes
+- [ ] `node scripts/validate-theme.js` passes
 - [ ] `node scripts/validate-header.js` passes
 - [ ] `node scripts/validate-css.js` passes
 - [ ] `node --check notes-widget.uc.js` passes
