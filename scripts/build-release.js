@@ -1,21 +1,6 @@
 #!/usr/bin/env node
 /**
- * build-release.js — Assembles the release ZIP package
- *
- * Output: dist/zen-notes-{version}.zip
- *
- * Structure (namespaced):
- *   zen-notes/
- *   ├── chrome/
- *   │   ├── JS/
- *   │   │   └── notes-widget.uc.js
- *   │   └── preferences.json
- *   ├── userChrome.css          (style.css renamed)
- *   ├── mod.json
- *   └── install.md
- *   README.md (at root of ZIP)
- *
- * Usage: node scripts/build-release.js
+ * build-release.js — Assembles a GitHub release archive.
  */
 
 const fs = require("fs");
@@ -35,11 +20,10 @@ function cp(src, dest) {
 }
 
 function main() {
-  const modJson = JSON.parse(read("mod.json"));
-  const version = modJson.version;
+  const themeJson = JSON.parse(read("theme.json"));
+  const version = themeJson.version;
   const zipName = `zen-notes-${version}.zip`;
 
-  // Clean and recreate dist
   if (fs.existsSync(DIST)) {
     fs.rmSync(DIST, { recursive: true });
   }
@@ -48,13 +32,10 @@ function main() {
   const pkgDir = path.join(DIST, "zen-notes");
   fs.mkdirSync(pkgDir, { recursive: true });
 
-  // Chrome folder contents
-  const chromeDir = path.join(pkgDir, "chrome");
-  fs.mkdirSync(path.join(chromeDir, "JS"), { recursive: true });
-
-  cp("notes-widget.uc.js", path.join(chromeDir, "JS", "notes-widget.uc.js"));
-  cp("preferences.json", path.join(chromeDir, "preferences.json"));
-  cp("style.css", path.join(pkgDir, "userChrome.css"));
+  cp("notes-widget.uc.js", path.join(pkgDir, "notes-widget.uc.js"));
+  cp("style.css", path.join(pkgDir, "style.css"));
+  cp("preferences.json", path.join(pkgDir, "preferences.json"));
+  cp("theme.json", path.join(pkgDir, "theme.json"));
   cp("mod.json", path.join(pkgDir, "mod.json"));
   cp("README.md", path.join(pkgDir, "README.md"));
 
@@ -62,34 +43,11 @@ function main() {
     cp("install.md", path.join(pkgDir, "install.md"));
   }
 
-  // Also copy README to zip root
-  cp("README.md", path.join(DIST, "README.md"));
+  const archivePath = path.join(ROOT, zipName);
+  if (fs.existsSync(archivePath)) fs.rmSync(archivePath);
+  execSync(`zip -r "${archivePath}" .`, { cwd: DIST, stdio: "pipe" });
+  const archiveSize = fs.statSync(archivePath).size;
 
-  // Create archive
-  const zipPath = path.join(ROOT, zipName);
-  let archivePath = zipPath;
-  let archiveSize = 0;
-
-  try {
-    execSync(`cd "${DIST}" && zip -r "${zipPath}" .`, { stdio: "pipe" });
-    archiveSize = fs.statSync(zipPath).size;
-  } catch (e) {
-    // zip not available (e.g. minimal Linux env), try tar.gz fallback
-    const tarName = `zen-notes-${version}.tar.gz`;
-    const tarPath = path.join(ROOT, tarName);
-    try {
-      execSync(`cd "${DIST}" && tar -czf "${tarPath}" .`, { stdio: "pipe" });
-      archivePath = tarPath;
-      archiveSize = fs.statSync(tarPath).size;
-      console.warn(`\n⚠️  'zip' not found. Created tar.gz instead.`);
-    } catch (tarErr) {
-      console.warn(`\n⚠️  Neither 'zip' nor 'tar' available. Dist folder left at: ${DIST}`);
-      console.log(`   Version: ${version}`);
-      process.exit(0);
-    }
-  }
-
-  // Clean up dist
   fs.rmSync(DIST, { recursive: true });
 
   console.log(`\n✅ Release package: ${archivePath}`);

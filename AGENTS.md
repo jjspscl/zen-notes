@@ -4,13 +4,13 @@
 
 ## Project Context
 
-Zen Browser mod that injects a persistent, collapsible notes widget into the sidebar, pinned above the workspace indicators.
+Zen Browser mod that injects a persistent, collapsible notes widget into the sidebar, with a global notes library and per-workspace pinned note state.
 
-- **Mechanism**: `userChrome.js` + `userChrome.css`
-- **Loader Required**: `fx-autoconfig` (or compatible `userChrome.js` loader)
-- **Storage**: `Services.prefs` string preference (`zen.notes.content`)
+- **Mechanism**: `userChrome.js` + `userChrome.css` with Sine-first repo metadata
+- **Loader Required for local beta testing**: `fx-autoconfig` (or compatible `userChrome.js` loader)
+- **Storage**: versioned `Services.prefs` JSON store (`zen.notes.data`) — schema v3 (global `notes[]` + per-workspace `workspaceState`); legacy v1/v2 prefs preserved for migration
 - **Target Browser**: Zen Browser v1.7x+
-- **Current Version**: v1.0.0
+- **Current Version**: v2.0.0-beta
 - **License**: MIT
 
 ## Quick Links
@@ -32,7 +32,6 @@ Zen Browser mod that injects a persistent, collapsible notes widget into the sid
    cp notes-widget.uc.js "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/JS/"
    cp style.css "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/userChrome.css"
    cp style.css "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/CSS/zen-notes.uc.css"
-   cp preferences.json "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/"
    ```
 3. Clear startup cache (via `about:support` or delete `startupCache/` folder)
 4. Restart Zen Browser
@@ -47,6 +46,7 @@ node scripts/bump.js patch   # or minor/major/explicit version
 
 # Validate
 node scripts/validate-version.js
+node scripts/validate-theme.js
 node scripts/validate-header.js
 node scripts/validate-css.js
 node --check notes-widget.uc.js
@@ -61,7 +61,8 @@ git push origin vX.Y.Z
 
 | Script | Purpose |
 |--------|---------|
-| `scripts/validate-version.js` | Cross-file version sync (mod.json, JS header, README, ROADMAP) |
+| `scripts/validate-version.js` | Cross-file version sync (`theme.json`, `mod.json`, JS header/runtime, README, ROADMAP) |
+| `scripts/validate-theme.js` | Sine `theme.json` contract validation |
 | `scripts/validate-header.js` | UserScript block validation (required fields) |
 | `scripts/validate-css.js` | CSS syntax check (brace balance, block depth) |
 | `scripts/build-release.js` | Assembles namespaced release ZIP |
@@ -81,7 +82,12 @@ git push origin vX.Y.Z
 - [ ] Long text wraps inside editor without expanding sidebar width
 - [ ] Drag-to-resize works and height persists
 - [ ] Bold/italic formatting via toolbar and keyboard shortcuts
+- [ ] Bullet/numbered list formatting persists correctly
 - [ ] Color picker changes card color and persists
+- [ ] Workspace-specific pinned note state switches correctly
+- [ ] Manager New note adds to global library without auto-pinning
+- [ ] Popover and manager can pin/open notes per workspace
+- [ ] Manager screen can rename, reorder, and hard-delete notes
 - [ ] Auto-save interval flushes on crash (test with forced shutdown)
 - [ ] Browser console shows no errors or warnings
 
@@ -121,8 +127,20 @@ This places the widget between the tab list and the bottom toolbar (workspace in
 - `tabsToolbar` = `document.getElementById("TabsToolbar")`
 - `footButtons` = `document.getElementById("zen-sidebar-foot-buttons")`
 
+### Storage Model (schema v3)
+- **Global notes library**: Single `state.notes[]` array shared across all workspaces.
+- **Per-workspace pinned state**: `state.workspaceState[workspaceId].pinnedActiveNoteId` stores which global note is active for that workspace.
+- **Migration Path**: v1 (single note prefs) → v3 (global notes). v2 (per-workspace note sets) → v3 detected and flattened with ID collision resolution.
+- **Delete reparation**: Removing a note repairs all workspace pinned refs that pointed at it, redirecting them to the first remaining global note.
+
+### Title Trigger + Popover
+- Header shows a button (`.zen-notes-title-trigger`) with current pinned note title + chevron.
+- Click opens an anchored popover (`.zen-notes-popover`) with the full note list.
+- Popover keyboard: Arrow Up/Down, Enter/Space to select, Home/End, Escape to close.
+- Focus management: selected row auto-focused on open; trigger re-focused on close.
+
 ### Storage Limits
-`Services.prefs` string prefs have a soft limit around 1MB. For a single note this is ample.
+`Services.prefs` string prefs have a soft limit around 1MB. This is still workable for a small global note library, but larger future features (search/export/history) should watch payload growth.
 
 ### Compatibility Risks
 - Zen sidebar DOM changes between versions may break injection selector
@@ -149,18 +167,28 @@ zen-notes-1.0.0.zip
 - **CI** (`.github/workflows/ci.yml`): validates on every push/PR
 - **Release** (`.github/workflows/release.yml`): builds ZIP + creates GitHub Release on `v*` tag push
 
-### Zen Mod Store
-**Not supported.** The mod store only accepts CSS-only themes. JS execution requires `fx-autoconfig` which is outside the store sandbox.
+### Sine / Store
+- Root `theme.json` is now part of the release contract.
+- Store publication should target Sine (`sineorg/store`), not the legacy Zen Mod Store.
+- Stable marketplace installs should track `main`.
+- Beta tester installs should track `beta` and replace stable in the same profile; no side-by-side beta/stable support unless prefs and DOM IDs are namespaced later.
+
+### Release Channels
+- **Stable**: `main`, normal SemVer (`vX.Y.Z`), official GitHub releases, Sine marketplace users.
+- **Beta**: `beta`, prerelease SemVer (`vX.Y.Z-beta.N`), GitHub prereleases, tester/custom installs.
+- Beta builds use the same mod ID (`zen-notes`) and `zen.notes.*` prefs as stable.
+- Any beta storage schema bump must include migration notes, rollback risk notes, and validation steps.
 
 ## Release Process
 
-1. Run `node scripts/bump.js <patch|minor|major|version>`
-2. Validate: `node scripts/validate-version.js && node scripts/validate-header.js && node scripts/validate-css.js && node --check notes-widget.uc.js`
-3. Update `ROADMAP.md` status if needed
-4. Commit: `git add -A && git commit -m "chore: release vX.Y.Z"`
-5. Tag: `git tag vX.Y.Z && git push origin vX.Y.Z`
-6. CI auto-creates GitHub Release with ZIP
-7. Update local build if testing: copy files to Zen profile, clear cache, restart
+1. Choose channel: stable from `main` (`vX.Y.Z`) or beta from `beta` (`vX.Y.Z-beta.N`)
+2. Run `node scripts/bump.js <patch|minor|major|version>`
+3. Validate: `node scripts/validate-version.js && node scripts/validate-theme.js && node scripts/validate-header.js && node scripts/validate-css.js && node --check notes-widget.uc.js`
+4. Update `ROADMAP.md` status if needed
+5. Commit: `git add -A && git commit -m "chore: release vX.Y.Z"`
+6. Tag: `git tag vX.Y.Z && git push origin vX.Y.Z`
+7. CI auto-creates GitHub Release with ZIP
+8. Update local build if testing: copy files to Zen profile, clear cache, restart
 
 ## Troubleshooting
 

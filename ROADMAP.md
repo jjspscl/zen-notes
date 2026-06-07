@@ -2,87 +2,67 @@
 
 ## Vision
 
-A persistent, collapsible rich-text notes widget pinned to the bottom of Zen Browser's sidebar, sitting just above the workspace indicators.
+A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser's sidebar, with a global notes library and per-workspace pinned note state.
 
 ## Current Version
 
-**v1.0.1** — CI/CD pipeline and release automation.
+**v2.0.0-beta** — Sine-first beta foundation with global notes library and title-trigger popover UX.
 
-## Milestones
+## Release Channels
 
-### v0.1 — Alpha ✅ Complete
-- [x] Project scaffolding and workspace setup
-- [x] `mod.json` metadata
-- [x] DOM injection above workspace indicators (using `#zen-sidebar-foot-buttons`)
-- [x] `contenteditable` text area with `Services.prefs` persistence
-- [x] Collapsible/expandable header
-- [x] Zen theme matching (light/dark modes)
-- [x] Basic height constraints (min 100px, default 200px, max 400px)
-- [x] Manual install README
+- **Stable channel**: `main` branch, normal SemVer (`vX.Y.Z`), official GitHub releases, and Sine marketplace installs.
+- **Beta channel**: `beta` branch, prerelease SemVer (`vX.Y.Z-beta.N`), GitHub prereleases, and tester/custom installs.
+- **Install behavior**: beta keeps the same mod ID (`zen-notes`) and preference namespace as stable, so beta replaces stable in a profile instead of running side-by-side.
+- **Storage policy**: beta storage migrations must be forward-safe or explicitly documented as forward-only before release.
 
-**v0.1.1 Fixes:**
-- [x] Fixed text wrapping — long text no longer expands sidebar width
-- [x] Fixed collapsed header visibility — full header bar with chevron remains visible
-- [x] Corrected DOM injection point — widget now sits between tabs and bottom toolbar
+## v2 Major Release Tracks
 
-### v0.2 — Sticky Note Redesign ✅ Complete
-- [x] Pastel card colors (yellow, orange, purple, green, blue) with color picker dot
-- [x] Bold, italic toolbar buttons above text area
-- [x] Keyboard shortcuts (`Ctrl+B`, `Ctrl+I`)
-- [x] HTML persistence instead of plain text
-- [x] Last edited date display
-- [x] Card styling with border-radius, shadow, and border
-- [x] Fixed body clipping and unbroken-string overflow
+### M0 — Workspace Contract Validation
+- [x] Research likely workspace selectors, events, and pref hooks
+- [ ] Verify runtime workspace UUID source in Zen directly
+- [ ] Verify switch behavior across restart, rename, and reorder
+- [ ] Confirm release blocker if runtime contract is unstable
 
-**v0.2.1 Fixes:**
-- [x] Fixed toolbar visibility — body converted from XUL vbox to HTML div
-- [x] Fixed right-side text clipping — added box-sizing: border-box
-- [x] Added external drag bar above widget for resizing
-- [x] Prevent image paste in editor
-- [x] Auto-focus editor on expand
-- [x] Escape key collapses widget
+### M1 — Sine Foundation
+- [x] Add root `theme.json`
+- [x] Convert `preferences.json` to Sine UI schema
+- [x] Move version/source-of-truth validation toward Sine metadata
+- [ ] Submit stable `main` to `sineorg/store`
 
-### v0.2.2 — Security & Robustness Hardening ✅ Complete
-- [x] Added periodic crash-safe auto-save (5s interval)
-- [x] Added top-level error boundary (`createWidgetSafe`)
-- [x] Fixed ResizeObserver feedback loop during drag
-- [x] Fixed global event listener leaks on unload
-- [x] Fixed hardcoded en-US locale in date formatting
-- [x] Added graceful DOM degradation warning
-- [x] Added accessibility attributes (aria-expanded, aria-pressed, aria-label)
-- [x] Extracted magic numbers to named constants
-- [x] Added startup console banner for debugging
-- [x] Added `sanitizeHTML()` placeholder (DOMParser approach deferred post-v1)
-- [x] Added MIT `LICENSE` and `.editorconfig`
+### M2 — Global Notes Library (schema v3)
+- [x] Add versioned `zen.notes.data` store
+- [x] Preserve legacy single-note prefs for migration/debugging
+- [x] Refactor from per-workspace note sets to single global `notes[]` library
+- [x] Each workspace stores only `pinnedActiveNoteId` in `workspaceState`
+- [x] v2→v3 migration flattens workspace buckets with ID collision detection
+- [x] Delete reparation: deleting a note repairs all workspace refs
+- [ ] Validate migration behavior against real v1/v2 user data
 
-### v0.3 — CI/CD & Distribution ✅ Complete
-- [x] GitHub Actions CI workflow (version sync, header, CSS, syntax checks)
-- [x] GitHub Actions release workflow (ZIP + GitHub Release on tag push)
-- [x] Automated version bump script (`scripts/bump.js`)
-- [x] Validation scripts (version, header, CSS)
-- [x] Build script for namespaced release ZIP
-- [x] `CONTRIBUTING.md` with conventional commits guide
-- [x] `CHANGELOG.md` with semver formatting
-- [x] `install.md` end-user installation guide
+### M3 — Note Management Screen
+- [x] Add central manager overlay for rename, reorder, open, and hard delete
+- [ ] Add richer settings and future search/export hooks
 
-### v1.0 — Release Ready ✅ Complete
-- [x] Core widget stable (daily usage validated)
-- [x] Packaged as distributable ZIP with namespaced chrome/ folder
-- [x] CI/CD pipeline operational (automated release on git tag)
-- [ ] `fx-autoconfig` compatibility verified across Zen versions *(deferred to post-v1 testing)*
-- [ ] Zen Browser v1.7x+ and v1.8x tested *(deferred to post-v1 testing)*
-- [ ] Dark mode color variants (CSS) *(deferred to v1.1 — requires per-change browser testing)*
-- [ ] Publish to Zen Mods store *(blocked: JS mods not supported by store)*
+### M4 — Sidebar UX
+- [x] Title trigger button with chevron, anchored popover note selector
+- [x] Popover keyboard navigation (arrows, Enter, Home/End, Escape)
+- [x] Focus management: auto-focus selected row, return focus on close
+- [x] Keep compact pinned widget feel
 
-### v1.0.1 — Color Picker UX Fix ✅ Complete
-- [x] Color picker palette now reorders so current color is always rightmost
-- [x] Mouse position stays consistent when opening the picker
+### M5 — Lists
+- [x] Add bullet list formatting
+- [x] Add numbered list formatting
+- [ ] Decide whether explicit nesting UX belongs in a later release
 
-## Future Ideas
+## Release blockers
 
-- Multiple notes (tabbed interface)
-- Export to Markdown / plain text file
-- Search within note
-- Word/character count display
-- Timestamps on edits
-- Sync across devices (future scope)
+- Stable Zen workspace identity must be verified in runtime before broad promotion.
+- Sine store ingestion must be validated from root `theme.json`.
+- Legacy v1/v2 note migration must be proven idempotent with no data loss.
+
+## Post-2.0 pipeline
+
+- Keep `main` stable and marketplace-ready.
+- Create or refresh `beta` from `main` after each official release.
+- Start the next beta at the next target version, for example `2.1.0-beta.1`.
+- Promote `beta` back to `main` only after validation and migration checks pass.
+- For stable hotfixes, patch `main` first, tag a stable release, then merge or cherry-pick back to `beta`.
