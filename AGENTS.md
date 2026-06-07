@@ -7,10 +7,10 @@
 Zen Browser mod that injects a persistent, collapsible notes widget into the sidebar, with a global notes library and per-workspace pinned note state.
 
 - **Mechanism**: `userChrome.js` + `userChrome.css` with Sine-first repo metadata
-- **Loader Required for local beta testing**: `fx-autoconfig` (or compatible `userChrome.js` loader)
+- **Loader Required for local development testing**: `fx-autoconfig` (or compatible `userChrome.js` loader)
 - **Storage**: versioned `Services.prefs` JSON store (`zen.notes.data`) — schema v3 (global `notes[]` + per-workspace `workspaceState`); legacy v1/v2 prefs preserved for migration
 - **Target Browser**: Zen Browser v1.7x+
-- **Current Version**: v2.0.0-beta
+- **Current Version**: v2.0.0
 - **License**: MIT
 
 ## Quick Links

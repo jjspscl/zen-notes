@@ -1,8 +1,8 @@
 {
   "name": "zen-notes-widget",
   "displayName": "Zen Notes Widget",
-  "version": "2.0.0-beta",
-  "description": "A lean multi-note sticky-note widget for the Zen Browser sidebar with workspace-aware storage",
+  "version": "2.0.0",
+  "description": "A lean notes widget for the Zen Browser sidebar with a global notes library and per-workspace pinned active note state",
   "author": "jjspscl",
   "license": "MIT",
   "compatibility": {
@@ -39,7 +39,7 @@
     "sticky-note"
   ],
   "marketplace": {
-    "submission_ready": false,
+    "submission_ready": true,
     "zen_store_compatible": false,
     "css_only": false,
     "sine_primary": true
