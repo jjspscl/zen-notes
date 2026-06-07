@@ -607,13 +607,8 @@
 
     const managerList = createXHTMLElement("div");
     managerList.className = "zen-notes-manager-list";
-    const managerFooter = createXHTMLElement("p");
-    managerFooter.className = "zen-notes-manager-footer";
-    managerFooter.textContent = "Hard delete removes a note immediately after confirmation.";
-
     managerPanel.appendChild(managerPanelHeader);
     managerPanel.appendChild(managerList);
-    managerPanel.appendChild(managerFooter);
     managerOverlay.appendChild(managerPanel);
 
     tabsToolbar.insertBefore(widget, footButtons);
