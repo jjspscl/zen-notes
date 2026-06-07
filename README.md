@@ -5,7 +5,7 @@ A lean, workspace-aware notes widget for [Zen Browser](https://zen-browser.app/)
 ![Version](https://img.shields.io/badge/version-2.0.0--beta-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-## v2 Beta Highlights
+## v2 Highlights
 
 - **Global notes library** — a single shared `notes[]` across workspaces; each workspace pins its active note
 - **Title trigger popover** — click the current note title in the header to open an anchored note selector
@@ -20,7 +20,9 @@ Zen Notes now includes root-level `theme.json` and Sine-compatible `preferences.
 
 ### Preferred path
 
-Install through [Sine](https://github.com/CosmoCreeper/Sine) once this repo is published to `sineorg/store`.
+Zen Notes is Sine-ready. Until the marketplace listing is accepted, install it in [Sine](https://github.com/CosmoCreeper/Sine) as an unpublished/custom mod from `https://github.com/jjspscl/zen-notes`.
+
+After marketplace acceptance, stable releases install from the Sine marketplace.
 
 ### Development / local testing
 
@@ -37,7 +39,14 @@ Until store publication is complete, local testing still uses a `userChrome.js` 
 
 ## Release status
 
-`2.0.0-beta` global notes library with title-trigger popover UX. Final v2 release still depends on validating the Zen workspace contract in runtime.
+`2.0.0-beta` is the current prerelease line for the v2 global notes library and title-trigger popover UX. The planned stable release is `2.0.0`.
+
+## Release channels
+
+- **Stable**: `main` branch, normal SemVer versions like `2.0.0`, tagged as `v2.0.0`, and intended for Sine marketplace users.
+- **Beta**: `beta` branch, prerelease versions like `2.1.0-beta.1`, tagged as `v2.1.0-beta.1`, and intended for testers.
+- **Install behavior**: beta uses the same mod ID (`zen-notes`) and preferences as stable. Installing beta replaces the stable install for that browser profile.
+- **Storage safety**: beta builds may include forward-only storage migrations. Testers should treat beta as an upgrade path, not a side-by-side install.
 
 ## Docs
 

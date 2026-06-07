@@ -7,7 +7,7 @@
   },
   {
     "type": "text",
-    "label": "Sine-first multi-note workspace notes for Zen. Note creation, rename, delete, and ordering live in the in-browser manager.",
+    "label": "Sine-first global notes library for Zen. Workspaces pin an active note, while creation, rename, delete, and ordering live in the in-browser manager.",
     "margin": "0 0 18px 0"
   },
   {
@@ -56,7 +56,7 @@
   },
   {
     "type": "text",
-    "label": "Workspace note isolation depends on Zen exposing a stable active workspace identifier. This beta keeps migration data local and preserves legacy single-note prefs for recovery.",
+    "label": "Workspace pinned-note state depends on Zen exposing a stable active workspace identifier. Zen Notes keeps migration data local and preserves legacy single-note prefs for recovery.",
     "margin": "8px 0 0 0"
   }
 ]

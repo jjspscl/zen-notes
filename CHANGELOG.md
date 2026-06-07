@@ -8,9 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Root `theme.json` and Sine-compatible preferences metadata for the v2 beta line.
+- Root `theme.json` and Sine-compatible preferences metadata for the v2 release line.
 - Workspace-aware `zen.notes.data` storage with legacy single-note migration preservation.
-- Sidebar note switcher, quick new note flow, and central note manager overlay.
+- Sidebar note selector and central note manager overlay.
 - Bullet and numbered list formatting controls.
 - Global notes library with per-workspace pinned note state (schema v3).
 - Title trigger button showing current pinned note; click opens anchored popover list.
@@ -33,7 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Quick new note button from widget header.
 
 ### Notes
-- Final v2 release remains blocked on validating Zen workspace runtime contracts in-browser.
+- Stable releases track `main`; beta releases track `beta` and replace stable installs in the same profile.
+- Beta builds may include forward-only storage migrations and should be used by testers only.
 
 ## [1.0.1] — 2025-06-04
 

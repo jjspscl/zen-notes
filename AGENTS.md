@@ -170,17 +170,25 @@ zen-notes-1.0.0.zip
 ### Sine / Store
 - Root `theme.json` is now part of the release contract.
 - Store publication should target Sine (`sineorg/store`), not the legacy Zen Mod Store.
-- Final v2 release remains blocked on validating Zen workspace runtime identity and switching contracts.
+- Stable marketplace installs should track `main`.
+- Beta tester installs should track `beta` and replace stable in the same profile; no side-by-side beta/stable support unless prefs and DOM IDs are namespaced later.
+
+### Release Channels
+- **Stable**: `main`, normal SemVer (`vX.Y.Z`), official GitHub releases, Sine marketplace users.
+- **Beta**: `beta`, prerelease SemVer (`vX.Y.Z-beta.N`), GitHub prereleases, tester/custom installs.
+- Beta builds use the same mod ID (`zen-notes`) and `zen.notes.*` prefs as stable.
+- Any beta storage schema bump must include migration notes, rollback risk notes, and validation steps.
 
 ## Release Process
 
-1. Run `node scripts/bump.js <patch|minor|major|version>`
-2. Validate: `node scripts/validate-version.js && node scripts/validate-theme.js && node scripts/validate-header.js && node scripts/validate-css.js && node --check notes-widget.uc.js`
-3. Update `ROADMAP.md` status if needed
-4. Commit: `git add -A && git commit -m "chore: release vX.Y.Z"`
-5. Tag: `git tag vX.Y.Z && git push origin vX.Y.Z`
-6. CI auto-creates GitHub Release with ZIP
-7. Update local build if testing: copy files to Zen profile, clear cache, restart
+1. Choose channel: stable from `main` (`vX.Y.Z`) or beta from `beta` (`vX.Y.Z-beta.N`)
+2. Run `node scripts/bump.js <patch|minor|major|version>`
+3. Validate: `node scripts/validate-version.js && node scripts/validate-theme.js && node scripts/validate-header.js && node scripts/validate-css.js && node --check notes-widget.uc.js`
+4. Update `ROADMAP.md` status if needed
+5. Commit: `git add -A && git commit -m "chore: release vX.Y.Z"`
+6. Tag: `git tag vX.Y.Z && git push origin vX.Y.Z`
+7. CI auto-creates GitHub Release with ZIP
+8. Update local build if testing: copy files to Zen profile, clear cache, restart
 
 ## Troubleshooting
 

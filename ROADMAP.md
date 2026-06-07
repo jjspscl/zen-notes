@@ -8,6 +8,13 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 **v2.0.0-beta** — Sine-first beta foundation with global notes library and title-trigger popover UX.
 
+## Release Channels
+
+- **Stable channel**: `main` branch, normal SemVer (`vX.Y.Z`), official GitHub releases, and Sine marketplace installs.
+- **Beta channel**: `beta` branch, prerelease SemVer (`vX.Y.Z-beta.N`), GitHub prereleases, and tester/custom installs.
+- **Install behavior**: beta keeps the same mod ID (`zen-notes`) and preference namespace as stable, so beta replaces stable in a profile instead of running side-by-side.
+- **Storage policy**: beta storage migrations must be forward-safe or explicitly documented as forward-only before release.
+
 ## v2 Major Release Tracks
 
 ### M0 — Workspace Contract Validation
@@ -20,7 +27,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 - [x] Add root `theme.json`
 - [x] Convert `preferences.json` to Sine UI schema
 - [x] Move version/source-of-truth validation toward Sine metadata
-- [ ] Publish repo to `sineorg/store`
+- [ ] Submit stable `main` to `sineorg/store`
 
 ### M2 — Global Notes Library (schema v3)
 - [x] Add versioned `zen.notes.data` store
@@ -48,6 +55,14 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Release blockers
 
-- Stable Zen workspace identity must be verified in runtime.
+- Stable Zen workspace identity must be verified in runtime before broad promotion.
 - Sine store ingestion must be validated from root `theme.json`.
 - Legacy v1/v2 note migration must be proven idempotent with no data loss.
+
+## Post-2.0 pipeline
+
+- Keep `main` stable and marketplace-ready.
+- Create or refresh `beta` from `main` after each official release.
+- Start the next beta at the next target version, for example `2.1.0-beta.1`.
+- Promote `beta` back to `main` only after validation and migration checks pass.
+- For stable hotfixes, patch `main` first, tag a stable release, then merge or cherry-pick back to `beta`.
