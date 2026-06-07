@@ -12,7 +12,7 @@
   margin: 6px 8px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
-  overflow: visible;
+  overflow: hidden;
   transition: max-height 0.25s ease, opacity 0.2s ease;
   -moz-user-select: none;
   --zen-notes-bg: #fef3c7;
@@ -367,7 +367,7 @@
   border-radius: 14px;
   box-shadow: 0 8px 32px rgba(15, 23, 42, 0.22);
   padding: 6px;
-  max-height: 50vh;
+  box-sizing: border-box;
   overflow-y: auto;
 }
 .zen-notes-popover.zen-notes-popover--open { display: block; }

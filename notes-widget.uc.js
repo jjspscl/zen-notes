@@ -45,6 +45,13 @@
   const SIDEBAR_MARGIN = 8;
   const SIDEBAR_PADDING = SIDEBAR_MARGIN * 2;
 
+  // Popup panel sizing — sidebars are ~240-340px wide
+  const POPUP_MARGIN = 8;
+  const POPUP_MIN_WIDTH = 240;
+  const POPUP_MAX_WIDTH = 320;
+  const POPUP_WIDTH_RATIO = 0.9;
+  const POPUP_MAX_HEIGHT = 360;
+
   const XHTML_NS = "http://www.w3.org/1999/xhtml";
   const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
   const ALLOWED_TAGS = new Set(["B", "STRONG", "I", "EM", "U", "BR", "DIV", "P", "UL", "OL", "LI"]);
@@ -295,16 +302,23 @@
     for (const wsId of wsKeys) {
       const bucket = v2state.workspaces[wsId];
       const rawNotes = Array.isArray(bucket && bucket.notes) ? bucket.notes : [];
+      // Track old -> new ID mapping per workspace for correct pin resolution
+      const oldToNewId = new Map();
+      const wsNoteIds = [];
       for (const note of rawNotes) {
+        const oldId = note && note.id ? String(note.id) : "";
         const normalized = normalizeNote(note, order++);
         normalized.id = uniqueId(normalized.id || createId("note"));
+        if (oldId) oldToNewId.set(oldId, normalized.id);
+        wsNoteIds.push(normalized.id);
         allNotes.push(normalized);
       }
-      const firstValid = bucket && (bucket.notes || []).find((n) => n.id);
+      const activeId = bucket && bucket.activeNoteId ? String(bucket.activeNoteId) : "";
       workspaceState[wsId] = {
-        pinnedActiveNoteId: firstValid && firstValid.id
-          ? (allNotes.find((n) => n.id === firstValid.id) ? firstValid.id : (allNotes[0] ? allNotes[0].id : null))
-          : (allNotes[0] ? allNotes[0].id : null),
+        pinnedActiveNoteId:
+          (activeId && oldToNewId.get(activeId)) ||
+          wsNoteIds[0] ||
+          (allNotes[0] ? allNotes[0].id : null),
       };
     }
     return {
@@ -690,10 +704,25 @@
     }
 
     function positionPopover() {
+      const sidebarRect = tabsToolbar.getBoundingClientRect();
       const triggerRect = titleTrigger.getBoundingClientRect();
-      popover.style.left = `${triggerRect.left}px`;
-      popover.style.top = `${triggerRect.bottom + 4}px`;
-      popover.style.minWidth = `${Math.max(triggerRect.width, 180)}px`;
+      const availableWidth = Math.max(0, sidebarRect.width - POPUP_MARGIN * 2);
+      const desiredWidth = Math.min(
+        POPUP_MAX_WIDTH,
+        Math.max(POPUP_MIN_WIDTH, Math.round(availableWidth * POPUP_WIDTH_RATIO))
+      );
+      const panelWidth = Math.min(availableWidth, desiredWidth);
+      const left = sidebarRect.left + (sidebarRect.width - panelWidth) / 2;
+      const top = triggerRect.bottom + 6;
+      const availableHeight = Math.round(
+        Math.min(window.innerHeight - top - POPUP_MARGIN, sidebarRect.bottom - top - POPUP_MARGIN)
+      );
+      // Delete min-width, always set explicit width
+      popover.style.minWidth = "";
+      popover.style.width = `${panelWidth}px`;
+      popover.style.left = `${Math.round(left)}px`;
+      popover.style.top = `${Math.round(top)}px`;
+      popover.style.maxHeight = `${Math.min(POPUP_MAX_HEIGHT, Math.max(120, availableHeight))}px`;
     }
 
     function renderPopoverList() {
@@ -1000,11 +1029,11 @@
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
 
-    /* ── Width enforcement ────────────────────────────────────── */
-    function enforceWidth(width) { widget.style.width = `${Math.max(0, width - SIDEBAR_PADDING)}px`; }
-    enforceWidth(tabsToolbar.getBoundingClientRect().width);
-    const sidebarObserver = new ResizeObserver((entries) => { for (const entry of entries) enforceWidth(entry.contentRect.width); });
+    /* ── Sidebar resize handler ───────────────────────────────── */
+    // Reposition popup when sidebar width changes; do NOT write hard width on widget
+    const sidebarObserver = new ResizeObserver(() => { if (popoverOpen) positionPopover(); });
     sidebarObserver.observe(tabsToolbar);
+    window.addEventListener("resize", () => { if (popoverOpen) positionPopover(); });
 
     const resizeObserver = new ResizeObserver((entries) => {
       if (isDragging) return;
@@ -1041,6 +1070,7 @@
       flushPendingSave();
       resizeObserver.disconnect();
       sidebarObserver.disconnect();
+      window.removeEventListener("resize", positionPopover);
       workspaceObserver.disconnect();
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
