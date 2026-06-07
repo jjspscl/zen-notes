@@ -1,5 +1,5 @@
 /* Zen Notes Widget — v2.0.0 Beta */
-/* Sine-first multi-note workspace sidebar */
+/* Global notes library with per-workspace pinned notes */
 
 #zen-notes-widget {
   display: flex;
@@ -12,7 +12,7 @@
   margin: 6px 8px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+  overflow: visible;
   transition: max-height 0.25s ease, opacity 0.2s ease;
   -moz-user-select: none;
   --zen-notes-bg: #fef3c7;
@@ -28,25 +28,21 @@
   --zen-notes-text: #78350f;
   --zen-notes-border: rgba(120, 53, 15, 0.15);
 }
-
 #zen-notes-widget.zen-notes-orange {
   --zen-notes-bg: #ffedd5;
   --zen-notes-text: #9a3412;
   --zen-notes-border: rgba(154, 52, 18, 0.15);
 }
-
 #zen-notes-widget.zen-notes-purple {
   --zen-notes-bg: #f3e8ff;
   --zen-notes-text: #6b21a8;
   --zen-notes-border: rgba(107, 33, 168, 0.15);
 }
-
 #zen-notes-widget.zen-notes-green {
   --zen-notes-bg: #d1fae5;
   --zen-notes-text: #065f46;
   --zen-notes-border: rgba(6, 95, 70, 0.15);
 }
-
 #zen-notes-widget.zen-notes-blue {
   --zen-notes-bg: #dbeafe;
   --zen-notes-text: #1e40af;
@@ -57,7 +53,6 @@
   max-height: 42px;
   min-height: 42px;
 }
-
 #zen-notes-widget[data-collapsed="true"] .zen-notes-body {
   opacity: 0;
   pointer-events: none;
@@ -65,6 +60,7 @@
   padding: 0 12px;
 }
 
+/* ── Header ──────────────────────────────────────────────────── */
 .zen-notes-header {
   display: flex;
   align-items: center;
@@ -78,63 +74,62 @@
   flex-shrink: 0;
   border-bottom: 1px solid var(--zen-notes-border);
 }
+.zen-notes-header:hover { filter: brightness(0.98); }
 
-.zen-notes-header:hover {
-  filter: brightness(0.98);
-}
-
-.zen-notes-title-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  flex: 1;
-}
-
-.zen-notes-title-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--zen-notes-text);
+/* Title trigger button */
+.zen-notes-title-trigger {
   display: flex;
   align-items: center;
   gap: 6px;
-  opacity: 0.88;
-  flex-shrink: 0;
-}
-
-.zen-notes-title-label::before {
-  content: "";
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2378350f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>');
-  background-size: contain;
-  background-repeat: no-repeat;
-  opacity: 0.6;
-}
-
-.zen-notes-select {
   min-width: 0;
   flex: 1;
-  max-width: 130px;
   border: 1px solid transparent;
   border-radius: 8px;
   background: var(--zen-notes-surface);
   color: var(--zen-notes-text);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 8px;
-  outline: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 10px;
   cursor: pointer;
   box-sizing: border-box;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  text-align: left;
 }
-
-.zen-notes-select:hover,
-.zen-notes-select:focus {
+.zen-notes-title-trigger:hover,
+.zen-notes-title-trigger:focus-visible {
+  background: var(--zen-notes-surface-strong);
+  border-color: var(--zen-notes-border);
+  outline: none;
+}
+.zen-notes-title-trigger[aria-expanded="true"] {
   background: var(--zen-notes-surface-strong);
   border-color: var(--zen-notes-border);
 }
 
+.zen-notes-trigger-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zen-notes-trigger-chevron {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2378350f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.5;
+  transition: transform 0.2s ease;
+}
+.zen-notes-title-trigger[aria-expanded="true"] .zen-notes-trigger-chevron {
+  transform: rotate(180deg);
+}
+
+/* ── Header actions ──────────────────────────────────────────── */
 .zen-notes-header-actions {
   display: flex;
   align-items: center;
@@ -158,7 +153,6 @@
   cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease;
 }
-
 .zen-notes-icon-btn {
   width: 22px;
   height: 22px;
@@ -166,7 +160,6 @@
   font-weight: 700;
   padding: 0;
 }
-
 .zen-notes-icon-btn:hover,
 .zen-notes-toolbar-btn:hover,
 .zen-notes-manager-primary-btn:hover,
@@ -175,7 +168,6 @@
 .zen-notes-manager-danger-btn:hover {
   background: var(--zen-notes-surface-strong);
 }
-
 .zen-notes-icon-btn:active,
 .zen-notes-toolbar-btn:active,
 .zen-notes-manager-primary-btn:active,
@@ -185,6 +177,7 @@
   transform: scale(0.97);
 }
 
+/* Color dot */
 .zen-notes-color-dot {
   width: 10px;
   height: 10px;
@@ -197,23 +190,17 @@
   transition: opacity 0.2s ease, transform 0.15s ease;
   flex-shrink: 0;
 }
-
 .zen-notes-color-dot:hover {
   opacity: 0.9;
   transform: scale(1.2);
 }
-
 .zen-notes-color-palette {
   display: none;
   align-items: center;
   gap: 6px;
   padding: 0 4px;
 }
-
-.zen-notes-color-palette[data-visible="true"] {
-  display: flex;
-}
-
+.zen-notes-color-palette[data-visible="true"] { display: flex; }
 .zen-notes-color-swatch {
   width: 14px;
   height: 14px;
@@ -224,18 +211,17 @@
   transition: transform 0.15s ease, border-color 0.15s ease;
   flex-shrink: 0;
 }
-
 .zen-notes-color-swatch:hover {
   transform: scale(1.25);
   border-color: var(--zen-notes-text);
 }
-
 .zen-notes-color-swatch[data-color="yellow"] { background: #fef3c7; }
 .zen-notes-color-swatch[data-color="orange"] { background: #ffedd5; }
 .zen-notes-color-swatch[data-color="purple"] { background: #f3e8ff; }
-.zen-notes-color-swatch[data-color="green"] { background: #d1fae5; }
-.zen-notes-color-swatch[data-color="blue"] { background: #dbeafe; }
+.zen-notes-color-swatch[data-color="green"]  { background: #d1fae5; }
+.zen-notes-color-swatch[data-color="blue"]   { background: #dbeafe; }
 
+/* Toggle chevron */
 .zen-notes-toggle {
   width: 14px;
   height: 14px;
@@ -246,11 +232,11 @@
   transition: transform 0.2s ease, opacity 0.2s ease;
   flex-shrink: 0;
 }
-
 #zen-notes-widget[data-collapsed="true"] .zen-notes-toggle {
   transform: rotate(-90deg);
 }
 
+/* ── Body ────────────────────────────────────────────────────── */
 .zen-notes-body {
   flex-grow: 1;
   flex-shrink: 1;
@@ -265,7 +251,6 @@
   box-sizing: border-box;
   transition: opacity 0.2s ease, max-height 0.25s ease, padding 0.25s ease;
 }
-
 .zen-notes-toolbar {
   display: flex;
   align-items: center;
@@ -273,7 +258,6 @@
   padding-bottom: 6px;
   flex-shrink: 0;
 }
-
 .zen-notes-toolbar-btn {
   width: 24px;
   height: 24px;
@@ -282,7 +266,6 @@
   padding: 0;
   line-height: 1;
 }
-
 .zen-notes-toolbar-btn[data-active="true"] {
   background: var(--zen-notes-surface-strong);
   box-shadow: inset 0 0 0 1px var(--zen-notes-border);
@@ -316,43 +299,24 @@
   white-space: pre-wrap;
   max-width: 100%;
 }
-
 .zen-notes-editor:empty::before {
   content: "Type your note...";
   color: var(--zen-notes-text);
   opacity: 0.4;
   pointer-events: none;
 }
-
 .zen-notes-editor ul,
 .zen-notes-editor ol {
   margin: 0.4em 0 0.4em 1.25em;
   padding: 0;
 }
+.zen-notes-editor li + li { margin-top: 0.15em; }
+.zen-notes-editor::-webkit-scrollbar { width: 4px; }
+.zen-notes-editor::-webkit-scrollbar-thumb { background: var(--zen-notes-border); border-radius: 2px; }
+.zen-notes-editor b, .zen-notes-editor strong { font-weight: 700; }
+.zen-notes-editor i, .zen-notes-editor em { font-style: italic; }
 
-.zen-notes-editor li + li {
-  margin-top: 0.15em;
-}
-
-.zen-notes-editor::-webkit-scrollbar {
-  width: 4px;
-}
-
-.zen-notes-editor::-webkit-scrollbar-thumb {
-  background: var(--zen-notes-border);
-  border-radius: 2px;
-}
-
-.zen-notes-editor b,
-.zen-notes-editor strong {
-  font-weight: 700;
-}
-
-.zen-notes-editor i,
-.zen-notes-editor em {
-  font-style: italic;
-}
-
+/* ── Drag bar ────────────────────────────────────────────────── */
 .zen-notes-drag-bar {
   height: 6px;
   width: calc(100% - 16px);
@@ -365,7 +329,6 @@
   flex-shrink: 0;
   transition: background 0.15s ease;
 }
-
 .zen-notes-drag-bar::before {
   content: "";
   display: block;
@@ -376,15 +339,10 @@
   opacity: 0;
   transition: opacity 0.15s ease;
 }
+.zen-notes-drag-bar:hover { background: var(--zen-notes-border); }
+.zen-notes-drag-bar:hover::before { opacity: 1; }
 
-.zen-notes-drag-bar:hover {
-  background: var(--zen-notes-border);
-}
-
-.zen-notes-drag-bar:hover::before {
-  opacity: 1;
-}
-
+/* ── Date ────────────────────────────────────────────────────── */
 .zen-notes-date {
   font-size: 10px;
   color: var(--zen-notes-text);
@@ -398,6 +356,52 @@
   text-overflow: ellipsis;
 }
 
+/* ── Popover note selector ───────────────────────────────────── */
+.zen-notes-popover {
+  display: none;
+  position: fixed;
+  z-index: 2147483647;
+  background: light-dark(rgba(255, 255, 255, 0.98), rgba(30, 30, 33, 0.98));
+  color: light-dark(#18181b, #fafafa);
+  border: 1px solid light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.1));
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.22);
+  padding: 6px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+.zen-notes-popover.zen-notes-popover--open { display: block; }
+
+.zen-notes-popover-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.zen-notes-popover-row {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.12s ease;
+}
+.zen-notes-popover-row:focus-visible {
+  outline: 2px solid light-dark(rgba(0, 0, 0, 0.35), rgba(255, 255, 255, 0.5));
+  outline-offset: -2px;
+  background: light-dark(rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.08));
+}
+.zen-notes-popover-row:hover { background: light-dark(rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.08)); }
+.zen-notes-popover-row--selected {
+  font-weight: 700;
+  background: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.06));
+}
+.zen-notes-popover-row--selected:hover { background: light-dark(rgba(0, 0, 0, 0.09), rgba(255, 255, 255, 0.12)); }
+
+/* ── Manager overlay ─────────────────────────────────────────── */
 #zen-notes-manager-overlay {
   position: fixed;
   inset: 0;
@@ -409,10 +413,7 @@
   padding: 24px;
   box-sizing: border-box;
 }
-
-#zen-notes-manager-overlay[data-open="true"] {
-  display: flex;
-}
+#zen-notes-manager-overlay[data-open="true"] { display: flex; }
 
 .zen-notes-manager-panel {
   width: min(760px, 92vw);
@@ -434,17 +435,12 @@
   gap: 16px;
   margin-bottom: 16px;
 }
-
-.zen-notes-manager-title-group {
-  min-width: 0;
-}
-
+.zen-notes-manager-title-group { min-width: 0; }
 .zen-notes-manager-title {
   margin: 0;
   font-size: 22px;
   line-height: 1.2;
 }
-
 .zen-notes-manager-subtitle,
 .zen-notes-manager-footer,
 .zen-notes-manager-note-meta {
@@ -453,7 +449,6 @@
   line-height: 1.5;
   opacity: 0.7;
 }
-
 .zen-notes-manager-header-actions,
 .zen-notes-manager-note-actions {
   display: flex;
@@ -461,7 +456,6 @@
   gap: 8px;
   flex-wrap: wrap;
 }
-
 .zen-notes-manager-primary-btn,
 .zen-notes-manager-close-btn,
 .zen-notes-manager-action-btn,
@@ -471,22 +465,17 @@
   font-size: 12px;
   font-weight: 700;
 }
-
 .zen-notes-manager-danger-btn {
   background: rgba(239, 68, 68, 0.12);
   color: #b91c1c;
 }
-
-.zen-notes-manager-danger-btn:hover {
-  background: rgba(239, 68, 68, 0.18);
-}
+.zen-notes-manager-danger-btn:hover { background: rgba(239, 68, 68, 0.18); }
 
 .zen-notes-manager-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
 .zen-notes-manager-note {
   display: flex;
   align-items: center;
@@ -497,12 +486,10 @@
   background: light-dark(rgba(244, 244, 245, 0.92), rgba(39, 39, 42, 0.92));
   border: 1px solid transparent;
 }
-
 .zen-notes-manager-note[data-active="true"] {
   border-color: color-mix(in srgb, var(--zen-notes-text) 26%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--zen-notes-text) 10%, transparent);
 }
-
 .zen-notes-manager-note-main {
   display: flex;
   flex-direction: column;
@@ -510,7 +497,6 @@
   min-width: 0;
   flex: 1;
 }
-
 .zen-notes-manager-title-input {
   width: 100%;
   min-width: 0;
@@ -524,20 +510,13 @@
   padding: 10px 12px;
   box-sizing: border-box;
 }
-
 .zen-notes-manager-title-input:focus {
   outline: 2px solid color-mix(in srgb, var(--zen-notes-text) 22%, transparent);
 }
 
 @media (max-width: 720px) {
   .zen-notes-manager-header,
-  .zen-notes-manager-note {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
+  .zen-notes-manager-note { flex-direction: column; align-items: stretch; }
   .zen-notes-manager-header-actions,
-  .zen-notes-manager-note-actions {
-    justify-content: flex-start;
-  }
+  .zen-notes-manager-note-actions { justify-content: flex-start; }
 }

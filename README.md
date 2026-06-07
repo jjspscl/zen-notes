@@ -7,11 +7,11 @@ A lean, workspace-aware notes widget for [Zen Browser](https://zen-browser.app/)
 
 ## v2 Beta Highlights
 
-- **Workspace-aware note sets** — each workspace can keep its own note collection
-- **Multi-note flow** — switch notes from the sidebar and quick-create a new active note
+- **Global notes library** — a single shared `notes[]` across workspaces; each workspace pins its active note
+- **Title trigger popover** — click the current note title in the header to open an anchored note selector
 - **Central manager** — rename, reorder, open, and hard-delete notes from a dedicated manager screen
 - **Lists** — bullet and numbered list formatting alongside bold and italic
-- **Legacy migration** — v1 single-note content migrates into the v2 data model without deleting old prefs
+- **Legacy migration** — v1 single-note and v2 per-workspace data migrates into v3 global model with ID collision resolution
 - **Lean pinned UX** — compact card stays in the sidebar while management moves into a central overlay
 
 ## Installation
@@ -28,8 +28,8 @@ Until store publication is complete, local testing still uses a `userChrome.js` 
 
 ## Usage
 
-- **Switch notes** from the header dropdown
-- **Create note** with the `+` button; the new note becomes the active pinned note immediately
+- **Switch notes** — click the title button in the header to open the popover; click any note to pin it
+- **Create note** — open the manager (`≡`) and click "New note"
 - **Manage notes** with the `≡` button to rename, reorder, open, or hard-delete
 - **Format text** with bold, italic, bullet list, and numbered list controls
 - **Change color** with the header color dot
@@ -37,7 +37,7 @@ Until store publication is complete, local testing still uses a `userChrome.js` 
 
 ## Release status
 
-`2.0.0-beta` starts the Sine migration and workspace-aware multi-note implementation. Final v2 release still depends on validating the Zen workspace contract in runtime.
+`2.0.0-beta` global notes library with title-trigger popover UX. Final v2 release still depends on validating the Zen workspace contract in runtime.
 
 ## Docs
 

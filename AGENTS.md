@@ -4,11 +4,11 @@
 
 ## Project Context
 
-Zen Browser mod that injects a persistent, collapsible notes widget into the sidebar, pinned above the workspace indicators.
+Zen Browser mod that injects a persistent, collapsible notes widget into the sidebar, with a global notes library and per-workspace pinned note state.
 
 - **Mechanism**: `userChrome.js` + `userChrome.css` with Sine-first repo metadata
 - **Loader Required for local beta testing**: `fx-autoconfig` (or compatible `userChrome.js` loader)
-- **Storage**: versioned `Services.prefs` JSON store (`zen.notes.data`) plus legacy v1 prefs preserved for migration
+- **Storage**: versioned `Services.prefs` JSON store (`zen.notes.data`) — schema v3 (global `notes[]` + per-workspace `workspaceState`); legacy v1/v2 prefs preserved for migration
 - **Target Browser**: Zen Browser v1.7x+
 - **Current Version**: v2.0.0-beta
 - **License**: MIT
@@ -126,8 +126,20 @@ This places the widget between the tab list and the bottom toolbar (workspace in
 - `tabsToolbar` = `document.getElementById("TabsToolbar")`
 - `footButtons` = `document.getElementById("zen-sidebar-foot-buttons")`
 
+### Storage Model (schema v3)
+- **Global notes library**: Single `state.notes[]` array shared across all workspaces.
+- **Per-workspace pinned state**: `state.workspaceState[workspaceId].pinnedActiveNoteId` stores which global note is active for that workspace.
+- **Migration Path**: v1 (single note prefs) → v3 (global notes). v2 (per-workspace note sets) → v3 detected and flattened with ID collision resolution.
+- **Delete reparation**: Removing a note repairs all workspace pinned refs that pointed at it, redirecting them to the first remaining global note.
+
+### Title Trigger + Popover
+- Header shows a button (`.zen-notes-title-trigger`) with current pinned note title + chevron.
+- Click opens an anchored popover (`.zen-notes-popover`) with the full note list.
+- Popover keyboard: Arrow Up/Down, Enter/Space to select, Home/End, Escape to close.
+- Focus management: selected row auto-focused on open; trigger re-focused on close.
+
 ### Storage Limits
-`Services.prefs` string prefs have a soft limit around 1MB. This is still workable for a small workspace-keyed note library, but larger future features (search/export/history) should watch payload growth.
+`Services.prefs` string prefs have a soft limit around 1MB. This is still workable for a small global note library, but larger future features (search/export/history) should watch payload growth.
 
 ### Compatibility Risks
 - Zen sidebar DOM changes between versions may break injection selector

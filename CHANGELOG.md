@@ -12,10 +12,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Workspace-aware `zen.notes.data` storage with legacy single-note migration preservation.
 - Sidebar note switcher, quick new note flow, and central note manager overlay.
 - Bullet and numbered list formatting controls.
+- Global notes library with per-workspace pinned note state (schema v3).
+- Title trigger button showing current pinned note; click opens anchored popover list.
+- Popover keyboard navigation: arrow keys, Enter to select, Home/End, Escape to close.
+- Auto-focus selected row on popover open; focus returns to trigger on close.
+- v2→v3 migration flattens workspace note sets into global library with ID collision detection.
+- Delete reparation: deleting a note repairs all workspace pinned refs pointing at it.
 
 ### Changed
 - Version source of truth now includes `theme.json` plus runtime/header sync checks.
 - Release packaging and CI now validate Sine metadata alongside existing JS/CSS checks.
+- Storage model refactored from per-workspace note sets to a single global `notes[]` library.
+- Each workspace stores only `pinnedActiveNoteId` in `workspaceState`.
+- Quick-add button removed from header; new note creation moved exclusively to manager overlay.
+- Header action order: color picker first, then manager button.
+- Title group (label + `<select>`) replaced with `.zen-notes-title-trigger` button + popover.
+
+### Removed
+- Per-workspace `notes[]` buckets (replaced by global notes library).
+- Quick new note button from widget header.
 
 ### Notes
 - Final v2 release remains blocked on validating Zen workspace runtime contracts in-browser.
