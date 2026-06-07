@@ -6,7 +6,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Current Version
 
-**v2.0.0-beta** — Sine-first beta foundation with global notes library and title-trigger popover UX.
+**v2.0.0** — Stable v2 release with Sine-first metadata, global notes library, and title-trigger popover UX.
 
 ## Release Channels
 
@@ -53,11 +53,11 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 - [x] Add numbered list formatting
 - [ ] Decide whether explicit nesting UX belongs in a later release
 
-## Release blockers
+## Release follow-up
 
-- Stable Zen workspace identity must be verified in runtime before broad promotion.
-- Sine store ingestion must be validated from root `theme.json`.
-- Legacy v1/v2 note migration must be proven idempotent with no data loss.
+- Validate Zen workspace identity across switch/restart/rename/reorder before broad promotion.
+- Submit stable `main` to `sineorg/store` and confirm ingestion from root `theme.json`.
+- Continue testing legacy v1/v2 note migration against real user data.
 
 ## Post-2.0 pipeline
 

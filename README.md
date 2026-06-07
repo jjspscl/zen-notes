@@ -2,7 +2,7 @@
 
 A lean, workspace-aware notes widget for [Zen Browser](https://zen-browser.app/), pinned to the bottom of the sidebar above the workspace indicators.
 
-![Version](https://img.shields.io/badge/version-2.0.0--beta-blue)
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## v2 Highlights
@@ -26,7 +26,7 @@ After marketplace acceptance, stable releases install from the Sine marketplace.
 
 ### Development / local testing
 
-Until store publication is complete, local testing still uses a `userChrome.js` loader such as [fx-autoconfig](https://github.com/MrOtherGuy/fx-autoconfig). See [install.md](./install.md).
+Manual development testing can still use a `userChrome.js` loader such as [fx-autoconfig](https://github.com/MrOtherGuy/fx-autoconfig). See [install.md](./install.md).
 
 ## Usage
 
@@ -39,7 +39,7 @@ Until store publication is complete, local testing still uses a `userChrome.js` 
 
 ## Release status
 
-`2.0.0-beta` is the current prerelease line for the v2 global notes library and title-trigger popover UX. The planned stable release is `2.0.0`.
+`2.0.0` is the stable v2 release for the global notes library and title-trigger popover UX. Sine marketplace submission is pending acceptance.
 
 ## Release channels
 

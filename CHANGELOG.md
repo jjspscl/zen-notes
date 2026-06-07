@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+No unreleased changes.
+
+## [2.0.0] — 2026-06-07
+
 ### Added
 - Root `theme.json` and Sine-compatible preferences metadata for the v2 release line.
 - Workspace-aware `zen.notes.data` storage with legacy single-note migration preservation.
@@ -127,7 +131,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic height constraints (min 100px, default 200px, max 400px).
 - Manual install README.
 
-[Unreleased]: https://github.com/jjspscl/zen-notes/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/jjspscl/zen-notes/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/jjspscl/zen-notes/compare/v1.0.1...v2.0.0
 [1.0.1]: https://github.com/jjspscl/zen-notes/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/jjspscl/zen-notes/compare/v0.2.2-alpha...v1.0.0
 [0.2.2-alpha]: https://github.com/jjspscl/zen-notes/compare/v0.2.1-alpha...v0.2.2-alpha
