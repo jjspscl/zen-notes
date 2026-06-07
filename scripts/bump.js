@@ -13,7 +13,7 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
-const VERSION_PATTERN = /\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/;
+const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 
 function read(file) {
   return fs.readFileSync(path.join(ROOT, file), "utf8");
@@ -63,7 +63,7 @@ function updateUserScriptHeader(newVersion) {
 function updateReadmeBadge(newVersion) {
   const file = "README.md";
   const badgeVersion = newVersion.replace(/-/g, "--");
-  const content = read(file).replace(/version-[^-]+-blue/, `version-${badgeVersion}-blue`);
+  const content = read(file).replace(/version-[0-9A-Za-z.]+(?:--[0-9A-Za-z.]+)*-blue/, `version-${badgeVersion}-blue`);
   write(file, content);
   console.log(`  ${file}: badge updated`);
 }

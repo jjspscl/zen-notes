@@ -9,12 +9,12 @@
     "zen": ">=1.7.0"
   },
   "features": [
-    "Workspace-aware note collections with active note switching",
+    "Global notes library with per-workspace pinned active note",
     "Lean pinned sidebar widget above workspace indicators",
-    "Quick new note flow that replaces the pinned active note",
-    "Manager screen for rename, reorder, and hard delete",
+    "Title trigger popover for note selection",
+    "Manager screen for create, rename, reorder, and hard delete",
     "Bullet and numbered list formatting",
-    "Legacy single-note migration into the v2 data model",
+    "Legacy v1/v2 migration into the schema v3 data model",
     "Dark/light theme matching"
   ],
   "files": {

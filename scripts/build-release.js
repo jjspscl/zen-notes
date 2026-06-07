@@ -44,6 +44,7 @@ function main() {
   }
 
   const archivePath = path.join(ROOT, zipName);
+  if (fs.existsSync(archivePath)) fs.rmSync(archivePath);
   execSync(`zip -r "${archivePath}" .`, { cwd: DIST, stdio: "pipe" });
   const archiveSize = fs.statSync(archivePath).size;
 

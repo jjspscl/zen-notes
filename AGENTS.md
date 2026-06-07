@@ -84,8 +84,9 @@ git push origin vX.Y.Z
 - [ ] Bold/italic formatting via toolbar and keyboard shortcuts
 - [ ] Bullet/numbered list formatting persists correctly
 - [ ] Color picker changes card color and persists
-- [ ] Workspace-specific note sets switch correctly
-- [ ] Quick new creates and pins a new active note
+- [ ] Workspace-specific pinned note state switches correctly
+- [ ] Manager New note adds to global library without auto-pinning
+- [ ] Popover and manager can pin/open notes per workspace
 - [ ] Manager screen can rename, reorder, and hard-delete notes
 - [ ] Auto-save interval flushes on crash (test with forced shutdown)
 - [ ] Browser console shows no errors or warnings
