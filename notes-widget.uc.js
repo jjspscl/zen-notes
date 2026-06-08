@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.0.1
+// @version         2.0.2
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -28,7 +28,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.0.1";
+  const VERSION = "2.0.2";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 110;

@@ -9,7 +9,7 @@
   min-width: 0;
   width: calc(100% - 16px);
   box-sizing: border-box;
-  margin: 6px 8px;
+  margin: 8px;
   border-radius: 12px;
   box-shadow: 0 2px 8px light-dark(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.4)),
               0 1px 2px light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.3));
@@ -29,6 +29,7 @@
     color-mix(in srgb, #fbbf24 16%, #1a1a1a)
   );
   background: var(--zen-notes-bg);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 }
 #zen-notes-widget[data-appearance="light"] { color-scheme: light; }
 #zen-notes-widget[data-appearance="dark"] { color-scheme: dark; }
@@ -116,7 +117,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 8px 12px;
   min-height: 42px;
   box-sizing: border-box;
   cursor: pointer;
@@ -130,7 +131,7 @@
 .zen-notes-title-trigger {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
   flex: 1;
   border: 1px solid transparent;
@@ -139,8 +140,8 @@
   color: var(--zen-notes-text);
   font-family: inherit;
   font-size: 13px;
-  font-weight: 700;
-  padding: 6px 10px;
+  font-weight: 600;
+  padding: 6px 12px;
   cursor: pointer;
   box-sizing: border-box;
   transition: background 0.15s ease, border-color 0.15s ease;
@@ -187,7 +188,7 @@
 .zen-notes-header-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .zen-notes-icon-btn,
@@ -302,7 +303,7 @@
   min-width: 0;
   width: 100%;
   min-height: 0;
-  padding: 8px 10px 10px;
+  padding: 8px 12px 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -313,7 +314,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding-bottom: 6px;
+  padding-bottom: 8px;
   flex-shrink: 0;
 }
 .zen-notes-toolbar-btn {
@@ -341,9 +342,9 @@
   border: none;
   border-radius: 0;
   box-sizing: border-box;
-  padding: 0 8px 0 0;
-  font-size: 12px;
-  line-height: 1.6;
+  padding: 0 4px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
   color: var(--zen-notes-text);
   outline: none;
   overflow-y: auto;
@@ -402,10 +403,12 @@
 
 /* ── Date ────────────────────────────────────────────────────── */
 .zen-notes-date {
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--zen-notes-text);
-  opacity: 0.45;
-  padding-top: 6px;
+  opacity: 0.5;
+  margin-top: 4px;
+  padding-bottom: 2px;
   padding-right: 4px;
   flex-shrink: 0;
   text-align: right;
