@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.0.0
+// @version         2.0.1
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -17,6 +17,7 @@
   const PREF_HEIGHT = "zen.notes.height";
   const PREF_DEFAULT_COLOR = "zen.notes.defaultColor";
   const PREF_SHOW_WORKSPACE_KEY = "zen.notes.showWorkspaceKey";
+  const PREF_APPEARANCE = "zen.notes.appearance";
   const PREF_ACTIVE_WORKSPACE = "zen.workspaces.active";
   const PREF_DATA_BACKUP = "zen.notes.dataBackup";
 
@@ -27,7 +28,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.0.0";
+  const VERSION = "2.0.1";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 110;
@@ -614,11 +615,16 @@
     tabsToolbar.insertBefore(widget, footButtons);
     tabsToolbar.insertBefore(dragBar, widget);
     (document.body || document.documentElement).appendChild(managerOverlay);
-    document.body.appendChild(popover);
+    (document.body || document.documentElement).appendChild(popover);
 
     /* ── Core functions ──────────────────────────────────────── */
     function execFormat(command) { document.execCommand(command, false, null); }
     function setWidgetColor(color) { widget.className = `zen-notes-${isColorValid(color) ? color : getDefaultColor()}`; }
+    function applyAppearanceMode() {
+      const mode = getPrefString(PREF_APPEARANCE, "system");
+      if (mode === "light" || mode === "dark") widget.setAttribute("data-appearance", mode);
+      else widget.removeAttribute("data-appearance");
+    }
 
     function updateToolbarState() {
       const states = [[boldBtn, "bold"], [italicBtn, "italic"], [bulletBtn, "insertUnorderedList"], [numberBtn, "insertOrderedList"]];
@@ -844,6 +850,7 @@
     }
 
     function renderAll() {
+      applyAppearanceMode();
       renderActiveNote();
       renderManager();
     }
@@ -1053,8 +1060,14 @@
     const workspaceContainer = document.getElementById("tabbrowser-arrowscrollbox") || document.documentElement;
     workspaceObserver.observe(workspaceContainer, { subtree: true, attributes: true, attributeFilter: ["active"] });
 
-    const prefObserver = { observe(subject, topic, data) { if (topic === "nsPref:changed" && data === PREF_ACTIVE_WORKSPACE) requeryWorkspace(); } };
+    const prefObserver = { observe(subject, topic, data) {
+      if (topic === "nsPref:changed") {
+        if (data === PREF_ACTIVE_WORKSPACE) requeryWorkspace();
+        if (data === PREF_APPEARANCE) applyAppearanceMode();
+      }
+    } };
     Services.prefs.addObserver(PREF_ACTIVE_WORKSPACE, prefObserver);
+    Services.prefs.addObserver(PREF_APPEARANCE, prefObserver);
     window.addEventListener(WORKSPACE_EVENT_NAME, onWorkspaceEvent);
     window.addEventListener(WORKSPACE_DATA_EVENT_NAME, onWorkspaceEvent);
 
@@ -1073,6 +1086,7 @@
       window.removeEventListener(WORKSPACE_DATA_EVENT_NAME, onWorkspaceEvent);
       document.removeEventListener("click", onColorPaletteOutside);
       Services.prefs.removeObserver(PREF_ACTIVE_WORKSPACE, prefObserver);
+      Services.prefs.removeObserver(PREF_APPEARANCE, prefObserver);
       clearInterval(autoSaveInterval);
       if (saveTimeout) clearTimeout(saveTimeout);
       if (workspaceRequeryTimeout) clearTimeout(workspaceRequeryTimeout);
@@ -1084,11 +1098,16 @@
     renderAll();
   }
 
-  function createWidgetSafe() { try { createWidget(); } catch (e) { console.error("[ZenNotes] Failed to initialize widget:", e); } }
+  function createWidgetSafe(attempt = 0) {
+    try { createWidget(); } catch (e) { console.error("[ZenNotes] Failed to initialize widget:", e); }
+    if (!document.getElementById("zen-notes-widget") && attempt < 3) {
+      setTimeout(() => createWidgetSafe(attempt + 1), 200 * (attempt + 1));
+    }
+  }
   function init() {
     console.info("[ZenNotes] v" + VERSION + " loaded");
     if (document.readyState === "complete" || document.readyState === "interactive") createWidgetSafe();
-    else window.addEventListener("DOMContentLoaded", createWidgetSafe, { once: true });
+    else window.addEventListener("DOMContentLoaded", () => createWidgetSafe(), { once: true });
   }
   function cleanup() {
     const widget = document.getElementById("zen-notes-widget");

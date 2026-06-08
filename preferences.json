@@ -15,6 +15,17 @@
     "label": "Sidebar"
   },
   {
+    "type": "dropdown",
+    "property": "zen.notes.appearance",
+    "label": "Appearance",
+    "defaultValue": "system",
+    "options": [
+      { "label": "System (follow browser)", "value": "system" },
+      { "label": "Light", "value": "light" },
+      { "label": "Dark", "value": "dark" }
+    ]
+  },
+  {
     "type": "checkbox",
     "property": "zen.notes.collapsed",
     "label": "Start with the widget collapsed",
