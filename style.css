@@ -2,51 +2,101 @@
 /* Global notes library with per-workspace pinned notes */
 
 #zen-notes-widget {
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
+  display: flex !important;
+  flex-direction: column !important;
+  flex-shrink: 0 !important;
   position: relative;
   min-width: 0;
   width: calc(100% - 16px);
   box-sizing: border-box;
   margin: 6px 8px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px light-dark(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.4)),
+              0 1px 2px light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.3));
   overflow: hidden;
   transition: max-height 0.25s ease, opacity 0.2s ease;
   -moz-user-select: none;
-  --zen-notes-bg: #fef3c7;
-  --zen-notes-text: #78350f;
-  --zen-notes-border: rgba(120, 53, 15, 0.15);
-  --zen-notes-surface: rgba(255, 255, 255, 0.5);
-  --zen-notes-surface-strong: rgba(255, 255, 255, 0.82);
+  color-scheme: light dark;
+  --zen-notes-bg: light-dark(#fef3c7, #2a2010);
+  --zen-notes-text: light-dark(#78350f, #fbbf24);
+  --zen-notes-border: light-dark(rgba(120, 53, 15, 0.15), rgba(251, 191, 36, 0.2));
+  --zen-notes-surface: light-dark(
+    color-mix(in srgb, #78350f 6%, white),
+    color-mix(in srgb, #fbbf24 10%, #1a1a1a)
+  );
+  --zen-notes-surface-strong: light-dark(
+    color-mix(in srgb, #78350f 12%, white),
+    color-mix(in srgb, #fbbf24 16%, #1a1a1a)
+  );
   background: var(--zen-notes-bg);
 }
+#zen-notes-widget[data-appearance="light"] { color-scheme: light; }
+#zen-notes-widget[data-appearance="dark"] { color-scheme: dark; }
 
 #zen-notes-widget.zen-notes-yellow {
-  --zen-notes-bg: #fef3c7;
-  --zen-notes-text: #78350f;
-  --zen-notes-border: rgba(120, 53, 15, 0.15);
+  --zen-notes-bg: light-dark(#fef3c7, #2a2010);
+  --zen-notes-text: light-dark(#78350f, #fbbf24);
+  --zen-notes-border: light-dark(rgba(120, 53, 15, 0.15), rgba(251, 191, 36, 0.2));
+  --zen-notes-surface: light-dark(
+    color-mix(in srgb, #78350f 6%, white),
+    color-mix(in srgb, #fbbf24 10%, #1a1a1a)
+  );
+  --zen-notes-surface-strong: light-dark(
+    color-mix(in srgb, #78350f 12%, white),
+    color-mix(in srgb, #fbbf24 16%, #1a1a1a)
+  );
 }
 #zen-notes-widget.zen-notes-orange {
-  --zen-notes-bg: #ffedd5;
-  --zen-notes-text: #9a3412;
-  --zen-notes-border: rgba(154, 52, 18, 0.15);
+  --zen-notes-bg: light-dark(#ffedd5, #2a1a0e);
+  --zen-notes-text: light-dark(#9a3412, #fb923c);
+  --zen-notes-border: light-dark(rgba(154, 52, 18, 0.15), rgba(251, 146, 60, 0.2));
+  --zen-notes-surface: light-dark(
+    color-mix(in srgb, #9a3412 6%, white),
+    color-mix(in srgb, #fb923c 10%, #1a1a1a)
+  );
+  --zen-notes-surface-strong: light-dark(
+    color-mix(in srgb, #9a3412 12%, white),
+    color-mix(in srgb, #fb923c 16%, #1a1a1a)
+  );
 }
 #zen-notes-widget.zen-notes-purple {
-  --zen-notes-bg: #f3e8ff;
-  --zen-notes-text: #6b21a8;
-  --zen-notes-border: rgba(107, 33, 168, 0.15);
+  --zen-notes-bg: light-dark(#f3e8ff, #1e1528);
+  --zen-notes-text: light-dark(#6b21a8, #c084fc);
+  --zen-notes-border: light-dark(rgba(107, 33, 168, 0.15), rgba(192, 132, 252, 0.2));
+  --zen-notes-surface: light-dark(
+    color-mix(in srgb, #6b21a8 6%, white),
+    color-mix(in srgb, #c084fc 10%, #1a1a1a)
+  );
+  --zen-notes-surface-strong: light-dark(
+    color-mix(in srgb, #6b21a8 12%, white),
+    color-mix(in srgb, #c084fc 16%, #1a1a1a)
+  );
 }
 #zen-notes-widget.zen-notes-green {
-  --zen-notes-bg: #d1fae5;
-  --zen-notes-text: #065f46;
-  --zen-notes-border: rgba(6, 95, 70, 0.15);
+  --zen-notes-bg: light-dark(#d1fae5, #0f2318);
+  --zen-notes-text: light-dark(#065f46, #34d399);
+  --zen-notes-border: light-dark(rgba(6, 95, 70, 0.15), rgba(52, 211, 153, 0.2));
+  --zen-notes-surface: light-dark(
+    color-mix(in srgb, #065f46 6%, white),
+    color-mix(in srgb, #34d399 10%, #1a1a1a)
+  );
+  --zen-notes-surface-strong: light-dark(
+    color-mix(in srgb, #065f46 12%, white),
+    color-mix(in srgb, #34d399 16%, #1a1a1a)
+  );
 }
 #zen-notes-widget.zen-notes-blue {
-  --zen-notes-bg: #dbeafe;
-  --zen-notes-text: #1e40af;
-  --zen-notes-border: rgba(30, 64, 175, 0.15);
+  --zen-notes-bg: light-dark(#dbeafe, #111827);
+  --zen-notes-text: light-dark(#1e40af, #60a5fa);
+  --zen-notes-border: light-dark(rgba(30, 64, 175, 0.15), rgba(96, 165, 250, 0.2));
+  --zen-notes-surface: light-dark(
+    color-mix(in srgb, #1e40af 6%, white),
+    color-mix(in srgb, #60a5fa 10%, #1a1a1a)
+  );
+  --zen-notes-surface-strong: light-dark(
+    color-mix(in srgb, #1e40af 12%, white),
+    color-mix(in srgb, #60a5fa 16%, #1a1a1a)
+  );
 }
 
 #zen-notes-widget[data-collapsed="true"] {
@@ -119,9 +169,13 @@
   width: 12px;
   height: 12px;
   flex-shrink: 0;
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2378350f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
-  background-size: contain;
-  background-repeat: no-repeat;
+  background-color: var(--zen-notes-text);
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
   opacity: 0.5;
   transition: transform 0.2s ease;
 }
@@ -225,9 +279,13 @@
 .zen-notes-toggle {
   width: 14px;
   height: 14px;
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2378350f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
-  background-size: contain;
-  background-repeat: no-repeat;
+  background-color: var(--zen-notes-text);
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
   opacity: 0.4;
   transition: transform 0.2s ease, opacity 0.2s ease;
   flex-shrink: 0;
