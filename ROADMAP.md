@@ -6,7 +6,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Current Version
 
-**v2.0.2** — Stable v2 release with Sine-first metadata, global notes library, and title-trigger popover UX.
+**v2.0.3** — Stable v2 release with Sine-first metadata, global notes library, and title-trigger popover UX.
 
 ## Release Channels
 

@@ -1,7 +1,7 @@
 {
   "name": "zen-notes-widget",
   "displayName": "Zen Notes Widget",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "A lean notes widget for the Zen Browser sidebar with a global notes library and per-workspace pinned active note state",
   "author": "jjspscl",
   "license": "MIT",
