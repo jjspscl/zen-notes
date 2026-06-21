@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.0.2
+// @version         2.0.3
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -28,7 +28,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.0.2";
+  const VERSION = "2.0.3";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 110;
@@ -896,11 +896,12 @@
     titleTrigger.addEventListener("click", togglePopover);
 
     // Close popover on outside click
-    document.addEventListener("click", (e) => {
+    const onPopoverOutsideClick = (e) => {
       if (popoverOpen && !e.target.closest("#zen-notes-popover") && e.target !== titleTrigger && !titleTrigger.contains(e.target)) {
         closePopover();
       }
-    });
+    };
+    document.addEventListener("click", onPopoverOutsideClick);
 
     // Keyboard for popover
     titleTrigger.addEventListener("keydown", (e) => {
@@ -936,7 +937,7 @@
       }
     });
 
-    document.addEventListener("keydown", (e) => {
+    const onDocumentKeydown = (e) => {
       if (popoverOpen && e.key === "Escape") { closePopover(); e.preventDefault(); }
       if (!popoverOpen && e.key === "Escape") {
         managerOverlay.setAttribute("data-open", "false");
@@ -945,7 +946,8 @@
         setPrefBool(PREF_COLLAPSED, true);
         widget.style.height = "";
       }
-    });
+    };
+    document.addEventListener("keydown", onDocumentKeydown);
 
     managerBtn.addEventListener("click", (e) => { e.stopPropagation(); renderManager(); managerOverlay.setAttribute("data-open", "true"); });
     managerNewBtn.addEventListener("click", (e) => { e.stopPropagation(); createNewNote(); renderManager(); });
@@ -1035,7 +1037,8 @@
     // Reposition popup when sidebar width changes; do NOT write hard width on widget
     const sidebarObserver = new ResizeObserver(() => { if (popoverOpen) positionPopover(); });
     sidebarObserver.observe(tabsToolbar);
-    window.addEventListener("resize", () => { if (popoverOpen) positionPopover(); });
+    const onWindowResize = () => { if (popoverOpen) positionPopover(); };
+    window.addEventListener("resize", onWindowResize);
 
     const resizeObserver = new ResizeObserver((entries) => {
       if (isDragging) return;
@@ -1078,13 +1081,15 @@
       flushPendingSave();
       resizeObserver.disconnect();
       sidebarObserver.disconnect();
-      window.removeEventListener("resize", positionPopover);
+      window.removeEventListener("resize", onWindowResize);
       workspaceObserver.disconnect();
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener(WORKSPACE_EVENT_NAME, onWorkspaceEvent);
       window.removeEventListener(WORKSPACE_DATA_EVENT_NAME, onWorkspaceEvent);
       document.removeEventListener("click", onColorPaletteOutside);
+      document.removeEventListener("click", onPopoverOutsideClick);
+      document.removeEventListener("keydown", onDocumentKeydown);
       Services.prefs.removeObserver(PREF_ACTIVE_WORKSPACE, prefObserver);
       Services.prefs.removeObserver(PREF_APPEARANCE, prefObserver);
       clearInterval(autoSaveInterval);
@@ -1093,6 +1098,7 @@
       if (managerOverlay && managerOverlay.parentNode) managerOverlay.parentNode.removeChild(managerOverlay);
       if (popover && popover.parentNode) popover.parentNode.removeChild(popover);
       if (dragBar && dragBar.parentNode) dragBar.parentNode.removeChild(dragBar);
+      if (widget && widget.parentNode) widget.parentNode.removeChild(widget);
     };
 
     renderAll();
@@ -1110,8 +1116,11 @@
     else window.addEventListener("DOMContentLoaded", () => createWidgetSafe(), { once: true });
   }
   function cleanup() {
-    const widget = document.getElementById("zen-notes-widget");
-    if (widget && widget._zenNotesCleanup) widget._zenNotesCleanup();
+    const w = document.getElementById("zen-notes-widget");
+    if (w && w._zenNotesCleanup) w._zenNotesCleanup();
+  }
+  if (typeof window.addUnloadListener === "function") {
+    window.addUnloadListener(cleanup);
   }
   window.addEventListener("unload", cleanup, { once: true });
   init();
