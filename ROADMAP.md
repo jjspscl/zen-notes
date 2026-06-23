@@ -6,7 +6,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Current Version
 
-**v2.0.3** — Stable v2 release with Sine-first metadata, global notes library, and title-trigger popover UX.
+**v2.0.4** — Adds strikethrough formatting and interactive checkbox/todo lists.
 
 ## Release Channels
 
@@ -51,6 +51,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 ### M5 — Lists
 - [x] Add bullet list formatting
 - [x] Add numbered list formatting
+- [x] Add checkbox/todo list formatting
 - [ ] Decide whether explicit nesting UX belongs in a later release
 
 ## Release follow-up

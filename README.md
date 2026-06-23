@@ -2,7 +2,7 @@
 
 A lean, workspace-aware notes widget for [Zen Browser](https://zen-browser.app/), pinned to the bottom of the sidebar above the workspace indicators.
 
-![Version](https://img.shields.io/badge/version-2.0.3-blue)
+![Version](https://img.shields.io/badge/version-2.0.4-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## v2 Highlights
@@ -10,7 +10,7 @@ A lean, workspace-aware notes widget for [Zen Browser](https://zen-browser.app/)
 - **Global notes library** — a single shared `notes[]` across workspaces; each workspace pins its active note
 - **Title trigger popover** — click the current note title in the header to open an anchored note selector
 - **Central manager** — rename, reorder, open, and hard-delete notes from a dedicated manager screen
-- **Lists** — bullet and numbered list formatting alongside bold and italic
+- **Lists** — bullet, numbered, and checkbox/todo list formatting alongside bold, italic, and strikethrough
 - **Legacy migration** — v1 single-note and v2 per-workspace data migrates into v3 global model with ID collision resolution
 - **Lean pinned UX** — compact card stays in the sidebar while management moves into a central overlay
 
@@ -33,13 +33,13 @@ Manual development testing can still use a `userChrome.js` loader such as [fx-au
 - **Switch notes** — click the title button in the header to open the popover; click any note to pin it
 - **Create note** — open the manager (`≡`) and click "New note"
 - **Manage notes** with the `≡` button to rename, reorder, open, or hard-delete
-- **Format text** with bold, italic, bullet list, and numbered list controls
+- **Format text** with bold, italic, strikethrough, bullet list, numbered list, and checkbox/todo list controls
 - **Change color** with the header color dot
 - **Collapse or expand** by clicking the header
 
 ## Release status
 
-`2.0.0` is the stable v2 release for the global notes library and title-trigger popover UX. Sine marketplace submission is pending acceptance.
+`2.0.4` adds strikethrough formatting and interactive checkbox/todo lists to the stable v2 release line.
 
 ## Release channels
 

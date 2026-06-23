@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 No unreleased changes.
 
+## [2.0.4] — 2026-06-22
+
+### Added
+- Strikethrough formatting via toolbar button (S) and keyboard shortcut (Ctrl+Shift+X).
+- Checkbox/todo lists via toolbar button (☐) with click-to-toggle interaction.
+- Checked checklist items automatically apply strikethrough and reduced opacity.
+
 ## [2.0.0] — 2026-06-07
 
 ### Added
@@ -131,7 +138,8 @@ No unreleased changes.
 - Basic height constraints (min 100px, default 200px, max 400px).
 - Manual install README.
 
-[Unreleased]: https://github.com/jjspscl/zen-notes/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/jjspscl/zen-notes/compare/v2.0.4...HEAD
+[2.0.4]: https://github.com/jjspscl/zen-notes/compare/v2.0.0...v2.0.4
 [2.0.0]: https://github.com/jjspscl/zen-notes/compare/v1.0.1...v2.0.0
 [1.0.1]: https://github.com/jjspscl/zen-notes/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/jjspscl/zen-notes/compare/v0.2.2-alpha...v1.0.0
