@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.0.3
+// @version         2.0.4
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -28,7 +28,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.0.3";
+  const VERSION = "2.0.4";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 110;
@@ -55,7 +55,7 @@
 
   const XHTML_NS = "http://www.w3.org/1999/xhtml";
   const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-  const ALLOWED_TAGS = new Set(["B", "STRONG", "I", "EM", "U", "BR", "DIV", "P", "UL", "OL", "LI"]);
+  const ALLOWED_TAGS = new Set(["B", "STRONG", "I", "EM", "U", "S", "STRIKE", "DEL", "BR", "DIV", "P", "UL", "OL", "LI"]);
 
   /* ── Preference helpers ───────────────────────────────────── */
   function getPrefString(key, defaultValue = "") {
@@ -120,6 +120,7 @@
         return fragment;
       }
       const safeElement = createXHTMLElement(tagName.toLowerCase());
+      if (tagName === "LI" && node.hasAttribute("data-checked")) safeElement.setAttribute("data-checked", node.getAttribute("data-checked"));
       for (const child of node.childNodes) { const safeChild = sanitizeNode(child); if (safeChild) safeElement.appendChild(safeChild); }
       return safeElement;
     }
@@ -547,10 +548,15 @@
     italicBtn.style.fontStyle = "italic";
     const bulletBtn = createToolbarButton("•", "Bullet list", "insertUnorderedList");
     const numberBtn = createToolbarButton("1.", "Numbered list", "insertOrderedList");
+    const strikeBtn = createToolbarButton("S", "Strikethrough", "strikeThrough");
+    strikeBtn.style.textDecoration = "line-through";
+    const checklistBtn = createToolbarButton("☐", "Checklist", "checklist");
     toolbar.appendChild(boldBtn);
     toolbar.appendChild(italicBtn);
+    toolbar.appendChild(strikeBtn);
     toolbar.appendChild(bulletBtn);
     toolbar.appendChild(numberBtn);
+    toolbar.appendChild(checklistBtn);
 
     const editor = createXHTMLElement("div");
     editor.className = "zen-notes-editor";
@@ -626,14 +632,25 @@
       else widget.removeAttribute("data-appearance");
     }
 
+    function isInsideChecklist() {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return false;
+      let node = sel.getRangeAt(0).commonAncestorContainer;
+      if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
+      return !!node.closest("ul.zen-notes-checklist");
+    }
+
     function updateToolbarState() {
-      const states = [[boldBtn, "bold"], [italicBtn, "italic"], [bulletBtn, "insertUnorderedList"], [numberBtn, "insertOrderedList"]];
+      const states = [[boldBtn, "bold"], [italicBtn, "italic"], [bulletBtn, "insertUnorderedList"], [numberBtn, "insertOrderedList"], [strikeBtn, "strikeThrough"]];
       for (const [btn, command] of states) {
         let active = false;
         try { active = document.queryCommandState(command); } catch (e) {}
         btn.setAttribute("data-active", active ? "true" : "false");
         btn.setAttribute("aria-pressed", active ? "true" : "false");
       }
+      const checklistActive = isInsideChecklist();
+      checklistBtn.setAttribute("data-active", checklistActive ? "true" : "false");
+      checklistBtn.setAttribute("aria-pressed", checklistActive ? "true" : "false");
     }
 
     function updateDateLabel(note, overrideIso) {
@@ -887,8 +904,33 @@
       syncWorkspace(next.id, next.source);
     }
 
-    function handleToolbarCommand(command) { editor.focus(); execFormat(command); updateToolbarState(); scheduleSave(editor.innerHTML || ""); }
-    [boldBtn, italicBtn, bulletBtn, numberBtn].forEach((btn) => {
+    function getClosestList() {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return null;
+      let node = sel.getRangeAt(0).commonAncestorContainer;
+      if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
+      return node.closest("ul");
+    }
+
+    function handleToolbarCommand(command) {
+      editor.focus();
+      if (command === "checklist") {
+        const existing = isInsideChecklist();
+        if (existing) {
+          const list = getClosestList();
+          if (list) { list.classList.remove("zen-notes-checklist"); list.querySelectorAll("li[data-checked]").forEach((li) => li.removeAttribute("data-checked")); }
+        } else {
+          document.execCommand("insertUnorderedList", false, null);
+          const list = getClosestList();
+          if (list) { list.classList.add("zen-notes-checklist"); list.querySelectorAll("li").forEach((li) => { if (!li.hasAttribute("data-checked")) li.setAttribute("data-checked", "false"); }); }
+        }
+      } else {
+        execFormat(command);
+      }
+      updateToolbarState();
+      scheduleSave(editor.innerHTML || "");
+    }
+    [boldBtn, italicBtn, strikeBtn, bulletBtn, numberBtn, checklistBtn].forEach((btn) => {
       btn.addEventListener("click", (e) => { e.stopPropagation(); handleToolbarCommand(btn.getAttribute("data-command")); });
     });
 
@@ -956,7 +998,18 @@
 
     editor.addEventListener("keyup", updateToolbarState);
     editor.addEventListener("mouseup", updateToolbarState);
-    editor.addEventListener("click", updateToolbarState);
+    editor.addEventListener("click", (e) => {
+      const li = e.target.closest("ul.zen-notes-checklist > li");
+      if (li && e.offsetX < 24) {
+        e.preventDefault();
+        const checked = li.getAttribute("data-checked") === "true";
+        li.setAttribute("data-checked", checked ? "false" : "true");
+        updateToolbarState();
+        scheduleSave(editor.innerHTML || "");
+      } else {
+        updateToolbarState();
+      }
+    });
 
     header.addEventListener("click", (e) => {
       if (e.target.closest("button") || e.target.closest("input") || e.target.closest(".zen-notes-color-swatch") || e.target.closest(".zen-notes-color-dot")) return;
@@ -975,6 +1028,8 @@
       if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey) {
         if (e.key === "b" || e.key === "B") { e.preventDefault(); handleToolbarCommand("bold"); }
         else if (e.key === "i" || e.key === "I") { e.preventDefault(); handleToolbarCommand("italic"); }
+      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey) {
+        if (e.key === "x" || e.key === "X") { e.preventDefault(); handleToolbarCommand("strikeThrough"); }
       }
     });
 

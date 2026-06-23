@@ -370,10 +370,36 @@
   padding: 0;
 }
 .zen-notes-editor li + li { margin-top: 0.15em; }
+.zen-notes-editor ul.zen-notes-checklist {
+  list-style: none;
+  margin-left: 0;
+  padding-left: 0;
+}
+.zen-notes-editor ul.zen-notes-checklist li {
+  position: relative;
+  padding-left: 1.5em;
+}
+.zen-notes-editor ul.zen-notes-checklist li::before {
+  content: "☐";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.5em;
+  text-align: center;
+  cursor: pointer;
+}
+.zen-notes-editor ul.zen-notes-checklist li[data-checked="true"]::before {
+  content: "☑";
+}
+.zen-notes-editor ul.zen-notes-checklist li[data-checked="true"] {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
 .zen-notes-editor::-webkit-scrollbar { width: 4px; }
 .zen-notes-editor::-webkit-scrollbar-thumb { background: var(--zen-notes-border); border-radius: 2px; }
 .zen-notes-editor b, .zen-notes-editor strong { font-weight: 700; }
 .zen-notes-editor i, .zen-notes-editor em { font-style: italic; }
+.zen-notes-editor s, .zen-notes-editor strike, .zen-notes-editor del { text-decoration: line-through; }
 
 /* ── Drag bar ────────────────────────────────────────────────── */
 .zen-notes-drag-bar {
