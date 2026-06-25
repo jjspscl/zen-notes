@@ -5,9 +5,28 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.1.0] — 2026-06-26
 
-No unreleased changes.
+### Added
+- Paste as plain text by default; internal paste (within editor) preserves formatting.
+- Underline formatting via toolbar button (U) and keyboard shortcut (Ctrl+U).
+- Save status indicator ("Saved" / "Saving…") with `aria-live="polite"`.
+- Keyboard shortcut hints in toolbar tooltips (e.g., "Bold (Ctrl+B)").
+- Ctrl+Shift+L / Ctrl+Shift+O / Ctrl+Shift+C shortcuts for bullet list, numbered list, and checklist toggle.
+- Tab/Shift+Tab for indent/outdent within lists.
+
+### Changed
+- Paste handler now strips all foreign HTML on paste from external sources.
+- Checklist click hit-test uses computed `::before` pseudo-element width instead of hardcoded `offsetX < 24` (zoom-safe).
+- Format commands and toolbar clicks now save and restore selection state to prevent cursor jumps.
+- Blur handler no longer destructively re-syncs editor content when it already matches the stored value.
+- Enter key exits a list when pressed on an empty list item (double-Enter to break out).
+- Enter key inside a checklist automatically marks the new item as unchecked (`data-checked="false"`).
+
+### Fixed
+- Cursor no longer jumps to end of editor after formatting operations.
+- Editor undo history preserved on blur when content is already in sync.
+- Checklist toggle works reliably at all zoom levels and font sizes.
 
 ## [2.0.4] — 2026-06-22
 
@@ -138,7 +157,8 @@ No unreleased changes.
 - Basic height constraints (min 100px, default 200px, max 400px).
 - Manual install README.
 
-[Unreleased]: https://github.com/jjspscl/zen-notes/compare/v2.0.4...HEAD
+[Unreleased]: https://github.com/jjspscl/zen-notes/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/jjspscl/zen-notes/compare/v2.0.4...v2.1.0
 [2.0.4]: https://github.com/jjspscl/zen-notes/compare/v2.0.0...v2.0.4
 [2.0.0]: https://github.com/jjspscl/zen-notes/compare/v1.0.1...v2.0.0
 [1.0.1]: https://github.com/jjspscl/zen-notes/compare/v1.0.0...v1.0.1
