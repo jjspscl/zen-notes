@@ -2,7 +2,7 @@
 
 A lean, workspace-aware notes widget for [Zen Browser](https://zen-browser.app/), pinned to the bottom of the sidebar above the workspace indicators.
 
-![Version](https://img.shields.io/badge/version-2.0.4-blue)
+![Version](https://img.shields.io/badge/version-2.1.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## v2 Highlights
@@ -10,7 +10,10 @@ A lean, workspace-aware notes widget for [Zen Browser](https://zen-browser.app/)
 - **Global notes library** — a single shared `notes[]` across workspaces; each workspace pins its active note
 - **Title trigger popover** — click the current note title in the header to open an anchored note selector
 - **Central manager** — rename, reorder, open, and hard-delete notes from a dedicated manager screen
-- **Lists** — bullet, numbered, and checkbox/todo list formatting alongside bold, italic, and strikethrough
+- **Rich formatting** — bold, italic, underline, strikethrough, bullet, numbered, and checkbox/todo lists
+- **Keyboard shortcuts** — full shortcut set for all formatting commands (see below)
+- **Smart paste** — external paste strips foreign HTML; internal paste preserves formatting
+- **Save indicator** — subtle "Saved" / "Saving…" feedback with aria-live
 - **Legacy migration** — v1 single-note and v2 per-workspace data migrates into v3 global model with ID collision resolution
 - **Lean pinned UX** — compact card stays in the sidebar while management moves into a central overlay
 
@@ -33,13 +36,28 @@ Manual development testing can still use a `userChrome.js` loader such as [fx-au
 - **Switch notes** — click the title button in the header to open the popover; click any note to pin it
 - **Create note** — open the manager (`≡`) and click "New note"
 - **Manage notes** with the `≡` button to rename, reorder, open, or hard-delete
-- **Format text** with bold, italic, strikethrough, bullet list, numbered list, and checkbox/todo list controls
+- **Format text** with bold, italic, underline, strikethrough, bullet list, numbered list, and checkbox/todo list controls
 - **Change color** with the header color dot
 - **Collapse or expand** by clicking the header
 
+## Keyboard shortcuts
+
+| Action | Shortcut |
+|--------|----------|
+| Bold | `Ctrl+B` |
+| Italic | `Ctrl+I` |
+| Underline | `Ctrl+U` |
+| Strikethrough | `Ctrl+Shift+X` |
+| Bullet list | `Ctrl+Shift+L` |
+| Numbered list | `Ctrl+Shift+O` |
+| Checklist | `Ctrl+Shift+C` |
+| Indent (in list) | `Tab` |
+| Outdent (in list) | `Shift+Tab` |
+| Exit list | `Enter` on empty list item |
+
 ## Release status
 
-`2.0.4` adds strikethrough formatting and interactive checkbox/todo lists to the stable v2 release line.
+`2.1.0` adds editor robustness improvements: plain-text paste by default, selection preservation across formatting, save status indicator, underline support, list toggle shortcuts, Tab indent/outdent, and zoom-safe checklist clicking.
 
 ## Release channels
 

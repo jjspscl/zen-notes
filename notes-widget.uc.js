@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.0.4
+// @version         2.1.0
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -28,7 +28,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.0.4";
+  const VERSION = "2.1.0";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 110;
@@ -417,6 +417,7 @@
     let currentWorkspaceId = workspaceContext.id;
     let saveTimeout = null;
     let pendingSave = null;
+    let saveStatusClearTimer = null;
     let popoverOpen = false;
 
     const widget = createXULElement("vbox");
@@ -543,16 +544,19 @@
       return btn;
     }
 
-    const boldBtn = createToolbarButton("B", "Bold", "bold");
-    const italicBtn = createToolbarButton("I", "Italic", "italic");
+    const boldBtn = createToolbarButton("B", "Bold (Ctrl+B)", "bold");
+    const italicBtn = createToolbarButton("I", "Italic (Ctrl+I)", "italic");
     italicBtn.style.fontStyle = "italic";
-    const bulletBtn = createToolbarButton("•", "Bullet list", "insertUnorderedList");
-    const numberBtn = createToolbarButton("1.", "Numbered list", "insertOrderedList");
-    const strikeBtn = createToolbarButton("S", "Strikethrough", "strikeThrough");
+    const bulletBtn = createToolbarButton("•", "Bullet list (Ctrl+Shift+L)", "insertUnorderedList");
+    const numberBtn = createToolbarButton("1.", "Numbered list (Ctrl+Shift+O)", "insertOrderedList");
+    const strikeBtn = createToolbarButton("S", "Strikethrough (Ctrl+Shift+X)", "strikeThrough");
     strikeBtn.style.textDecoration = "line-through";
-    const checklistBtn = createToolbarButton("☐", "Checklist", "checklist");
+    const checklistBtn = createToolbarButton("☐", "Checklist (Ctrl+Shift+C)", "checklist");
+    const underlineBtn = createToolbarButton("U", "Underline (Ctrl+U)", "underline");
+    underlineBtn.style.textDecoration = "underline";
     toolbar.appendChild(boldBtn);
     toolbar.appendChild(italicBtn);
+    toolbar.appendChild(underlineBtn);
     toolbar.appendChild(strikeBtn);
     toolbar.appendChild(bulletBtn);
     toolbar.appendChild(numberBtn);
@@ -567,9 +571,13 @@
 
     const dateLabel = createXHTMLElement("span");
     dateLabel.className = "zen-notes-date";
+    const saveStatus = createXHTMLElement("span");
+    saveStatus.className = "zen-notes-save-status";
+    saveStatus.setAttribute("aria-live", "polite");
 
     body.appendChild(toolbar);
     body.appendChild(editor);
+    body.appendChild(saveStatus);
     body.appendChild(dateLabel);
     widget.appendChild(header);
     widget.appendChild(body);
@@ -641,7 +649,7 @@
     }
 
     function updateToolbarState() {
-      const states = [[boldBtn, "bold"], [italicBtn, "italic"], [bulletBtn, "insertUnorderedList"], [numberBtn, "insertOrderedList"], [strikeBtn, "strikeThrough"]];
+      const states = [[boldBtn, "bold"], [italicBtn, "italic"], [underlineBtn, "underline"], [bulletBtn, "insertUnorderedList"], [numberBtn, "insertOrderedList"], [strikeBtn, "strikeThrough"]];
       for (const [btn, command] of states) {
         let active = false;
         try { active = document.queryCommandState(command); } catch (e) {}
@@ -658,6 +666,18 @@
       dateLabel.textContent = label ? `Last edited: ${label}` : "";
     }
 
+    function setSaveStatus(text) {
+      saveStatus.textContent = text;
+      saveStatus.setAttribute("data-state", text === "" ? "idle" : text === "Saving\u2026" ? "saving" : "saved");
+      if (text !== "") {
+        if (saveStatusClearTimer) clearTimeout(saveStatusClearTimer);
+        saveStatusClearTimer = setTimeout(() => {
+          saveStatus.textContent = "";
+          saveStatus.setAttribute("data-state", "idle");
+        }, 1500);
+      }
+    }
+
     function flushPendingSave() {
       if (saveTimeout) { clearTimeout(saveTimeout); saveTimeout = null; }
       if (!pendingSave) return;
@@ -665,11 +685,13 @@
       const sanitized = sanitizeHTML(html);
       updateNoteGlobal(state, noteId, (note) => { note.contentHTML = sanitized; note.updatedAt = nowISOString(); note.legacyLastEditedLabel = ""; });
       pendingSave = null;
+      setSaveStatus("Saved");
     }
 
     function scheduleSave(html) {
       const pinned = getPinnedNote(state, currentWorkspaceId);
       if (!pinned) return;
+      setSaveStatus("Saving\u2026");
       pendingSave = { noteId: pinned.id, html };
       if (saveTimeout) clearTimeout(saveTimeout);
       saveTimeout = setTimeout(() => { flushPendingSave(); renderManager(); }, DEBOUNCE_MS);
@@ -912,7 +934,34 @@
       return node.closest("ul");
     }
 
+    function saveSelection() {
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return null;
+      const range = sel.getRangeAt(0);
+      return { startContainer: range.startContainer, startOffset: range.startOffset, endContainer: range.endContainer, endOffset: range.endOffset };
+    }
+
+    function restoreSelection(saved) {
+      if (!saved) return;
+      const sel = window.getSelection();
+      if (!sel) return;
+      try {
+        const range = document.createRange();
+        range.setStart(saved.startContainer, saved.startOffset);
+        range.setEnd(saved.endContainer, saved.endOffset);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } catch (e) {
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }
+
     function handleToolbarCommand(command) {
+      const saved = saveSelection();
       editor.focus();
       if (command === "checklist") {
         const existing = isInsideChecklist();
@@ -927,10 +976,11 @@
       } else {
         execFormat(command);
       }
+      restoreSelection(saved);
       updateToolbarState();
       scheduleSave(editor.innerHTML || "");
     }
-    [boldBtn, italicBtn, strikeBtn, bulletBtn, numberBtn, checklistBtn].forEach((btn) => {
+    [boldBtn, italicBtn, underlineBtn, strikeBtn, bulletBtn, numberBtn, checklistBtn].forEach((btn) => {
       btn.addEventListener("click", (e) => { e.stopPropagation(); handleToolbarCommand(btn.getAttribute("data-command")); });
     });
 
@@ -998,9 +1048,18 @@
 
     editor.addEventListener("keyup", updateToolbarState);
     editor.addEventListener("mouseup", updateToolbarState);
+    function isCheckboxHit(li, e) {
+      const beforeStyle = window.getComputedStyle(li, "::before");
+      let checkboxWidth = beforeStyle ? parseFloat(beforeStyle.width) : NaN;
+      if (isNaN(checkboxWidth) || checkboxWidth <= 0) {
+        checkboxWidth = 1.5 * parseFloat(getComputedStyle(li).fontSize);
+      }
+      return e.offsetX < checkboxWidth;
+    }
+
     editor.addEventListener("click", (e) => {
       const li = e.target.closest("ul.zen-notes-checklist > li");
-      if (li && e.offsetX < 24) {
+      if (li && isCheckboxHit(li, e)) {
         e.preventDefault();
         const checked = li.getAttribute("data-checked") === "true";
         li.setAttribute("data-checked", checked ? "false" : "true");
@@ -1025,25 +1084,111 @@
     });
 
     editor.addEventListener("keydown", (e) => {
+      // Tab/Shift+Tab for indent/outdent in lists
+      if (e.key === "Tab" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const list = getClosestList();
+        if (list) {
+          e.preventDefault();
+          document.execCommand(e.shiftKey ? "outdent" : "indent");
+          return;
+        }
+      }
+      // Enter in lists: exit list on double-Enter at empty item
+      if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const list = getClosestList();
+        if (list) {
+          let li = window.getSelection();
+          if (li && li.rangeCount) {
+            let node = li.getRangeAt(0).commonAncestorContainer;
+            if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
+            li = node.closest("li");
+          }
+          if (li && !li.textContent.trim()) {
+            e.preventDefault();
+            document.execCommand("outdent");
+            if (getClosestList()) {
+              document.execCommand("insertParagraph");
+            }
+            return;
+          }
+          // Checklist continuation: set data-checked on new item
+          if (list.classList.contains("zen-notes-checklist")) {
+            setTimeout(() => {
+              const newLi = list.querySelector("li:not([data-checked])");
+              if (newLi) newLi.setAttribute("data-checked", "false");
+            }, 0);
+          }
+        }
+      }
       if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey) {
         if (e.key === "b" || e.key === "B") { e.preventDefault(); handleToolbarCommand("bold"); }
         else if (e.key === "i" || e.key === "I") { e.preventDefault(); handleToolbarCommand("italic"); }
+        else if (e.key === "u" || e.key === "U") { e.preventDefault(); handleToolbarCommand("underline"); }
       } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey) {
         if (e.key === "x" || e.key === "X") { e.preventDefault(); handleToolbarCommand("strikeThrough"); }
+        else if (e.key === "l" || e.key === "L") { e.preventDefault(); handleToolbarCommand("insertUnorderedList"); }
+        else if (e.key === "o" || e.key === "O") { e.preventDefault(); handleToolbarCommand("insertOrderedList"); }
+        else if (e.key === "c" || e.key === "C") { e.preventDefault(); handleToolbarCommand("checklist"); }
       }
     });
 
     editor.addEventListener("paste", (e) => {
-      const items = e.clipboardData && e.clipboardData.items;
-      if (!items) return;
-      for (const item of items) {
-        if (item.type && item.type.startsWith("image/")) {
-          e.preventDefault();
-          document.execCommand("insertText", false, e.clipboardData.getData("text/plain") || "");
+      e.preventDefault();
+      const clipboard = e.clipboardData;
+      if (!clipboard) return;
+
+      const items = clipboard.items;
+      let hasImage = false;
+      if (items) {
+        for (const item of items) {
+          if (item.type && item.type.startsWith("image/")) {
+            hasImage = true;
+            break;
+          }
+        }
+      }
+
+      const plainText = clipboard.getData("text/plain") || "";
+      const html = clipboard.getData("text/html");
+
+      // If images are in clipboard, block them and insert only plain text
+      if (hasImage) {
+        if (!document.execCommand("insertText", false, plainText)) {
+          fallbackInsertText(plainText);
+        }
+        return;
+      }
+
+      // Internal paste detection: if html exists, sanitize it and check if it
+      // contains meaningful formatting (tags beyond plain text wrappers)
+      if (html) {
+        const sanitized = sanitizeHTML(html);
+        const tempDiv = createXHTMLElement("div");
+        tempDiv.innerHTML = sanitized;
+        const hasFormatting = tempDiv.querySelector("b, strong, i, em, u, s, strike, del, ul, ol, li, p");
+        if (hasFormatting) {
+          document.execCommand("insertHTML", false, sanitized);
           return;
         }
       }
+
+      // Default: plain text insert (preserves undo buffer)
+      if (!document.execCommand("insertText", false, plainText)) {
+        fallbackInsertText(plainText);
+      }
     });
+
+    function fallbackInsertText(text) {
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      const textNode = document.createTextNode(text);
+      range.insertNode(textNode);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
 
     editor.addEventListener("input", () => {
       scheduleSave(editor.innerHTML || "");
@@ -1055,7 +1200,9 @@
       renderManager();
       const pinned = getPinnedNote(state, currentWorkspaceId);
       if (pinned) {
-        if (editor.innerHTML !== sanitizeHTML(pinned.contentHTML || "")) editor.innerHTML = sanitizeHTML(pinned.contentHTML || "");
+        const current = sanitizeHTML(editor.innerHTML || "");
+        const stored = sanitizeHTML(pinned.contentHTML || "");
+        if (current !== stored) editor.innerHTML = stored;
         updateDateLabel(pinned);
       }
     });

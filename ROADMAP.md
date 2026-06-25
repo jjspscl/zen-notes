@@ -6,7 +6,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Current Version
 
-**v2.0.4** — Adds strikethrough formatting and interactive checkbox/todo lists.
+**v2.1.0** — Editor robustness improvements: fixed paste handling, selection preservation, save indicator, underline support, list shortcuts, indent/outdent, improved Enter behavior, and zoom-safe checklist clicking.
 
 ## Release Channels
 
@@ -52,7 +52,19 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 - [x] Add bullet list formatting
 - [x] Add numbered list formatting
 - [x] Add checkbox/todo list formatting
-- [ ] Decide whether explicit nesting UX belongs in a later release
+- [x] Decide whether explicit nesting UX belongs in a later release
+
+### M6 — Editor Robustness & Polish (v2.1.0)
+- [x] Fix paste handling (strip foreign HTML, preserve internal formatting)
+- [x] Add selection save/restore utilities
+- [x] Remove destructive innerHTML re-sync on blur
+- [x] Fix checklist click target (zoom-safe via computed style)
+- [x] Add save status indicator
+- [x] Add keyboard shortcut hints to tooltips
+- [x] Add underline button + Ctrl+U shortcut
+- [x] Add Ctrl+Shift+L/O/C for list toggles
+- [x] Improve Enter behavior (exit list on empty item, checklist continuation)
+- [x] Add Tab/Shift+Tab for indent/outdent in lists
 
 ## Release follow-up
 

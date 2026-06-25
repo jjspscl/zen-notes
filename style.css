@@ -1,4 +1,4 @@
-/* Zen Notes Widget — v2.0.0 Beta */
+/* Zen Notes Widget — v2.1.0 */
 /* Global notes library with per-workspace pinned notes */
 
 #zen-notes-widget {
@@ -441,6 +441,30 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+/* ── Save status ──────────────────────────────────────────────── */
+.zen-notes-save-status {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--zen-notes-text);
+  opacity: 0;
+  margin-top: 4px;
+  padding-bottom: 2px;
+  padding-left: 4px;
+  flex-shrink: 0;
+  text-align: left;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: opacity 0.2s ease;
+}
+.zen-notes-save-status[data-state="saving"],
+.zen-notes-save-status[data-state="saved"] {
+  opacity: 0.7;
+}
+.zen-notes-save-status[data-state="saving"] {
+  font-style: italic;
 }
 
 /* ── Popover note selector ───────────────────────────────────── */
