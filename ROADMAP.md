@@ -6,7 +6,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Current Version
 
-**v2.1.0** — Editor robustness improvements: fixed paste handling, selection preservation, save indicator, underline support, list shortcuts, indent/outdent, improved Enter behavior, and zoom-safe checklist clicking.
+**v2.2.0** — Editor robustness improvements: fixed paste handling, selection preservation, save indicator, underline support, list shortcuts, indent/outdent, improved Enter behavior, and zoom-safe checklist clicking.
 
 ## Release Channels
 
