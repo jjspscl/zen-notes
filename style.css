@@ -259,7 +259,7 @@
   min-width: 0;
   width: 100%;
   min-height: 0;
-  padding: 8px 12px 12px;
+  padding: 6px 12px 8px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -292,7 +292,7 @@
   flex-basis: 0;
   width: 100%;
   min-width: 0;
-  min-height: 80px;
+  min-height: 40px;
   max-height: 100%;
   background: transparent;
   border: none;
@@ -313,6 +313,10 @@
   overflow-wrap: anywhere;
   white-space: pre-wrap;
   max-width: 100%;
+}
+.zen-notes-editor[data-scroll-bottom="false"] {
+  mask-image: linear-gradient(to bottom, black 0, black calc(100% - 24px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0, black calc(100% - 24px), transparent 100%);
 }
 .zen-notes-editor:empty::before {
   content: "Type your note...";
@@ -361,7 +365,7 @@
 .zen-notes-drag-bar {
   height: 10px;
   width: calc(100% - 16px);
-  margin: 4px 8px 0;
+  margin: 2px 8px 0;
   cursor: ns-resize;
   background: transparent;
   display: flex;

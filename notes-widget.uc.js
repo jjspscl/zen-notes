@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.2.0
+// @version         2.2.1
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -28,10 +28,10 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.2.0";
+  const VERSION = "2.2.1";
 
   const DEFAULT_HEIGHT = 220;
-  const MIN_HEIGHT = 110;
+  const MIN_HEIGHT = 160;
   const MAX_HEIGHT = 460;
   const DEFAULT_COLOR = "yellow";
   const COLORS = ["yellow", "orange", "purple", "green", "blue"];
@@ -898,6 +898,7 @@
       editor.innerHTML = sanitizeHTML(pinned.contentHTML || "");
       updateDateLabel(pinned);
       updateToolbarState();
+      onEditorScroll();
     }
 
     function renderAll() {
@@ -1219,6 +1220,13 @@
       }
     });
 
+    function onEditorScroll() {
+      if (!editor) return;
+      const atBottom = editor.scrollTop + editor.clientHeight >= editor.scrollHeight - 2;
+      editor.setAttribute("data-scroll-bottom", atBottom ? "true" : "false");
+    }
+    editor.addEventListener("scroll", onEditorScroll);
+
     /* ── Drag ─────────────────────────────────────────────────── */
     let isDragging = false;
     let dragStartY = 0;
@@ -1300,6 +1308,7 @@
       window.removeEventListener(WORKSPACE_DATA_EVENT_NAME, onWorkspaceEvent);
       document.removeEventListener("click", onPopoverOutsideClick);
       document.removeEventListener("keydown", onDocumentKeydown);
+      if (editor) editor.removeEventListener("scroll", onEditorScroll);
       Services.prefs.removeObserver(PREF_ACTIVE_WORKSPACE, prefObserver);
       Services.prefs.removeObserver(PREF_APPEARANCE, prefObserver);
       clearInterval(autoSaveInterval);
