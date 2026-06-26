@@ -232,50 +232,6 @@
   transform: scale(0.97);
 }
 
-/* Color dot */
-.zen-notes-color-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--zen-notes-text);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  opacity: 0.55;
-  cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.15s ease;
-  flex-shrink: 0;
-}
-.zen-notes-color-dot:hover {
-  opacity: 0.9;
-  transform: scale(1.2);
-}
-.zen-notes-color-palette {
-  display: none;
-  align-items: center;
-  gap: 6px;
-  padding: 0 4px;
-}
-.zen-notes-color-palette[data-visible="true"] { display: flex; }
-.zen-notes-color-swatch {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease;
-  flex-shrink: 0;
-}
-.zen-notes-color-swatch:hover {
-  transform: scale(1.25);
-  border-color: var(--zen-notes-text);
-}
-.zen-notes-color-swatch[data-color="yellow"] { background: #fef3c7; }
-.zen-notes-color-swatch[data-color="orange"] { background: #ffedd5; }
-.zen-notes-color-swatch[data-color="purple"] { background: #f3e8ff; }
-.zen-notes-color-swatch[data-color="green"]  { background: #d1fae5; }
-.zen-notes-color-swatch[data-color="blue"]   { background: #dbeafe; }
-
 /* Toggle chevron */
 .zen-notes-toggle {
   width: 14px;
@@ -403,29 +359,33 @@
 
 /* ── Drag bar ────────────────────────────────────────────────── */
 .zen-notes-drag-bar {
-  height: 6px;
+  height: 10px;
   width: calc(100% - 16px);
-  margin: 0 8px;
+  margin: 4px 8px 0;
   cursor: ns-resize;
   background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background 0.15s ease;
 }
 .zen-notes-drag-bar::before {
   content: "";
   display: block;
-  width: 32px;
-  height: 2px;
-  border-radius: 1px;
-  background: var(--zen-notes-border);
-  opacity: 0;
-  transition: opacity 0.15s ease;
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: light-dark(rgba(0, 0, 0, 0.18), rgba(255, 255, 255, 0.18));
+  transition: background 0.15s ease, transform 0.15s ease;
 }
-.zen-notes-drag-bar:hover { background: var(--zen-notes-border); }
-.zen-notes-drag-bar:hover::before { opacity: 1; }
+.zen-notes-drag-bar:hover::before {
+  background: light-dark(rgba(0, 0, 0, 0.40), rgba(255, 255, 255, 0.40));
+  transform: scaleX(1.1);
+}
+.zen-notes-drag-bar--active::before {
+  background: light-dark(rgba(0, 0, 0, 0.55), rgba(255, 255, 255, 0.55));
+  transform: scaleX(1.15);
+}
 
 /* ── Date ────────────────────────────────────────────────────── */
 .zen-notes-date {
@@ -630,3 +590,57 @@
   .zen-notes-manager-header-actions,
   .zen-notes-manager-note-actions { justify-content: flex-start; }
 }
+
+/* ── Manager settings section ────────────────────────────────── */
+.zen-notes-manager-divider {
+  border: none;
+  border-top: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08));
+  margin: 16px 0 12px;
+}
+.zen-notes-manager-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 4px;
+}
+.zen-notes-manager-settings-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  opacity: 0.85;
+}
+.zen-notes-manager-settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.zen-notes-manager-settings-label {
+  font-size: 13px;
+  opacity: 0.75;
+}
+.zen-notes-manager-color-swatches {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.zen-notes-manager-color-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+}
+.zen-notes-manager-color-swatch:hover { transform: scale(1.2); }
+.zen-notes-manager-color-swatch[data-active="true"] {
+  border-color: light-dark(rgba(0, 0, 0, 0.5), rgba(255, 255, 255, 0.6));
+  transform: scale(1.15);
+}
+.zen-notes-manager-color-swatch[data-color="yellow"] { background: #fef3c7; }
+.zen-notes-manager-color-swatch[data-color="orange"] { background: #ffedd5; }
+.zen-notes-manager-color-swatch[data-color="purple"] { background: #f3e8ff; }
+.zen-notes-manager-color-swatch[data-color="green"]  { background: #d1fae5; }
+.zen-notes-manager-color-swatch[data-color="blue"]   { background: #dbeafe; }

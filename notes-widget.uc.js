@@ -469,46 +469,6 @@
     const headerActions = createXULElement("hbox");
     headerActions.className = "zen-notes-header-actions";
 
-    const colorDot = createXHTMLElement("span");
-    colorDot.className = "zen-notes-color-dot";
-    colorDot.setAttribute("role", "button");
-    colorDot.setAttribute("aria-label", "Change note color");
-
-    const colorPalette = createXHTMLElement("span");
-    colorPalette.className = "zen-notes-color-palette";
-    colorPalette.setAttribute("data-visible", "false");
-
-    COLORS.forEach((color) => {
-      const swatch = createXHTMLElement("span");
-      swatch.className = "zen-notes-color-swatch";
-      swatch.setAttribute("data-color", color);
-      swatch.setAttribute("role", "button");
-      swatch.setAttribute("aria-label", `${color} color`);
-      swatch.addEventListener("click", (e) => {
-        e.stopPropagation();
-        flushPendingSave();
-        const pinned = getPinnedNote(state, currentWorkspaceId);
-        if (!pinned) return;
-        updateNoteGlobal(state, pinned.id, (note) => { note.color = color; note.updatedAt = nowISOString(); note.legacyLastEditedLabel = ""; });
-        colorPalette.setAttribute("data-visible", "false");
-        renderAll();
-      });
-      colorPalette.appendChild(swatch);
-    });
-
-    colorDot.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const visible = colorPalette.getAttribute("data-visible") === "true";
-      if (!visible) {
-        const pinned = getPinnedNote(state, currentWorkspaceId);
-        if (pinned) {
-          const activeSwatch = colorPalette.querySelector(`[data-color="${pinned.color}"]`);
-          if (activeSwatch) colorPalette.appendChild(activeSwatch);
-        }
-      }
-      colorPalette.setAttribute("data-visible", visible ? "false" : "true");
-    });
-
     const managerBtn = createXHTMLElement("button");
     managerBtn.className = "zen-notes-icon-btn";
     managerBtn.textContent = "≡";
@@ -519,8 +479,6 @@
     toggle.className = "zen-notes-toggle";
     toggle.setAttribute("aria-hidden", "true");
 
-    headerActions.appendChild(colorDot);
-    headerActions.appendChild(colorPalette);
     headerActions.appendChild(managerBtn);
     headerActions.appendChild(toggle);
 
@@ -624,6 +582,54 @@
     managerList.className = "zen-notes-manager-list";
     managerPanel.appendChild(managerPanelHeader);
     managerPanel.appendChild(managerList);
+
+    const settingsDivider = createXHTMLElement("hr");
+    settingsDivider.className = "zen-notes-manager-divider";
+
+    const settingsSection = createXHTMLElement("div");
+    settingsSection.className = "zen-notes-manager-settings";
+
+    const settingsTitle = createXHTMLElement("h3");
+    settingsTitle.className = "zen-notes-manager-settings-title";
+    settingsTitle.textContent = "Settings";
+
+    const colorRow = createXHTMLElement("div");
+    colorRow.className = "zen-notes-manager-settings-row";
+
+    const colorLabel = createXHTMLElement("span");
+    colorLabel.className = "zen-notes-manager-settings-label";
+    colorLabel.textContent = "Default color";
+
+    const colorSwatches = createXHTMLElement("div");
+    colorSwatches.className = "zen-notes-manager-color-swatches";
+
+    COLORS.forEach((color) => {
+      const swatch = createXHTMLElement("span");
+      swatch.className = "zen-notes-manager-color-swatch";
+      swatch.setAttribute("data-color", color);
+      swatch.setAttribute("role", "button");
+      swatch.setAttribute("aria-label", `${color} color`);
+      swatch.setAttribute("tabindex", "0");
+      swatch.addEventListener("click", (e) => {
+        e.stopPropagation();
+        flushCurrentEditorImmediately();
+        setPrefString(PREF_DEFAULT_COLOR, color);
+        for (const note of state.notes) {
+          note.color = color;
+        }
+        persistState(state);
+        renderAll();
+        renderManager();
+      });
+      colorSwatches.appendChild(swatch);
+    });
+
+    colorRow.appendChild(colorLabel);
+    colorRow.appendChild(colorSwatches);
+    settingsSection.appendChild(settingsTitle);
+    settingsSection.appendChild(colorRow);
+    managerPanel.appendChild(settingsDivider);
+    managerPanel.appendChild(settingsSection);
     managerOverlay.appendChild(managerPanel);
 
     tabsToolbar.insertBefore(widget, footButtons);
@@ -876,6 +882,12 @@
         row.appendChild(noteActions);
         managerList.appendChild(row);
       });
+      const currentColor = getDefaultColor();
+      if (colorSwatches) {
+        colorSwatches.querySelectorAll(".zen-notes-manager-color-swatch").forEach((sw) => {
+          sw.setAttribute("data-active", sw.getAttribute("data-color") === currentColor ? "true" : "false");
+        });
+      }
     }
 
     function renderActiveNote() {
@@ -1071,7 +1083,7 @@
     });
 
     header.addEventListener("click", (e) => {
-      if (e.target.closest("button") || e.target.closest("input") || e.target.closest(".zen-notes-color-swatch") || e.target.closest(".zen-notes-color-dot")) return;
+      if (e.target.closest("button") || e.target.closest("input")) return;
       if (e.target === titleTrigger || titleTrigger.contains(e.target)) return;
       if (e.target.closest("#zen-notes-popover")) return;
       const currentlyCollapsed = widget.getAttribute("data-collapsed") === "true";
@@ -1207,11 +1219,6 @@
       }
     });
 
-    function onColorPaletteOutside(e) {
-      if (!e.target.closest(".zen-notes-color-dot") && !e.target.closest(".zen-notes-color-palette")) colorPalette.setAttribute("data-visible", "false");
-    }
-    document.addEventListener("click", onColorPaletteOutside);
-
     /* ── Drag ─────────────────────────────────────────────────── */
     let isDragging = false;
     let dragStartY = 0;
@@ -1223,11 +1230,13 @@
     function onMouseUp() {
       if (!isDragging) return;
       isDragging = false;
+      dragBar.classList.remove("zen-notes-drag-bar--active");
       setNumericPref(PREF_HEIGHT, clampHeight(Math.round(widget.getBoundingClientRect().height)));
     }
     dragBar.addEventListener("mousedown", (e) => {
       if (widget.getAttribute("data-collapsed") === "true") return;
       isDragging = true;
+      dragBar.classList.add("zen-notes-drag-bar--active");
       dragStartY = e.clientY;
       dragStartHeight = widget.getBoundingClientRect().height;
       e.preventDefault();
@@ -1289,7 +1298,6 @@
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener(WORKSPACE_EVENT_NAME, onWorkspaceEvent);
       window.removeEventListener(WORKSPACE_DATA_EVENT_NAME, onWorkspaceEvent);
-      document.removeEventListener("click", onColorPaletteOutside);
       document.removeEventListener("click", onPopoverOutsideClick);
       document.removeEventListener("keydown", onDocumentKeydown);
       Services.prefs.removeObserver(PREF_ACTIVE_WORKSPACE, prefObserver);
