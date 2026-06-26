@@ -1,11 +1,11 @@
 {
   "id": "zen-notes",
   "name": "Zen Notes",
-  "description": "Lean workspace-aware notes for the Zen Browser sidebar",
+  "description": "Workspace-aware multi-note sidebar widget with rich text formatting, drag-to-resize, and global color themes",
   "author": "jjspscl",
   "version": "2.1.0",
   "createdAt": "2025-06-02",
-  "updatedAt": "2026-06-07",
+  "updatedAt": "2026-06-26",
   "homepage": "https://github.com/jjspscl/zen-notes",
   "readme": "https://raw.githubusercontent.com/jjspscl/zen-notes/main/README.md",
   "fork": ["zen"],
@@ -16,7 +16,9 @@
     "Notes",
     "Sidebar",
     "Productivity",
-    "Workspace"
+    "Workspace",
+    "Formatting",
+    "Rich Text"
   ],
   "style": {
     "chrome": "style.css"
