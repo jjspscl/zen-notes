@@ -5,6 +5,11 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.3] — 2026-07-27
+
+### Fixed
+- List and checklist buttons destroyed the selected text instead of creating a list. Zen's chrome document is `application/xhtml+xml`, where `Element.tagName` is lowercase (`"ul"`), not uppercased as in HTML documents (`"UL"`). Every live-DOM comparison against an uppercase tag name therefore failed: valid lists were reported as malformed, which made the structural check run the normalizer on correct markup, and the normalizer in turn treated every `<li>` as an orphan and unwrapped the content out of existence. All tag comparisons now use `localName`, which is lowercase in both document types. This was the underlying cause of the list and checkbox failures across 2.3.0 through 2.3.2; the earlier fixes addressed real but secondary issues in the same code path.
+
 ## [2.3.2] — 2026-07-27
 
 ### Fixed

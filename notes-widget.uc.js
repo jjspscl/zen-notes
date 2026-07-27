@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.3.2
+// @version         2.3.3
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -28,7 +28,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.3.2";
+  const VERSION = "2.3.3";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 160;
@@ -141,6 +141,17 @@
     return target.innerHTML;
   }
 
+  // Zen's chrome document is application/xhtml+xml, where tagName is lowercase
+  // ("ul"), unlike HTML documents where it is uppercased ("UL"). Comparing
+  // tagName against uppercase literals silently fails there and made valid
+  // lists look malformed. localName is lowercase in both, so always use it.
+  function isTag(node, name) {
+    return !!node && node.nodeType === Node.ELEMENT_NODE && node.localName === name;
+  }
+  function isListTag(node) {
+    return isTag(node, "ul") || isTag(node, "ol");
+  }
+
   function normalizeEditorTree(root) {
     if (!root || !root.querySelectorAll) return;
     // Phase 1: Map legacy class="zen-notes-checklist" → data-checklist="true"
@@ -156,7 +167,7 @@
         const parent = n.parentElement;
         if (!parent) continue;
         const prevLi = n.previousElementSibling;
-        if (prevLi && prevLi.tagName === "LI") {
+        if (isTag(prevLi, "li")) {
           prevLi.appendChild(n);
         } else {
           const children = Array.from(n.childNodes);
@@ -170,12 +181,12 @@
     const allLIs = root.querySelectorAll("li");
     for (const li of allLIs) {
       const parent = li.parentElement;
-      if (parent && (parent.tagName === "UL" || parent.tagName === "OL")) continue;
+      if (isListTag(parent)) continue;
       const newUl = createXHTMLElement("ul");
       if (parent) parent.insertBefore(newUl, li);
       newUl.appendChild(li);
       const prev = newUl.previousElementSibling;
-      if (prev && prev.tagName === "UL") {
+      if (isTag(prev, "ul")) {
         while (newUl.firstChild) prev.appendChild(newUl.firstChild);
         if (newUl.parentNode) newUl.parentNode.removeChild(newUl);
       }
@@ -183,7 +194,7 @@
     // Phase 4: Collapse li containing only <br> when sole child of its list
     const soleBR = root.querySelectorAll("ul > li:only-child, ol > li:only-child");
     for (const li of soleBR) {
-      if (li.childNodes.length === 1 && li.childNodes[0] && li.childNodes[0].tagName === "BR") {
+      if (li.childNodes.length === 1 && isTag(li.childNodes[0], "br")) {
         const list = li.parentElement;
         if (list) list.removeChild(li);
       }
@@ -201,7 +212,7 @@
       let list = li.parentElement;
       let inChecklist = false;
       while (list) {
-        if ((list.tagName === "UL" || list.tagName === "OL") && list.getAttribute(CHECKLIST_ATTR) === "true") {
+        if (isListTag(list) && list.getAttribute(CHECKLIST_ATTR) === "true") {
           inChecklist = true;
           break;
         }
@@ -215,7 +226,7 @@
       let depth = 0;
       let p = list.parentElement;
       while (p) {
-        if (p.tagName === "UL" || p.tagName === "OL") depth++;
+        if (isListTag(p)) depth++;
         p = p.parentElement;
       }
       if (depth >= MAX_LIST_DEPTH) {
@@ -225,11 +236,11 @@
         // When the over-deep list sits inside an li, promoted li children must
         // land in that li's parent list (after the li), never inside the li —
         // an li directly inside an li is exactly the corruption we repair.
-        if (parent.tagName === "LI" && parent.parentElement) {
+        if (isTag(parent, "li") && parent.parentElement) {
           const ownerList = parent.parentElement;
           const anchor = parent.nextSibling;
           for (const child of children) {
-            if (child.nodeType === Node.ELEMENT_NODE && child.tagName === "LI") ownerList.insertBefore(child, anchor);
+            if (isTag(child, "li")) ownerList.insertBefore(child, anchor);
             else parent.appendChild(child);
           }
         } else {
@@ -1188,7 +1199,7 @@
       if (editor.querySelector("blockquote")) return true;
       for (const li of editor.querySelectorAll("li")) {
         const p = li.parentElement;
-        if (!p || (p.tagName !== "UL" && p.tagName !== "OL")) return true;
+        if (!isListTag(p)) return true;
       }
       return false;
     }

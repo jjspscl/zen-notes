@@ -10,7 +10,7 @@ Zen Browser mod that injects a persistent, collapsible notes widget into the sid
 - **Loader Required for local development testing**: `fx-autoconfig` (or compatible `userChrome.js` loader)
 - **Storage**: versioned `Services.prefs` JSON store (`zen.notes.data`) — schema v3 (global `notes[]` + per-workspace `workspaceState`); legacy v1/v2 prefs preserved for migration
 - **Target Browser**: Zen Browser v1.7x+
-- **Current Version**: v2.3.2
+- **Current Version**: v2.3.3
 - **License**: MIT
 
 ## Quick Links
@@ -102,6 +102,7 @@ git push origin vX.Y.Z
 ## Coding Conventions
 
 ### JavaScript (`*.uc.js`)
+- **Never compare `Element.tagName` against uppercase literals.** The chrome document is `application/xhtml+xml`, where `tagName` is lowercase (`"ul"`), unlike HTML documents where it is uppercased (`"UL"`). Use `localName` (lowercase in both) or the `isTag`/`isListTag` helpers. This caused the list/checkbox failures in v2.3.0–v2.3.2, and it cannot be caught by tests running in an HTML page.
 - Preference prefix: `zen.notes.*`
 - Use `Services.prefs` for storage, not file I/O
 - Wait for DOM ready before injection (`gBrowserInitialized` or `DOMContentLoaded`)
