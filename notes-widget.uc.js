@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.3.5
+// @version         2.3.6
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -29,7 +29,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.3.5";
+  const VERSION = "2.3.6";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 160;
@@ -69,6 +69,7 @@
     "[ ]": "checklist",
   });
   const CARET_NAV_KEYS = Object.freeze(new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"]));
+  const ARROW_DIAG_AUTO_LOGS = 12;
 
   /* ── Preference helpers ───────────────────────────────────── */
   function getPrefString(key, defaultValue = "") {
@@ -1390,20 +1391,28 @@
 
     /* ── Arrow-key escape guard + diagnostics ───────────────── */
     const describeElement = (el) => (el ? el.id || el.className || el.localName || el.tagName : "none");
+    // Auto-reports the first few caret keypresses so the diagnostic needs no
+    // about:config step, then goes quiet. The pref forces it on indefinitely.
+    let arrowDiagBudget = ARROW_DIAG_AUTO_LOGS;
+    const shouldLogArrowDiag = () => {
+      if (getPrefBool(PREF_DEBUG_KEYNAV, false)) return true;
+      if (arrowDiagBudget > 0) { arrowDiagBudget--; return true; }
+      return false;
+    };
     const onDocumentKeydownCapture = (e) => {
-      if (!getPrefBool(PREF_DEBUG_KEYNAV, false)) return;
       if (!e.ctrlKey && !e.metaKey && !e.altKey && CARET_NAV_KEYS.has(e.key)) {
-        console.log("[ZenNotes ArrowDiag] CAPTURE key=" + e.key + " target=" + describeElement(e.target) + " activeEl=" + describeElement(document.activeElement));
+        if (!shouldLogArrowDiag()) return;
+        console.log("[ZenNotes ArrowDiag] CAPTURE key=" + e.key + " target=" + describeElement(e.target) + " activeEl=" + describeElement(document.activeElement) + " insideEditor=" + (editor.contains(e.target) ? "yes" : "no"));
       }
     };
     document.addEventListener("keydown", onDocumentKeydownCapture, true);
 
     const onEditorKeyNavKeydown = (e) => {
       if (!e.ctrlKey && !e.metaKey && !e.altKey && CARET_NAV_KEYS.has(e.key)) {
-        if (getPrefBool(PREF_DEBUG_KEYNAV, false)) {
+        if (shouldLogArrowDiag()) {
           console.log("[ZenNotes ArrowDiag] EDITOR key=" + e.key + " target=" + describeElement(e.target) + " activeEl=" + describeElement(document.activeElement));
           setTimeout(() => {
-            console.log("[ZenNotes ArrowDiag] AFTER-KEY activeEl=" + describeElement(document.activeElement));
+            console.log("[ZenNotes ArrowDiag] AFTER-KEY activeEl=" + describeElement(document.activeElement) + " editorHasFocus=" + (editor.contains(document.activeElement) ? "yes" : "NO-FOCUS-ESCAPED"));
           }, 0);
         }
         e.stopPropagation();

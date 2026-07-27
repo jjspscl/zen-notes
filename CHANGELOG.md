@@ -5,6 +5,11 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.6] — 2026-07-27
+
+### Changed
+- Caret-key diagnostics now self-report the first 12 keypresses without needing `zen.notes.debugKeyNav` set in `about:config`, then go quiet. Requiring the pref meant the diagnostic silently produced nothing. The output also now states directly whether focus escaped the editor, rather than leaving that to be inferred from element names. Setting the pref still forces logging on indefinitely.
+
 ## [2.3.5] — 2026-07-27
 
 ### Fixed
