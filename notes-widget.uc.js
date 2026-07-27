@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.3.4
+// @version         2.3.5
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -29,7 +29,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.3.4";
+  const VERSION = "2.3.5";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 160;
@@ -135,11 +135,19 @@
   }
   function clampHeight(height) { return Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, height)); }
 
+  // Notes saved before the scratch-document fix carry a literal xmlns attribute
+  // baked into their stored HTML. Gecko strips it during parsing and logs a
+  // warning, so it must be removed from the string before innerHTML sees it.
+  const LEGACY_XMLNS_PATTERN = /\s+xmlns(:[a-zA-Z0-9_-]+)?\s*=\s*("[^"]*"|'[^']*')/g;
+  function stripLegacyNamespaceAttrs(html) {
+    return typeof html === "string" ? html.replace(LEGACY_XMLNS_PATTERN, "") : "";
+  }
+
   function sanitizeHTML(html) {
     const scratch = getScratchDocument();
     const source = createScratchElement("div");
     const target = createScratchElement("div");
-    source.innerHTML = html || "";
+    source.innerHTML = stripLegacyNamespaceAttrs(html);
     function sanitizeNode(node) {
       if (node.nodeType === Node.TEXT_NODE) return (scratch || document).createTextNode(node.textContent || "");
       if (node.nodeType !== Node.ELEMENT_NODE) return null;

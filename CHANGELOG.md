@@ -5,6 +5,11 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.5] — 2026-07-27
+
+### Fixed
+- `Removed unsafe attribute. Element: ul. Attribute: xmlns.` warnings persisted after 2.3.4. That release stopped the sanitizer from *writing* the attribute, but notes saved by earlier versions still carry it in their stored HTML, so the warning fired while parsing that legacy content — before the sanitizer could strip it. The attribute is now removed from the input string ahead of parsing, so existing notes heal on their next load.
+
 ## [2.3.4] — 2026-07-27
 
 ### Fixed
