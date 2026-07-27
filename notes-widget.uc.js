@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.3.8
+// @version         2.3.9
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -29,7 +29,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.3.8";
+  const VERSION = "2.3.9";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 160;
@@ -69,7 +69,6 @@
     "[ ]": "checklist",
   });
   const CARET_NAV_KEYS = Object.freeze(new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"]));
-  const ARROW_DIAG_AUTO_LOGS = 12;
   // Selection.modify() arguments per caret key. Gecko does the caret math
   // (bidi-aware, line-height aware), so we never compute positions by hand.
   const CARET_NAV_MOVES = Object.freeze({
@@ -1409,22 +1408,9 @@
     });
 
     /* ── Arrow-key escape guard + diagnostics ───────────────── */
+    // Opt-in only, via zen.notes.debugKeyNav. Silent by default.
     const describeElement = (el) => (el ? el.id || el.className || el.localName || el.tagName : "none");
-    // Auto-reports the first few caret keypresses so the diagnostic needs no
-    // about:config step, then goes quiet. The pref forces it on indefinitely.
-    let arrowDiagBudget = ARROW_DIAG_AUTO_LOGS;
-    const shouldLogArrowDiag = () => {
-      if (getPrefBool(PREF_DEBUG_KEYNAV, false)) return true;
-      if (arrowDiagBudget > 0) { arrowDiagBudget--; return true; }
-      return false;
-    };
-    const onDocumentKeydownCapture = (e) => {
-      if (!e.ctrlKey && !e.metaKey && !e.altKey && CARET_NAV_KEYS.has(e.key)) {
-        if (!shouldLogArrowDiag()) return;
-        console.log("[ZenNotes ArrowDiag] CAPTURE key=" + e.key + " target=" + describeElement(e.target) + " activeEl=" + describeElement(document.activeElement) + " insideEditor=" + (editor.contains(e.target) ? "yes" : "no"));
-      }
-    };
-    document.addEventListener("keydown", onDocumentKeydownCapture, true);
+    const shouldLogArrowDiag = () => getPrefBool(PREF_DEBUG_KEYNAV, false);
 
     // Suppressing propagation in both event groups did not keep focus in the
     // editor, which means no listener was stealing the key — the *default
@@ -1460,10 +1446,7 @@
       if ((e.ctrlKey || e.metaKey || e.altKey) && !isWordMove) return;
       const moved = moveCaret(e);
       if (shouldLogArrowDiag()) {
-        console.log("[ZenNotes ArrowDiag] EDITOR key=" + e.key + " moved=" + (moved ? "yes" : "no") + " activeEl=" + describeElement(document.activeElement));
-        setTimeout(() => {
-          console.log("[ZenNotes ArrowDiag] AFTER-KEY activeEl=" + describeElement(document.activeElement) + " editorHasFocus=" + (editor.contains(document.activeElement) ? "yes" : "NO-FOCUS-ESCAPED"));
-        }, 0);
+        console.log("[ZenNotes] caret key=" + e.key + " moved=" + (moved ? "yes" : "no") + " activeEl=" + describeElement(document.activeElement));
       }
       if (!moved) return;
       // Only suppress the default action once the caret has actually moved, so a
@@ -1496,7 +1479,9 @@
     } catch (err) {
       console.warn("[ZenNotes] system-group key guard unavailable:", err);
     }
-    console.log("[ZenNotes ArrowDiag] systemGroupGuard=" + (systemGroupGuardAttached ? "attached" : "FAILED"));
+    if (getPrefBool(PREF_DEBUG_KEYNAV, false)) {
+      console.log("[ZenNotes] systemGroupGuard=" + (systemGroupGuardAttached ? "attached" : "unavailable"));
+    }
 
     editor.addEventListener("keydown", (e) => {
       // Tab/Shift+Tab for indent/outdent in lists
@@ -1797,7 +1782,6 @@
       window.removeEventListener(WORKSPACE_DATA_EVENT_NAME, onWorkspaceEvent);
       document.removeEventListener("click", onPopoverOutsideClick);
       document.removeEventListener("keydown", onDocumentKeydown);
-      document.removeEventListener("keydown", onDocumentKeydownCapture, true);
       if (editor) {
         editor.removeEventListener("scroll", onEditorScroll);
         editor.removeEventListener("keyup", onEditorSelectionActivity);

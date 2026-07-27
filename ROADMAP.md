@@ -6,7 +6,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Current Version
 
-**v2.3.8** — Keyboard fixes: arrow keys move the caret inside the editor instead of moving focus to the page, with word, line-boundary, and page movement plus shift-extend selection.
+**v2.3.9** — Keyboard fixes: arrow keys move the caret inside the editor instead of moving focus to the page, with word, line-boundary, and page movement plus shift-extend selection.
 
 ## Release Channels
 

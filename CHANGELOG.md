@@ -5,6 +5,11 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.9] — 2026-07-27
+
+### Changed
+- Caret-key handling is confirmed working in Zen, so the temporary diagnostics are gone. The document-level capture listener has been removed entirely, and the auto-logging that reported the first twelve keypresses no longer runs — it existed to diagnose the focus-escape bug and would otherwise print to every user's console. Setting `zen.notes.debugKeyNav` still logs caret movement and whether the system-group guard attached.
+
 ## [2.3.8] — 2026-07-27
 
 ### Fixed
