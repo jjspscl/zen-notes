@@ -5,6 +5,11 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.7] — 2026-07-27
+
+### Fixed
+- Arrow keys still moved focus from the editor to the content area despite the 2.3.4 guard. Diagnostics confirmed the guard ran and called `stopPropagation()`, yet focus still escaped — because Gecko runs two event groups, and XUL `<key>` elements and built-in chrome handlers live in the system group, which a normal-group `stopPropagation()` cannot stop. The guard is now also registered with `mozSystemGroup: true` (chrome-only), placing it in the same group as the competing handler so the event is stopped before it escapes. `preventDefault` is still deliberately not called, so native caret movement and the undo buffer are untouched. The same guard is applied to the note rename input, and startup logs whether it attached.
+
 ## [2.3.6] — 2026-07-27
 
 ### Changed

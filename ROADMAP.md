@@ -6,7 +6,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Current Version
 
-**v2.3.6** — Keyboard and sanitizer fixes: arrow keys no longer move focus out of the editor into the browser toolbar, and legacy `xmlns` attributes in stored notes no longer trigger sanitizer warnings on load.
+**v2.3.7** — Keyboard and sanitizer fixes: arrow keys stay in the editor instead of moving focus to the page, and legacy `xmlns` attributes in stored notes no longer trigger sanitizer warnings on load.
 
 ## Release Channels
 

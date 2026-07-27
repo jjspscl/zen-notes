@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.3.6
+// @version         2.3.7
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -29,7 +29,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.3.6";
+  const VERSION = "2.3.7";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 160;
@@ -1000,9 +1000,11 @@
         titleInput.value = getDisplayTitle(note.title);
         titleInput.setAttribute("aria-label", "Rename note");
         titleInput.addEventListener("click", (e) => e.stopPropagation());
-        titleInput.addEventListener("keydown", (e) => {
+        const onTitleInputKeyNav = (e) => {
           if (!e.ctrlKey && !e.metaKey && !e.altKey && CARET_NAV_KEYS.has(e.key)) e.stopPropagation();
-        });
+        };
+        titleInput.addEventListener("keydown", onTitleInputKeyNav);
+        try { titleInput.addEventListener("keydown", onTitleInputKeyNav, { mozSystemGroup: true }); } catch (err) {}
         titleInput.addEventListener("input", (e) => {
           e.stopPropagation();
           updateNoteGlobal(state, note.id, (n) => { n.title = getDisplayTitle(titleInput.value); n.updatedAt = nowISOString(); n.legacyLastEditedLabel = ""; });
@@ -1420,6 +1422,26 @@
     };
     editor.addEventListener("keydown", onEditorKeyNavKeydown);
 
+    // Gecko runs two event groups. XUL <key> elements and built-in chrome
+    // handlers live in the system group, which a normal-group stopPropagation
+    // cannot reach — the caret keys were still being consumed there even though
+    // the listener above ran. mozSystemGroup (chrome-only) registers into that
+    // same group so the event can actually be stopped before it escapes.
+    // stopPropagation only; preventDefault would kill native caret movement.
+    const onEditorKeyNavSystemGroup = (e) => {
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && CARET_NAV_KEYS.has(e.key)) {
+        e.stopPropagation();
+      }
+    };
+    let systemGroupGuardAttached = false;
+    try {
+      editor.addEventListener("keydown", onEditorKeyNavSystemGroup, { mozSystemGroup: true });
+      systemGroupGuardAttached = true;
+    } catch (err) {
+      console.warn("[ZenNotes] system-group key guard unavailable:", err);
+    }
+    console.log("[ZenNotes ArrowDiag] systemGroupGuard=" + (systemGroupGuardAttached ? "attached" : "FAILED"));
+
     editor.addEventListener("keydown", (e) => {
       // Tab/Shift+Tab for indent/outdent in lists
       if (e.key === "Tab" && !e.ctrlKey && !e.metaKey && !e.altKey) {
@@ -1726,6 +1748,9 @@
         editor.removeEventListener("mouseup", onEditorSelectionActivity);
         editor.removeEventListener("beforeinput", onEditorBeforeInput);
         editor.removeEventListener("keydown", onEditorKeyNavKeydown);
+        if (systemGroupGuardAttached) {
+          try { editor.removeEventListener("keydown", onEditorKeyNavSystemGroup, { mozSystemGroup: true }); } catch (err) {}
+        }
       }
       Services.prefs.removeObserver(PREF_ACTIVE_WORKSPACE, prefObserver);
       Services.prefs.removeObserver(PREF_APPEARANCE, prefObserver);
