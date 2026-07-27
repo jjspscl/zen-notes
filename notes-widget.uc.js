@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.2.1
+// @version         2.3.0
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -28,7 +28,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.2.1";
+  const VERSION = "2.3.0";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 160;
@@ -45,6 +45,8 @@
   const AUTO_SAVE_INTERVAL = 5000;
   const SIDEBAR_MARGIN = 8;
   const SIDEBAR_PADDING = SIDEBAR_MARGIN * 2;
+  const SCROLL_FADE_HEIGHT = 24;
+  const SCROLL_BOTTOM_TOLERANCE = 2;
 
   // Popup panel sizing — sidebars are ~240-340px wide
   const POPUP_MARGIN = 8;
@@ -56,6 +58,15 @@
   const XHTML_NS = "http://www.w3.org/1999/xhtml";
   const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
   const ALLOWED_TAGS = new Set(["B", "STRONG", "I", "EM", "U", "S", "STRIKE", "DEL", "BR", "DIV", "P", "UL", "OL", "LI"]);
+  const CHECKLIST_ATTR = "data-checklist";
+  const MAX_LIST_DEPTH = 4;
+  const MARKDOWN_SHORTCUTS = Object.freeze({
+    "-": "insertUnorderedList",
+    "*": "insertUnorderedList",
+    "1.": "insertOrderedList",
+    "[]": "checklist",
+    "[ ]": "checklist",
+  });
 
   /* ── Preference helpers ───────────────────────────────────── */
   function getPrefString(key, defaultValue = "") {
@@ -121,11 +132,112 @@
       }
       const safeElement = createXHTMLElement(tagName.toLowerCase());
       if (tagName === "LI" && node.hasAttribute("data-checked")) safeElement.setAttribute("data-checked", node.getAttribute("data-checked"));
+      if ((tagName === "UL" || tagName === "OL") && node.hasAttribute(CHECKLIST_ATTR)) safeElement.setAttribute(CHECKLIST_ATTR, node.getAttribute(CHECKLIST_ATTR));
       for (const child of node.childNodes) { const safeChild = sanitizeNode(child); if (safeChild) safeElement.appendChild(safeChild); }
       return safeElement;
     }
     for (const child of source.childNodes) { const safeChild = sanitizeNode(child); if (safeChild) target.appendChild(safeChild); }
+    normalizeEditorTree(target);
     return target.innerHTML;
+  }
+
+  function normalizeEditorTree(root) {
+    if (!root || !root.querySelectorAll) return;
+    // Phase 1: Map legacy class="zen-notes-checklist" → data-checklist="true"
+    const legacyLists = root.querySelectorAll("ul.zen-notes-checklist, ol.zen-notes-checklist");
+    for (const list of legacyLists) {
+      list.setAttribute(CHECKLIST_ATTR, "true");
+      list.classList.remove("zen-notes-checklist");
+    }
+    // Phase 2: Fix ul > ul, ul > ol, ol > ul, ol > ol nesting
+    let nested = root.querySelectorAll("ul > ul, ul > ol, ol > ul, ol > ol");
+    while (nested.length > 0) {
+      for (const n of nested) {
+        const parent = n.parentElement;
+        if (!parent) continue;
+        const prevLi = n.previousElementSibling;
+        if (prevLi && prevLi.tagName === "LI") {
+          prevLi.appendChild(n);
+        } else {
+          const children = Array.from(n.childNodes);
+          for (const child of children) parent.insertBefore(child, n);
+          parent.removeChild(n);
+        }
+      }
+      nested = root.querySelectorAll("ul > ul, ul > ol, ol > ul, ol > ol");
+    }
+    // Phase 3: Promote orphan LIs into wrapping ULs, merging with preceding sibling list
+    const allLIs = root.querySelectorAll("li");
+    for (const li of allLIs) {
+      const parent = li.parentElement;
+      if (parent && (parent.tagName === "UL" || parent.tagName === "OL")) continue;
+      const newUl = createXHTMLElement("ul");
+      if (parent) parent.insertBefore(newUl, li);
+      newUl.appendChild(li);
+      const prev = newUl.previousElementSibling;
+      if (prev && prev.tagName === "UL") {
+        while (newUl.firstChild) prev.appendChild(newUl.firstChild);
+        if (newUl.parentNode) newUl.parentNode.removeChild(newUl);
+      }
+    }
+    // Phase 4: Collapse li containing only <br> when sole child of its list
+    const soleBR = root.querySelectorAll("ul > li:only-child, ol > li:only-child");
+    for (const li of soleBR) {
+      if (li.childNodes.length === 1 && li.childNodes[0] && li.childNodes[0].tagName === "BR") {
+        const list = li.parentElement;
+        if (list) list.removeChild(li);
+      }
+    }
+    // Phase 5: Drop empty lists (no li children)
+    const allLists = root.querySelectorAll("ul, ol");
+    for (const list of allLists) {
+      if (!list.querySelector(":scope > li")) {
+        if (list.parentNode) list.parentNode.removeChild(list);
+      }
+    }
+    // Phase 6: Strip data-checked from li not inside a [data-checklist] list
+    const checkedLIs = root.querySelectorAll("li[data-checked]");
+    for (const li of checkedLIs) {
+      let list = li.parentElement;
+      let inChecklist = false;
+      while (list) {
+        if ((list.tagName === "UL" || list.tagName === "OL") && list.getAttribute(CHECKLIST_ATTR) === "true") {
+          inChecklist = true;
+          break;
+        }
+        list = list.parentElement;
+      }
+      if (!inChecklist) li.removeAttribute("data-checked");
+    }
+    // Phase 7: Unwrap lists nested deeper than MAX_LIST_DEPTH
+    const depthCandidates = root.querySelectorAll("ul, ol");
+    for (const list of depthCandidates) {
+      let depth = 0;
+      let p = list.parentElement;
+      while (p) {
+        if (p.tagName === "UL" || p.tagName === "OL") depth++;
+        p = p.parentElement;
+      }
+      if (depth >= MAX_LIST_DEPTH) {
+        const parent = list.parentElement;
+        if (!parent) continue;
+        const children = Array.from(list.childNodes);
+        // When the over-deep list sits inside an li, promoted li children must
+        // land in that li's parent list (after the li), never inside the li —
+        // an li directly inside an li is exactly the corruption we repair.
+        if (parent.tagName === "LI" && parent.parentElement) {
+          const ownerList = parent.parentElement;
+          const anchor = parent.nextSibling;
+          for (const child of children) {
+            if (child.nodeType === Node.ELEMENT_NODE && child.tagName === "LI") ownerList.insertBefore(child, anchor);
+            else parent.appendChild(child);
+          }
+        } else {
+          for (const child of children) parent.insertBefore(child, list);
+        }
+        if (list.parentNode) list.parentNode.removeChild(list);
+      }
+    }
   }
 
   function formatDate(isoString) {
@@ -526,17 +638,25 @@
     editor.setAttribute("role", "textbox");
     editor.setAttribute("aria-multiline", "true");
     editor.setAttribute("aria-label", "Notes editor");
+    try { document.execCommand("styleWithCSS", false, false); document.execCommand("defaultParagraphSeparator", false, "div"); } catch (e) {}
 
     const dateLabel = createXHTMLElement("span");
     dateLabel.className = "zen-notes-date";
+    const countLabel = createXHTMLElement("span");
+    countLabel.className = "zen-notes-count";
     const saveStatus = createXHTMLElement("span");
     saveStatus.className = "zen-notes-save-status";
     saveStatus.setAttribute("aria-live", "polite");
 
+    const footerRow = createXHTMLElement("div");
+    footerRow.className = "zen-notes-footer-row";
+
     body.appendChild(toolbar);
     body.appendChild(editor);
     body.appendChild(saveStatus);
-    body.appendChild(dateLabel);
+    footerRow.appendChild(dateLabel);
+    footerRow.appendChild(countLabel);
+    body.appendChild(footerRow);
     widget.appendChild(header);
     widget.appendChild(body);
 
@@ -651,7 +771,7 @@
       if (!sel.rangeCount) return false;
       let node = sel.getRangeAt(0).commonAncestorContainer;
       if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
-      return !!node.closest("ul.zen-notes-checklist");
+      return !!node.closest("[" + CHECKLIST_ATTR + '="true"]');
     }
 
     function updateToolbarState() {
@@ -670,6 +790,14 @@
     function updateDateLabel(note, overrideIso) {
       const label = overrideIso ? formatDate(overrideIso) : formatNoteEditedLabel(note);
       dateLabel.textContent = label ? `Last edited: ${label}` : "";
+    }
+
+    function updateCountLabel() {
+      const text = editor.textContent || "";
+      if (!text.trim()) { countLabel.textContent = ""; return; }
+      const words = text.trim().split(/\s+/).filter(Boolean).length;
+      const chars = text.length;
+      countLabel.textContent = `${words}w · ${chars}c`;
     }
 
     function setSaveStatus(text) {
@@ -893,12 +1021,13 @@
     function renderActiveNote() {
       const pinned = getPinnedNote(state, currentWorkspaceId);
       updateTitleTrigger();
-      if (!pinned) { editor.innerHTML = ""; updateDateLabel(null); return; }
+      if (!pinned) { editor.innerHTML = ""; updateDateLabel(null); updateCountLabel(); return; }
       setWidgetColor(pinned.color);
       editor.innerHTML = sanitizeHTML(pinned.contentHTML || "");
       updateDateLabel(pinned);
       updateToolbarState();
       onEditorScroll();
+      updateCountLabel();
     }
 
     function renderAll() {
@@ -944,24 +1073,53 @@
       if (!sel.rangeCount) return null;
       let node = sel.getRangeAt(0).commonAncestorContainer;
       if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
-      return node.closest("ul");
+      return node.closest("ul, ol");
     }
 
     function saveSelection() {
       const sel = window.getSelection();
       if (!sel || !sel.rangeCount) return null;
       const range = sel.getRangeAt(0);
-      return { startContainer: range.startContainer, startOffset: range.startOffset, endContainer: range.endContainer, endOffset: range.endOffset };
+      if (!editor.contains(range.commonAncestorContainer)) return null;
+      const walker = document.createNodeIterator(editor, NodeFilter.SHOW_TEXT, null);
+      let textNode;
+      let charOffset = 0;
+      let startOffset = -1;
+      let endOffset = -1;
+      while ((textNode = walker.nextNode())) {
+        if (textNode === range.startContainer) { startOffset = charOffset + range.startOffset; }
+        if (textNode === range.endContainer) { endOffset = charOffset + range.endOffset; }
+        if (startOffset >= 0 && endOffset >= 0) break;
+        charOffset += textNode.textContent.length;
+      }
+      return (startOffset >= 0 || endOffset >= 0) ? { startOffset, endOffset } : null;
     }
 
     function restoreSelection(saved) {
       if (!saved) return;
       const sel = window.getSelection();
       if (!sel) return;
+      const walker = document.createNodeIterator(editor, NodeFilter.SHOW_TEXT, null);
+      let textNode;
+      let charOffset = 0;
+      let startNode = null, startNodeOffset = 0;
+      let endNode = null, endNodeOffset = 0;
+      while ((textNode = walker.nextNode())) {
+        const len = textNode.textContent.length;
+        if (!startNode && saved.startOffset >= charOffset && saved.startOffset <= charOffset + len) {
+          startNode = textNode; startNodeOffset = saved.startOffset - charOffset;
+        }
+        if (!endNode && saved.endOffset >= charOffset && saved.endOffset <= charOffset + len) {
+          endNode = textNode; endNodeOffset = saved.endOffset - charOffset;
+        }
+        if (startNode && endNode) break;
+        charOffset += len;
+      }
       try {
         const range = document.createRange();
-        range.setStart(saved.startContainer, saved.startOffset);
-        range.setEnd(saved.endContainer, saved.endOffset);
+        if (startNode) range.setStart(startNode, Math.min(startNodeOffset, startNode.textContent.length));
+        if (endNode) range.setEnd(endNode, Math.min(endNodeOffset, endNode.textContent.length));
+        if (!startNode && !endNode) { range.selectNodeContents(editor); range.collapse(false); }
         sel.removeAllRanges();
         sel.addRange(range);
       } catch (e) {
@@ -980,14 +1138,18 @@
         const existing = isInsideChecklist();
         if (existing) {
           const list = getClosestList();
-          if (list) { list.classList.remove("zen-notes-checklist"); list.querySelectorAll("li[data-checked]").forEach((li) => li.removeAttribute("data-checked")); }
+          if (list) { list.removeAttribute(CHECKLIST_ATTR); list.querySelectorAll("li[data-checked]").forEach((li) => li.removeAttribute("data-checked")); }
         } else {
           document.execCommand("insertUnorderedList", false, null);
+          normalizeEditorTree(editor);
           const list = getClosestList();
-          if (list) { list.classList.add("zen-notes-checklist"); list.querySelectorAll("li").forEach((li) => { if (!li.hasAttribute("data-checked")) li.setAttribute("data-checked", "false"); }); }
+          if (list) { list.setAttribute(CHECKLIST_ATTR, "true"); list.querySelectorAll("li").forEach((li) => { if (!li.hasAttribute("data-checked")) li.setAttribute("data-checked", "false"); }); }
         }
       } else {
         execFormat(command);
+        if (command === "insertUnorderedList" || command === "insertOrderedList") {
+          normalizeEditorTree(editor);
+        }
       }
       restoreSelection(saved);
       updateToolbarState();
@@ -1071,7 +1233,7 @@
     }
 
     editor.addEventListener("click", (e) => {
-      const li = e.target.closest("ul.zen-notes-checklist > li");
+      const li = e.target.closest("[" + CHECKLIST_ATTR + '="true"] > li');
       if (li && isCheckboxHit(li, e)) {
         e.preventDefault();
         const checked = li.getAttribute("data-checked") === "true";
@@ -1103,6 +1265,7 @@
         if (list) {
           e.preventDefault();
           document.execCommand(e.shiftKey ? "outdent" : "indent");
+          normalizeEditorTree(editor);
           return;
         }
       }
@@ -1125,7 +1288,7 @@
             return;
           }
           // Checklist continuation: set data-checked on new item
-          if (list.classList.contains("zen-notes-checklist")) {
+          if (list.getAttribute(CHECKLIST_ATTR) === "true") {
             setTimeout(() => {
               const newLi = list.querySelector("li:not([data-checked])");
               if (newLi) newLi.setAttribute("data-checked", "false");
@@ -1203,9 +1366,95 @@
       sel.addRange(range);
     }
 
+    const onEditorBeforeInput = (e) => {
+      if (e.inputType === "deleteContentBackward") {
+        const sel = window.getSelection();
+        if (!sel || !sel.rangeCount) return;
+        const range = sel.getRangeAt(0);
+        if (!range.collapsed || range.startOffset !== 0) return;
+        let node = range.startContainer;
+        if (node.nodeType === Node.TEXT_NODE && node.parentElement) node = node.parentElement;
+        const li = node.nodeType === Node.ELEMENT_NODE ? node.closest("li") : null;
+        if (!li) return;
+        const list = li.closest("ul, ol");
+        if (!list) return;
+        if (li !== list.firstElementChild) return;
+        e.preventDefault();
+        const parentLi = list.parentElement ? list.parentElement.closest("li") : null;
+        if (parentLi) {
+          document.execCommand("outdent");
+        } else {
+          if (!document.execCommand("outdent")) {
+            const p = createXHTMLElement("div");
+            p.innerHTML = li.innerHTML || "";
+            if (list.parentNode) list.parentNode.insertBefore(p, list);
+            list.removeChild(li);
+            if (!list.querySelector("li") && list.parentNode) list.parentNode.removeChild(list);
+          }
+        }
+        normalizeEditorTree(editor);
+        resetEditorIfEmpty();
+      } else if (e.inputType === "deleteContentForward" || e.inputType === "deleteByDraft") {
+        setTimeout(() => {
+          normalizeEditorTree(editor);
+          resetEditorIfEmpty();
+        }, 0);
+      } else if (e.inputType === "insertText" && e.data === " ") {
+        tryMarkdownShortcut(e);
+      }
+    };
+
+    // Clear leftover empty blocks so the :empty::before placeholder returns.
+    // Checklist items are meaningful even with no text (an unlabeled checkbox is
+    // real user content), so never treat a surviving checklist as empty.
+    function resetEditorIfEmpty() {
+      if (editor.textContent.trim()) return;
+      if (editor.querySelector("[" + CHECKLIST_ATTR + '="true"]')) return;
+      editor.innerHTML = "";
+    }
+
+    function tryMarkdownShortcut(e) {
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      if (!range.collapsed) return;
+      let node = range.startContainer;
+      if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
+      const block = node.closest("div, p, li");
+      if (!block || !editor.contains(block)) return;
+      if (block.closest("ul, ol")) return;
+      const walker = document.createNodeIterator(block, NodeFilter.SHOW_TEXT, null);
+      let prefix = "";
+      let textNode;
+      while ((textNode = walker.nextNode())) {
+        if (textNode === range.startContainer) { prefix += textNode.textContent.substring(0, range.startOffset); break; }
+        prefix += textNode.textContent;
+      }
+      const shortcutCommand = MARKDOWN_SHORTCUTS[prefix];
+      if (!shortcutCommand) return;
+      e.preventDefault();
+      sel.removeAllRanges();
+      const delRange = document.createRange();
+      delRange.setStart(block, 0);
+      delRange.setEnd(range.startContainer, range.startOffset);
+      sel.addRange(delRange);
+      document.execCommand("delete");
+      if (shortcutCommand === "checklist") {
+        document.execCommand("insertUnorderedList");
+        normalizeEditorTree(editor);
+        const list = getClosestList();
+        if (list) { list.setAttribute(CHECKLIST_ATTR, "true"); list.querySelectorAll("li").forEach((li) => { if (!li.hasAttribute("data-checked")) li.setAttribute("data-checked", "false"); }); }
+      } else {
+        document.execCommand(shortcutCommand);
+        normalizeEditorTree(editor);
+      }
+    }
+    editor.addEventListener("beforeinput", onEditorBeforeInput);
+
     editor.addEventListener("input", () => {
       scheduleSave(editor.innerHTML || "");
       updateDateLabel(getPinnedNote(state, currentWorkspaceId), nowISOString());
+      updateCountLabel();
     });
 
     editor.addEventListener("blur", () => {
@@ -1222,7 +1471,7 @@
 
     function onEditorScroll() {
       if (!editor) return;
-      const atBottom = editor.scrollTop + editor.clientHeight >= editor.scrollHeight - 2;
+      const atBottom = editor.scrollTop + editor.clientHeight >= editor.scrollHeight - SCROLL_BOTTOM_TOLERANCE;
       editor.setAttribute("data-scroll-bottom", atBottom ? "true" : "false");
     }
     editor.addEventListener("scroll", onEditorScroll);
@@ -1308,7 +1557,12 @@
       window.removeEventListener(WORKSPACE_DATA_EVENT_NAME, onWorkspaceEvent);
       document.removeEventListener("click", onPopoverOutsideClick);
       document.removeEventListener("keydown", onDocumentKeydown);
-      if (editor) editor.removeEventListener("scroll", onEditorScroll);
+      if (editor) {
+        editor.removeEventListener("scroll", onEditorScroll);
+        editor.removeEventListener("keyup", updateToolbarState);
+        editor.removeEventListener("mouseup", updateToolbarState);
+        editor.removeEventListener("beforeinput", onEditorBeforeInput);
+      }
       Services.prefs.removeObserver(PREF_ACTIVE_WORKSPACE, prefObserver);
       Services.prefs.removeObserver(PREF_APPEARANCE, prefObserver);
       clearInterval(autoSaveInterval);

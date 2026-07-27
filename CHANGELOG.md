@@ -5,6 +5,26 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] — 2026-07-27
+
+### Fixed
+- Lists and checkboxes could not be deleted. Firefox `execCommand("indent")` emitted invalid `ul > ul` nesting (rendering a double `• ○` marker), and outside a list emitted `<blockquote>`, which the sanitizer unwrapped — promoting bare `<li>` elements to the editor root. Orphaned list items were unreachable by `execCommand`, so the bullet button, checklist button, and Backspace all appeared to do nothing.
+- Corrupted list structure was persisted to prefs and re-applied on load, so manual repairs were overwritten on the next save or reload.
+- Ordered lists were invisible to Tab/Enter/outdent handling — `getClosestList()` matched only `ul`.
+- Checklist state was lost on every save. `zen-notes-checklist` was a class, but the sanitizer preserved no attributes except `data-checked`, so checklists silently degraded to plain bullet lists while checked items kept strikethrough with no checkbox.
+- Caret jumped to the end of the editor after formatting; selection was restored from stale node references that `execCommand` had already replaced.
+- Deleting all content left a stray `<br>` or empty list behind, suppressing the placeholder text.
+
+### Added
+- Markdown input rules: `- `, `* `, `1. `, and `[] ` convert to the matching list at the start of a line. Applied through `execCommand` so a single Ctrl+Z reverts the conversion.
+- Live word and character count in the footer, sharing the date's row at no extra height. Hidden on empty notes.
+
+### Changed
+- Checklists are now marked with `data-checklist="true"` on the list element instead of a CSS class, so the state survives sanitization. Existing class-based checklists migrate automatically on first load.
+- `execCommand` output is normalized and repaired rather than replaced. It remains the mutation primitive because it is the only way to preserve the native undo buffer; explicit DOM surgery is limited to nodes `execCommand` cannot reach.
+- Selection is saved and restored as linear character offsets, surviving node replacement by `execCommand` and structural repair.
+- Checklist styling now also covers ordered lists, so a checklist survives a bullet/number toggle.
+
 ## [2.1.0] — 2026-06-26
 
 ### Added

@@ -10,7 +10,7 @@ Zen Browser mod that injects a persistent, collapsible notes widget into the sid
 - **Loader Required for local development testing**: `fx-autoconfig` (or compatible `userChrome.js` loader)
 - **Storage**: versioned `Services.prefs` JSON store (`zen.notes.data`) — schema v3 (global `notes[]` + per-workspace `workspaceState`); legacy v1/v2 prefs preserved for migration
 - **Target Browser**: Zen Browser v1.7x+
-- **Current Version**: v2.1.0
+- **Current Version**: v2.3.0
 - **License**: MIT
 
 ## Quick Links
@@ -83,6 +83,14 @@ git push origin vX.Y.Z
 - [ ] Drag-to-resize works and height persists
 - [ ] Bold/italic formatting via toolbar and keyboard shortcuts
 - [ ] Bullet/numbered list formatting persists correctly
+- [ ] List deletion: bullet/number button removes list; Backspace at start of first item exits list
+- [ ] Checklist deletion: checklist button clears checkboxes and strikethrough; Backspace at first item exits
+- [ ] Tab/Shift+Tab nests and unnests in both `ul` and `ol`; never produces `blockquote`
+- [ ] Ctrl+Z reverts list ops, indent/outdent, and markdown conversions in single steps
+- [ ] Markdown input rules: `- `, `* `, `1. `, `[] ` convert at line start only
+- [ ] Word/character count updates live and is hidden on empty notes
+- [ ] `data-checklist="true"` persists on save/reload; old `class="zen-notes-checklist"` migrates on load
+- [ ] Caret does not jump to editor end after formatting
 - [ ] Color picker changes card color and persists
 - [ ] Workspace-specific pinned note state switches correctly
 - [ ] Manager New note adds to global library without auto-pinning
