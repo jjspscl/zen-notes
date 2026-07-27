@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.3.7
+// @version         2.3.8
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -29,7 +29,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.3.7";
+  const VERSION = "2.3.8";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 160;
@@ -70,6 +70,23 @@
   });
   const CARET_NAV_KEYS = Object.freeze(new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"]));
   const ARROW_DIAG_AUTO_LOGS = 12;
+  // Selection.modify() arguments per caret key. Gecko does the caret math
+  // (bidi-aware, line-height aware), so we never compute positions by hand.
+  const CARET_NAV_MOVES = Object.freeze({
+    ArrowLeft: ["left", "character"],
+    ArrowRight: ["right", "character"],
+    ArrowUp: ["backward", "line"],
+    ArrowDown: ["forward", "line"],
+    Home: ["backward", "lineboundary"],
+    End: ["forward", "lineboundary"],
+    PageUp: ["backward", "line"],
+    PageDown: ["forward", "line"],
+  });
+  const CARET_NAV_WORD_MOVES = Object.freeze({
+    ArrowLeft: ["left", "word"],
+    ArrowRight: ["right", "word"],
+  });
+  const PAGE_NAV_LINE_COUNT = 10;
 
   /* ── Preference helpers ───────────────────────────────────── */
   function getPrefString(key, defaultValue = "") {
@@ -1409,29 +1426,68 @@
     };
     document.addEventListener("keydown", onDocumentKeydownCapture, true);
 
-    const onEditorKeyNavKeydown = (e) => {
-      if (!e.ctrlKey && !e.metaKey && !e.altKey && CARET_NAV_KEYS.has(e.key)) {
-        if (shouldLogArrowDiag()) {
-          console.log("[ZenNotes ArrowDiag] EDITOR key=" + e.key + " target=" + describeElement(e.target) + " activeEl=" + describeElement(document.activeElement));
-          setTimeout(() => {
-            console.log("[ZenNotes ArrowDiag] AFTER-KEY activeEl=" + describeElement(document.activeElement) + " editorHasFocus=" + (editor.contains(document.activeElement) ? "yes" : "NO-FOCUS-ESCAPED"));
-          }, 0);
-        }
-        e.stopPropagation();
+    // Suppressing propagation in both event groups did not keep focus in the
+    // editor, which means no listener was stealing the key — the *default
+    // action* was. Gecko finds no active editing session for the caret to move
+    // within, treats the key as unhandled, and its focus manager moves focus to
+    // the content <browser>. So the caret has to be moved explicitly.
+    //
+    // Selection.modify() is the native caret-movement primitive: it is
+    // bidi-aware, line-height aware, and only mutates the selection, never
+    // document content, so the undo buffer is unaffected.
+    function moveCaret(e) {
+      const selection = window.getSelection();
+      if (!selection || !selection.rangeCount) return false;
+      if (!editor.contains(selection.anchorNode)) return false;
+      const wordMove = (e.ctrlKey || e.metaKey) && CARET_NAV_WORD_MOVES[e.key];
+      const move = wordMove || CARET_NAV_MOVES[e.key];
+      if (!move) return false;
+      const alter = e.shiftKey ? "extend" : "move";
+      const steps = (e.key === "PageUp" || e.key === "PageDown") ? PAGE_NAV_LINE_COUNT : 1;
+      try {
+        for (let i = 0; i < steps; i++) selection.modify(alter, move[0], move[1]);
+      } catch (err) {
+        return false;
       }
+      return true;
+    }
+
+    const onEditorKeyNavKeydown = (e) => {
+      if (!CARET_NAV_KEYS.has(e.key)) return;
+      // Ctrl/Meta+Left/Right is word-wise caret movement; everything else with a
+      // modifier belongs to Zen's shortcuts and must pass through untouched.
+      const isWordMove = (e.ctrlKey || e.metaKey) && !!CARET_NAV_WORD_MOVES[e.key];
+      if ((e.ctrlKey || e.metaKey || e.altKey) && !isWordMove) return;
+      const moved = moveCaret(e);
+      if (shouldLogArrowDiag()) {
+        console.log("[ZenNotes ArrowDiag] EDITOR key=" + e.key + " moved=" + (moved ? "yes" : "no") + " activeEl=" + describeElement(document.activeElement));
+        setTimeout(() => {
+          console.log("[ZenNotes ArrowDiag] AFTER-KEY activeEl=" + describeElement(document.activeElement) + " editorHasFocus=" + (editor.contains(document.activeElement) ? "yes" : "NO-FOCUS-ESCAPED"));
+        }, 0);
+      }
+      if (!moved) return;
+      // Only suppress the default action once the caret has actually moved, so a
+      // failed move degrades to native behaviour rather than a dead key.
+      e.preventDefault();
+      e.stopPropagation();
+      updateToolbarState();
     };
     editor.addEventListener("keydown", onEditorKeyNavKeydown);
 
-    // Gecko runs two event groups. XUL <key> elements and built-in chrome
-    // handlers live in the system group, which a normal-group stopPropagation
-    // cannot reach — the caret keys were still being consumed there even though
-    // the listener above ran. mozSystemGroup (chrome-only) registers into that
-    // same group so the event can actually be stopped before it escapes.
-    // stopPropagation only; preventDefault would kill native caret movement.
+    // The system event group (XUL <key> elements, built-in chrome handlers) runs
+    // after the normal group and is where the focus-moving default action is
+    // dispatched, so the suppression has to be re-asserted there too.
+    // mozSystemGroup is chrome-only, hence the try/catch.
     const onEditorKeyNavSystemGroup = (e) => {
-      if (!e.ctrlKey && !e.metaKey && !e.altKey && CARET_NAV_KEYS.has(e.key)) {
-        e.stopPropagation();
-      }
+      if (!CARET_NAV_KEYS.has(e.key)) return;
+      const isWordMove = (e.ctrlKey || e.metaKey) && !!CARET_NAV_WORD_MOVES[e.key];
+      if ((e.ctrlKey || e.metaKey || e.altKey) && !isWordMove) return;
+      if (!editor.contains(document.activeElement)) return;
+      // defaultPrevented means the normal-group handler already moved the caret.
+      // Re-assert here so the system group does not re-run the default action
+      // that hands focus to the content browser.
+      e.preventDefault();
+      e.stopPropagation();
     };
     let systemGroupGuardAttached = false;
     try {

@@ -5,6 +5,14 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.8] — 2026-07-27
+
+### Fixed
+- Arrow keys moved focus to the page instead of the caret. Suppressing propagation in both the normal and system event groups (2.3.4, 2.3.7) did not help, which showed no listener was stealing the key — the default action was. Gecko found no active editing session for the caret to move within, treated the key as unhandled, and its focus manager handed focus to the content `<browser>`; the caret had never been moving at all. Caret keys are now handled explicitly via `Selection.modify()`, Gecko's native caret-movement primitive, which is bidi-aware and line-height aware and mutates only the selection, never document content, so the undo buffer is unaffected. The default action is suppressed only once the caret has actually moved, so an unhandled case degrades to native behaviour instead of a dead key.
+
+### Added
+- Shift+arrows extend the selection, Ctrl/Meta+Left/Right move by word, Home/End jump to line boundaries, and PageUp/PageDown move by ten lines. All other modifier combinations pass through to Zen's own shortcuts.
+
 ## [2.3.7] — 2026-07-27
 
 ### Fixed
