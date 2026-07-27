@@ -5,6 +5,14 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] — 2026-07-27
+
+### Fixed
+- Selected text disappeared when applying a list or checklist to a highlighted range. Selecting whole blocks anchors the selection boundaries on elements rather than text nodes, which the offset-based selection save could not resolve — it returned no offsets, so the restore built a range defaulting to a position outside the editor, and `execCommand` then ran against that range and removed the content. Boundaries are now measured by range length, so element-anchored selections resolve correctly, and a restored range can never fall outside the editor.
+- Selection end offset was measured against an incomplete character count when the start and end sat in different text nodes, so multi-block selections could be restored short.
+- Applying a checklist to a multi-block selection only marked the list under the caret. All lists intersecting the selection are now toggled together, and the toggle only clears when every selected list is already a checklist.
+- Structural repair no longer runs after every list command. It now runs only when the DOM is actually invalid, so a valid multi-block selection is left as `execCommand` set it instead of being rewritten.
+
 ## [2.3.0] — 2026-07-27
 
 ### Fixed

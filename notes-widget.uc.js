@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.3.0
+// @version         2.3.1
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -28,7 +28,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.3.0";
+  const VERSION = "2.3.1";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 160;
@@ -1076,82 +1076,146 @@
       return node.closest("ul, ol");
     }
 
+    // Linear character offset of a (container, offset) boundary relative to the
+    // editor. Uses a range measurement rather than text-node identity so that
+    // boundaries anchored on elements — which is what selecting whole blocks
+    // produces — resolve correctly instead of failing to match.
+    function boundaryToOffset(container, offset) {
+      try {
+        const measure = document.createRange();
+        measure.selectNodeContents(editor);
+        measure.setEnd(container, offset);
+        return measure.toString().length;
+      } catch (e) {
+        return -1;
+      }
+    }
+
     function saveSelection() {
       const sel = window.getSelection();
       if (!sel || !sel.rangeCount) return null;
       const range = sel.getRangeAt(0);
       if (!editor.contains(range.commonAncestorContainer)) return null;
+      const startOffset = boundaryToOffset(range.startContainer, range.startOffset);
+      const endOffset = boundaryToOffset(range.endContainer, range.endOffset);
+      if (startOffset < 0 || endOffset < 0) return null;
+      return { startOffset, endOffset, collapsed: range.collapsed };
+    }
+
+    // Resolve a linear character offset back to a live (node, offset) position.
+    // Always lands inside the editor; falls back to the last text position so a
+    // boundary can never default to a node outside the editor.
+    function offsetToBoundary(target) {
       const walker = document.createNodeIterator(editor, NodeFilter.SHOW_TEXT, null);
       let textNode;
       let charOffset = 0;
-      let startOffset = -1;
-      let endOffset = -1;
+      let lastNode = null;
+      let lastLen = 0;
       while ((textNode = walker.nextNode())) {
-        if (textNode === range.startContainer) { startOffset = charOffset + range.startOffset; }
-        if (textNode === range.endContainer) { endOffset = charOffset + range.endOffset; }
-        if (startOffset >= 0 && endOffset >= 0) break;
-        charOffset += textNode.textContent.length;
+        const len = textNode.textContent.length;
+        if (target <= charOffset + len) return { node: textNode, offset: Math.max(0, target - charOffset) };
+        charOffset += len;
+        lastNode = textNode;
+        lastLen = len;
       }
-      return (startOffset >= 0 || endOffset >= 0) ? { startOffset, endOffset } : null;
+      if (lastNode) return { node: lastNode, offset: lastLen };
+      return null;
+    }
+
+    function collapseToEditorEnd(sel) {
+      const range = document.createRange();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
     }
 
     function restoreSelection(saved) {
       if (!saved) return;
       const sel = window.getSelection();
       if (!sel) return;
-      const walker = document.createNodeIterator(editor, NodeFilter.SHOW_TEXT, null);
-      let textNode;
-      let charOffset = 0;
-      let startNode = null, startNodeOffset = 0;
-      let endNode = null, endNodeOffset = 0;
-      while ((textNode = walker.nextNode())) {
-        const len = textNode.textContent.length;
-        if (!startNode && saved.startOffset >= charOffset && saved.startOffset <= charOffset + len) {
-          startNode = textNode; startNodeOffset = saved.startOffset - charOffset;
-        }
-        if (!endNode && saved.endOffset >= charOffset && saved.endOffset <= charOffset + len) {
-          endNode = textNode; endNodeOffset = saved.endOffset - charOffset;
-        }
-        if (startNode && endNode) break;
-        charOffset += len;
-      }
       try {
+        const start = offsetToBoundary(saved.startOffset);
+        const end = saved.collapsed ? start : offsetToBoundary(saved.endOffset);
+        if (!start || !end) { collapseToEditorEnd(sel); return; }
         const range = document.createRange();
-        if (startNode) range.setStart(startNode, Math.min(startNodeOffset, startNode.textContent.length));
-        if (endNode) range.setEnd(endNode, Math.min(endNodeOffset, endNode.textContent.length));
-        if (!startNode && !endNode) { range.selectNodeContents(editor); range.collapse(false); }
+        range.setStart(start.node, Math.min(start.offset, start.node.textContent.length));
+        range.setEnd(end.node, Math.min(end.offset, end.node.textContent.length));
         sel.removeAllRanges();
         sel.addRange(range);
       } catch (e) {
-        const range = document.createRange();
-        range.selectNodeContents(editor);
-        range.collapse(false);
-        sel.removeAllRanges();
-        sel.addRange(range);
+        collapseToEditorEnd(sel);
       }
+    }
+
+    // Every list touched by the current selection, not just the one under the
+    // caret. Selecting several blocks and pressing a list button must affect all
+    // of them, so single-caret lookup is not enough.
+    function getListsInSelection() {
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return [];
+      const range = sel.getRangeAt(0);
+      const lists = [];
+      for (const list of editor.querySelectorAll("ul, ol")) {
+        if (range.intersectsNode ? range.intersectsNode(list) : list.contains(range.commonAncestorContainer)) lists.push(list);
+      }
+      if (!lists.length) {
+        const single = getClosestList();
+        if (single) lists.push(single);
+      }
+      return lists;
+    }
+
+    // Normalizing rewrites nodes, which disturbs a live multi-block selection.
+    // Only pay that cost when execCommand actually produced broken structure;
+    // on valid output leave the selection execCommand set up.
+    function editorStructureBroken() {
+      if (editor.querySelector("ul > ul, ul > ol, ol > ul, ol > ol")) return true;
+      if (editor.querySelector("blockquote")) return true;
+      for (const li of editor.querySelectorAll("li")) {
+        const p = li.parentElement;
+        if (!p || (p.tagName !== "UL" && p.tagName !== "OL")) return true;
+      }
+      return false;
+    }
+
+    function repairIfBroken() {
+      if (!editorStructureBroken()) return false;
+      const saved = saveSelection();
+      normalizeEditorTree(editor);
+      if (saved) restoreSelection(saved);
+      return true;
     }
 
     function handleToolbarCommand(command) {
       const saved = saveSelection();
       editor.focus();
+      if (saved) restoreSelection(saved);
       if (command === "checklist") {
-        const existing = isInsideChecklist();
-        if (existing) {
-          const list = getClosestList();
-          if (list) { list.removeAttribute(CHECKLIST_ATTR); list.querySelectorAll("li[data-checked]").forEach((li) => li.removeAttribute("data-checked")); }
+        const targets = getListsInSelection();
+        const alreadyChecklist = targets.length > 0 && targets.every((l) => l.getAttribute(CHECKLIST_ATTR) === "true");
+        if (alreadyChecklist) {
+          for (const list of targets) {
+            list.removeAttribute(CHECKLIST_ATTR);
+            list.querySelectorAll("li[data-checked]").forEach((li) => li.removeAttribute("data-checked"));
+          }
+        } else if (targets.length > 0) {
+          for (const list of targets) {
+            list.setAttribute(CHECKLIST_ATTR, "true");
+            list.querySelectorAll("li").forEach((li) => { if (!li.hasAttribute("data-checked")) li.setAttribute("data-checked", "false"); });
+          }
         } else {
           document.execCommand("insertUnorderedList", false, null);
-          normalizeEditorTree(editor);
-          const list = getClosestList();
-          if (list) { list.setAttribute(CHECKLIST_ATTR, "true"); list.querySelectorAll("li").forEach((li) => { if (!li.hasAttribute("data-checked")) li.setAttribute("data-checked", "false"); }); }
+          repairIfBroken();
+          for (const list of getListsInSelection()) {
+            list.setAttribute(CHECKLIST_ATTR, "true");
+            list.querySelectorAll("li").forEach((li) => { if (!li.hasAttribute("data-checked")) li.setAttribute("data-checked", "false"); });
+          }
         }
       } else {
         execFormat(command);
-        if (command === "insertUnorderedList" || command === "insertOrderedList") {
-          normalizeEditorTree(editor);
-        }
+        if (command === "insertUnorderedList" || command === "insertOrderedList") repairIfBroken();
       }
-      restoreSelection(saved);
       updateToolbarState();
       scheduleSave(editor.innerHTML || "");
     }
@@ -1265,7 +1329,7 @@
         if (list) {
           e.preventDefault();
           document.execCommand(e.shiftKey ? "outdent" : "indent");
-          normalizeEditorTree(editor);
+          repairIfBroken();
           return;
         }
       }
