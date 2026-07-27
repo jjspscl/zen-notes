@@ -6,7 +6,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Current Version
 
-**v2.3.3** — Editor robustness improvements: fixed paste handling, selection preservation, save indicator, underline support, list shortcuts, indent/outdent, improved Enter behavior, and zoom-safe checklist clicking.
+**v2.3.4** — Keyboard and sanitizer fixes: arrow keys no longer move focus out of the editor into the browser toolbar, and the `xmlns` sanitizer warnings on every list save/load are gone.
 
 ## Release Channels
 

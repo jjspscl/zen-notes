@@ -5,6 +5,15 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.4] — 2026-07-27
+
+### Fixed
+- Arrow keys moved focus out of the editor into the browser instead of moving the caret. The editor is an HTML `contenteditable` element inside `#TabsToolbar`, which Firefox registers as a keyboard-navigable toolbar area (`CustomizableUI.AREA_TABSTRIP`). Its `ToolbarKeyboardNavigator` claims Left/Right to walk between toolbar buttons, and Zen's vertical-tabs handling claims Up/Down, so every unmodified arrow key that bubbled out of the editor was consumed before the caret could move. Caret-navigation keys (arrows, Home, End, PageUp, PageDown) now stop propagating at the editor and at the note rename input, and the widget opts out of toolbar keyboard navigation via `keyNav="false"`. `preventDefault` is deliberately not called, so native caret movement and the undo buffer are untouched. Keys held with Ctrl, Meta, or Alt still reach Zen's own shortcuts.
+- Repeated `Removed unsafe attribute. Element: ul. Attribute: xmlns.` warnings on every save, load, and note switch involving a list. Zen's chrome document is `application/xhtml+xml`, so serializing namespaced elements through `innerHTML` emitted an explicit `xmlns` attribute into the stored note. That attribute round-tripped back into the sanitizer on the next load, where Gecko stripped it and logged a warning. The sanitizer and normalizer now build their scratch tree in a detached HTML document, which serializes without namespace declarations. Elements inserted into the live editor are still created in the chrome document.
+
+### Added
+- `zen.notes.debugKeyNav` pref (default `false`). When enabled, logs caret-key propagation and the resulting focus target to the Browser Console for diagnosing keyboard-focus issues.
+
 ## [2.3.3] — 2026-07-27
 
 ### Fixed

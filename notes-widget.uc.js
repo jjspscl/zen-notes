@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.3.3
+// @version         2.3.4
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -20,6 +20,7 @@
   const PREF_APPEARANCE = "zen.notes.appearance";
   const PREF_ACTIVE_WORKSPACE = "zen.workspaces.active";
   const PREF_DATA_BACKUP = "zen.notes.dataBackup";
+  const PREF_DEBUG_KEYNAV = "zen.notes.debugKeyNav";
 
   // Legacy v1 prefs kept for migration/debugging.
   const LEGACY_PREF_CONTENT = "zen.notes.content";
@@ -28,7 +29,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.3.3";
+  const VERSION = "2.3.4";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 160;
@@ -67,6 +68,7 @@
     "[]": "checklist",
     "[ ]": "checklist",
   });
+  const CARET_NAV_KEYS = Object.freeze(new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"]));
 
   /* ── Preference helpers ───────────────────────────────────── */
   function getPrefString(key, defaultValue = "") {
@@ -103,6 +105,22 @@
   /* ── General helpers ───────────────────────────────────────── */
   function createXHTMLElement(tag) { return document.createElementNS(XHTML_NS, tag); }
   function createXULElement(tag) { return document.createElementNS(XUL_NS, tag); }
+  // Zen's chrome document is application/xhtml+xml. Serializing namespaced
+  // elements through innerHTML there emits an explicit xmlns attribute, which
+  // then round-trips back into the sanitizer and gets stripped with a console
+  // warning on every save/load. Building the scratch tree in a detached HTML
+  // document serializes as plain HTML with no namespace declarations.
+  let scratchDocument = null;
+  function getScratchDocument() {
+    if (!scratchDocument) {
+      try { scratchDocument = document.implementation.createHTMLDocument(""); } catch (e) { scratchDocument = null; }
+    }
+    return scratchDocument;
+  }
+  function createScratchElement(tag) {
+    const doc = getScratchDocument();
+    return doc ? doc.createElement(tag) : createXHTMLElement(tag);
+  }
   function nowISOString() { return new Date().toISOString(); }
   function isColorValid(color) { return COLORS.includes(color); }
   function getDefaultColor() {
@@ -118,19 +136,20 @@
   function clampHeight(height) { return Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, height)); }
 
   function sanitizeHTML(html) {
-    const source = createXHTMLElement("div");
-    const target = createXHTMLElement("div");
+    const scratch = getScratchDocument();
+    const source = createScratchElement("div");
+    const target = createScratchElement("div");
     source.innerHTML = html || "";
     function sanitizeNode(node) {
-      if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.textContent || "");
+      if (node.nodeType === Node.TEXT_NODE) return (scratch || document).createTextNode(node.textContent || "");
       if (node.nodeType !== Node.ELEMENT_NODE) return null;
       const tagName = node.tagName.toUpperCase();
       if (!ALLOWED_TAGS.has(tagName)) {
-        const fragment = document.createDocumentFragment();
+        const fragment = (scratch || document).createDocumentFragment();
         for (const child of node.childNodes) { const safeChild = sanitizeNode(child); if (safeChild) fragment.appendChild(safeChild); }
         return fragment;
       }
-      const safeElement = createXHTMLElement(tagName.toLowerCase());
+      const safeElement = createScratchElement(tagName.toLowerCase());
       if (tagName === "LI" && node.hasAttribute("data-checked")) safeElement.setAttribute("data-checked", node.getAttribute("data-checked"));
       if ((tagName === "UL" || tagName === "OL") && node.hasAttribute(CHECKLIST_ATTR)) safeElement.setAttribute(CHECKLIST_ATTR, node.getAttribute(CHECKLIST_ATTR));
       for (const child of node.childNodes) { const safeChild = sanitizeNode(child); if (safeChild) safeElement.appendChild(safeChild); }
@@ -182,7 +201,10 @@
     for (const li of allLIs) {
       const parent = li.parentElement;
       if (isListTag(parent)) continue;
-      const newUl = createXHTMLElement("ul");
+      const ownerDoc = li.ownerDocument || getScratchDocument() || document;
+      const newUl = ownerDoc.createElement
+        ? ownerDoc.createElement("ul")
+        : createXHTMLElement("ul");
       if (parent) parent.insertBefore(newUl, li);
       newUl.appendChild(li);
       const prev = newUl.previousElementSibling;
@@ -546,6 +568,7 @@
     const widget = createXULElement("vbox");
     widget.id = "zen-notes-widget";
     widget.setAttribute("flex", "0");
+    widget.setAttribute("keyNav", "false");
     const isCollapsed = getPrefBool(PREF_COLLAPSED, false);
     widget.setAttribute("data-collapsed", isCollapsed ? "true" : "false");
     if (!isCollapsed) widget.style.height = `${clampHeight(getNumericPref(PREF_HEIGHT, DEFAULT_HEIGHT))}px`;
@@ -968,6 +991,9 @@
         titleInput.value = getDisplayTitle(note.title);
         titleInput.setAttribute("aria-label", "Rename note");
         titleInput.addEventListener("click", (e) => e.stopPropagation());
+        titleInput.addEventListener("keydown", (e) => {
+          if (!e.ctrlKey && !e.metaKey && !e.altKey && CARET_NAV_KEYS.has(e.key)) e.stopPropagation();
+        });
         titleInput.addEventListener("input", (e) => {
           e.stopPropagation();
           updateNoteGlobal(state, note.id, (n) => { n.title = getDisplayTitle(titleInput.value); n.updatedAt = nowISOString(); n.legacyLastEditedLabel = ""; });
@@ -1354,6 +1380,29 @@
       else { widget.style.height = `${clampHeight(getNumericPref(PREF_HEIGHT, DEFAULT_HEIGHT))}px`; setTimeout(() => editor.focus(), FOCUS_DELAY_MS); }
     });
 
+    /* ── Arrow-key escape guard + diagnostics ───────────────── */
+    const describeElement = (el) => (el ? el.id || el.className || el.localName || el.tagName : "none");
+    const onDocumentKeydownCapture = (e) => {
+      if (!getPrefBool(PREF_DEBUG_KEYNAV, false)) return;
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && CARET_NAV_KEYS.has(e.key)) {
+        console.log("[ZenNotes ArrowDiag] CAPTURE key=" + e.key + " target=" + describeElement(e.target) + " activeEl=" + describeElement(document.activeElement));
+      }
+    };
+    document.addEventListener("keydown", onDocumentKeydownCapture, true);
+
+    const onEditorKeyNavKeydown = (e) => {
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && CARET_NAV_KEYS.has(e.key)) {
+        if (getPrefBool(PREF_DEBUG_KEYNAV, false)) {
+          console.log("[ZenNotes ArrowDiag] EDITOR key=" + e.key + " target=" + describeElement(e.target) + " activeEl=" + describeElement(document.activeElement));
+          setTimeout(() => {
+            console.log("[ZenNotes ArrowDiag] AFTER-KEY activeEl=" + describeElement(document.activeElement));
+          }, 0);
+        }
+        e.stopPropagation();
+      }
+    };
+    editor.addEventListener("keydown", onEditorKeyNavKeydown);
+
     editor.addEventListener("keydown", (e) => {
       // Tab/Shift+Tab for indent/outdent in lists
       if (e.key === "Tab" && !e.ctrlKey && !e.metaKey && !e.altKey) {
@@ -1435,7 +1484,7 @@
       // contains meaningful formatting (tags beyond plain text wrappers)
       if (html) {
         const sanitized = sanitizeHTML(html);
-        const tempDiv = createXHTMLElement("div");
+        const tempDiv = createScratchElement("div");
         tempDiv.innerHTML = sanitized;
         const hasFormatting = tempDiv.querySelector("b, strong, i, em, u, s, strike, del, ul, ol, li, p");
         if (hasFormatting) {
@@ -1653,11 +1702,13 @@
       window.removeEventListener(WORKSPACE_DATA_EVENT_NAME, onWorkspaceEvent);
       document.removeEventListener("click", onPopoverOutsideClick);
       document.removeEventListener("keydown", onDocumentKeydown);
+      document.removeEventListener("keydown", onDocumentKeydownCapture, true);
       if (editor) {
         editor.removeEventListener("scroll", onEditorScroll);
         editor.removeEventListener("keyup", onEditorSelectionActivity);
         editor.removeEventListener("mouseup", onEditorSelectionActivity);
         editor.removeEventListener("beforeinput", onEditorBeforeInput);
+        editor.removeEventListener("keydown", onEditorKeyNavKeydown);
       }
       Services.prefs.removeObserver(PREF_ACTIVE_WORKSPACE, prefObserver);
       Services.prefs.removeObserver(PREF_APPEARANCE, prefObserver);
