@@ -5,6 +5,11 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.2] — 2026-07-27
+
+### Fixed
+- List, numbered list, and checklist toolbar buttons did nothing when clicked. Clicking a button moves focus out of the editor, which clears the selection before the handler runs, so the selection lookup returned nothing and `execCommand` executed with no target. The selection is now snapshotted on `mousedown`, before focus leaves the editor, and the button no longer blurs the editor at all. When no selection can be recovered the caret is placed in the editor rather than leaving the command with nowhere to apply.
+
 ## [2.3.1] — 2026-07-27
 
 ### Fixed

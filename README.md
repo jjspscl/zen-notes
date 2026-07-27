@@ -2,7 +2,7 @@
 
 A lean, workspace-aware notes widget for [Zen Browser](https://zen-browser.app/), pinned to the bottom of the sidebar above the workspace indicators.
 
-![Version](https://img.shields.io/badge/version-2.3.1-blue)
+![Version](https://img.shields.io/badge/version-2.3.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## v2 Highlights

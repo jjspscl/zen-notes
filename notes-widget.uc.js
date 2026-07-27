@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Widget
-// @version         2.3.1
+// @version         2.3.2
 // @description     Global notes library with per-workspace pinned notes for Zen Browser sidebar
 // @author          jjspscl
 // @include         main
@@ -28,7 +28,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 3;
-  const VERSION = "2.3.1";
+  const VERSION = "2.3.2";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 160;
@@ -1148,6 +1148,20 @@
       }
     }
 
+    // Last known editor selection. Toolbar buttons steal focus on click, which
+    // drops the selection before the handler runs, so keep a snapshot.
+    let lastEditorSelection = null;
+
+    function rememberEditorSelection() {
+      const snapshot = saveSelection();
+      if (snapshot) lastEditorSelection = snapshot;
+    }
+
+    function placeCaretAtEditorEnd() {
+      const sel = window.getSelection();
+      if (sel) collapseToEditorEnd(sel);
+    }
+
     // Every list touched by the current selection, not just the one under the
     // caret. Selecting several blocks and pressing a list button must affect all
     // of them, so single-caret lookup is not enough.
@@ -1188,9 +1202,12 @@
     }
 
     function handleToolbarCommand(command) {
-      const saved = saveSelection();
+      // Clicking a toolbar button blurs the editor, so by the time this runs the
+      // selection may already be gone. Prefer the snapshot taken on mousedown.
+      const saved = saveSelection() || lastEditorSelection;
       editor.focus();
       if (saved) restoreSelection(saved);
+      else placeCaretAtEditorEnd();
       if (command === "checklist") {
         const targets = getListsInSelection();
         const alreadyChecklist = targets.length > 0 && targets.every((l) => l.getAttribute(CHECKLIST_ATTR) === "true");
@@ -1220,6 +1237,9 @@
       scheduleSave(editor.innerHTML || "");
     }
     [boldBtn, italicBtn, underlineBtn, strikeBtn, bulletBtn, numberBtn, checklistBtn].forEach((btn) => {
+      // mousedown fires before focus leaves the editor, so the selection is still
+      // live here. preventDefault keeps the editor from blurring at all.
+      btn.addEventListener("mousedown", (e) => { rememberEditorSelection(); e.preventDefault(); });
       btn.addEventListener("click", (e) => { e.stopPropagation(); handleToolbarCommand(btn.getAttribute("data-command")); });
     });
 
@@ -1285,8 +1305,9 @@
     managerCloseBtn.addEventListener("click", (e) => { e.stopPropagation(); managerOverlay.setAttribute("data-open", "false"); });
     managerOverlay.addEventListener("click", (e) => { if (e.target === managerOverlay) managerOverlay.setAttribute("data-open", "false"); });
 
-    editor.addEventListener("keyup", updateToolbarState);
-    editor.addEventListener("mouseup", updateToolbarState);
+    const onEditorSelectionActivity = () => { updateToolbarState(); rememberEditorSelection(); };
+    editor.addEventListener("keyup", onEditorSelectionActivity);
+    editor.addEventListener("mouseup", onEditorSelectionActivity);
     function isCheckboxHit(li, e) {
       const beforeStyle = window.getComputedStyle(li, "::before");
       let checkboxWidth = beforeStyle ? parseFloat(beforeStyle.width) : NaN;
@@ -1623,8 +1644,8 @@
       document.removeEventListener("keydown", onDocumentKeydown);
       if (editor) {
         editor.removeEventListener("scroll", onEditorScroll);
-        editor.removeEventListener("keyup", updateToolbarState);
-        editor.removeEventListener("mouseup", updateToolbarState);
+        editor.removeEventListener("keyup", onEditorSelectionActivity);
+        editor.removeEventListener("mouseup", onEditorSelectionActivity);
         editor.removeEventListener("beforeinput", onEditorBeforeInput);
       }
       Services.prefs.removeObserver(PREF_ACTIVE_WORKSPACE, prefObserver);
