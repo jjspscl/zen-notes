@@ -613,10 +613,13 @@
       while (linkTarget && linkTarget !== editor) {
         if (linkTarget.localName === "a" && linkTarget.hasAttribute("href")) {
           e.preventDefault();
-          const href = linkTarget.getAttribute("href");
-          if (ALLOWED_HREF_SCHEMES.some(s => href.startsWith(s))) {
-            window.open(href, "_blank");
-          }
+          // Validate by parsed protocol rather than a case-sensitive prefix
+          // test, so links stored by older builds with an uppercase scheme
+          // still open.
+          try {
+            const url = new URL(linkTarget.getAttribute("href"));
+            if (ALLOWED_HREF_SCHEMES.includes(url.protocol)) window.open(url.href, "_blank");
+          } catch (err) {}
           return;
         }
         linkTarget = linkTarget.parentElement;
@@ -792,16 +795,26 @@
         return;
       }
 
-      if (plainText && ALLOWED_HREF_SCHEMES.some(s => plainText.startsWith(s))) {
+      const pastedUrl = (() => {
+        if (!plainText) return null;
+        try {
+          const url = new URL(plainText.trim());
+          return ALLOWED_HREF_SCHEMES.includes(url.protocol) ? url : null;
+        } catch (err) { return null; }
+      })();
+
+      if (pastedUrl) {
         const sel = window.getSelection();
         if (sel && sel.rangeCount) {
           if (!sel.isCollapsed) {
-            document.execCommand("createLink", false, plainText);
+            document.execCommand("createLink", false, pastedUrl.href);
             return;
           } else {
-            const escapedHref = plainText.replace(/"/g, "&quot;");
-            const escapedText = plainText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            document.execCommand("insertHTML", false, `<a href="${escapedHref}">${escapedText}</a>`);
+            // & must be escaped in an attribute value or the parser eats it as
+            // an entity reference (?a=1&copy=2 becomes ?a=1©=2).
+            const escapeAttr = (s) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const escapeText = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            document.execCommand("insertHTML", false, `<a href="${escapeAttr(pastedUrl.href)}">${escapeText(pastedUrl.href)}</a>`);
             return;
           }
         }

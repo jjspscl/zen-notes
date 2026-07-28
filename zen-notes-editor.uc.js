@@ -24,7 +24,9 @@
     function sanitizeNode(node) {
       if (node.nodeType === Node.TEXT_NODE) return (scratch || document).createTextNode(node.textContent || "");
       if (node.nodeType !== Node.ELEMENT_NODE) return null;
-      const tagName = node.tagName.toUpperCase();
+      // localName is reliably lowercase in both HTML and XHTML documents;
+      // tagName is not (see 2.3.3 regression), so derive the key from it.
+      const tagName = node.localName.toUpperCase();
       if (!ALLOWED_TAGS.has(tagName)) {
         const fragment = (scratch || document).createDocumentFragment();
         for (const child of node.childNodes) { const safeChild = sanitizeNode(child); if (safeChild) fragment.appendChild(safeChild); }
@@ -34,10 +36,12 @@
       if (tagName === "LI" && node.hasAttribute("data-checked")) safeElement.setAttribute("data-checked", node.getAttribute("data-checked"));
       if ((tagName === "UL" || tagName === "OL") && node.hasAttribute(CHECKLIST_ATTR)) safeElement.setAttribute(CHECKLIST_ATTR, node.getAttribute(CHECKLIST_ATTR));
       if (tagName === "A" && node.hasAttribute("href")) {
-        const href = node.getAttribute("href");
         try {
-          const url = new URL(href);
-          if (ALLOWED_HREF_SCHEMES.includes(url.protocol)) safeElement.setAttribute("href", href);
+          const url = new URL(node.getAttribute("href"));
+          // Store the parsed href, not the raw attribute. new URL() lowercases
+          // the scheme and percent-encodes the rest, so "HTTP://x" cannot be
+          // stored in a form that later case-sensitive checks would reject.
+          if (ALLOWED_HREF_SCHEMES.includes(url.protocol)) safeElement.setAttribute("href", url.href);
         } catch (e) {}
       }
       for (const child of node.childNodes) { const safeChild = sanitizeNode(child); if (safeChild) safeElement.appendChild(safeChild); }

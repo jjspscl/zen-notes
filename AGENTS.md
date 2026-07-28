@@ -8,7 +8,7 @@ Zen Browser mod that injects a persistent, collapsible notes widget into the sid
 
 - **Mechanism**: Sine-loaded mod with `theme.json`-driven script injection (3 modules with `loadOrder`) and chrome CSS sheet
 - **Development**: install as an unpublished local Sine mod, or build a release ZIP with `node scripts/build-release.js` and install via Sine → Install from file
-- **Storage**: versioned `Services.prefs` JSON store (`zen.notes.data`) — schema v4 (single note); legacy v1/v2/v3 prefs backed up on first launch and replaced with fresh state
+- **Storage**: versioned `Services.prefs` JSON store (`zen.notes.data`) — schema v4 (single note); v2/v3 state is backed up to `zen.notes.dataBackup` and replaced, while v1 single-note content is carried forward
 - **Target Browser**: Zen Browser v1.7x+
 - **Current Version**: v2.4.0
 - **License**: MIT
@@ -131,7 +131,8 @@ This places the widget between the tab list and the bottom toolbar (workspace in
 
 ### Storage Model (schema v4)
 - **Single note**: `state.note` holds one note object with `id`, `title`, `contentHTML`, `color`, `createdAt`, `updatedAt`.
-- **Pre-v4 migration**: Any state without `state.note` (v1/v2/v3) is backed up raw to `zen.notes.dataBackup` and replaced with a fresh single note. No concatenation, no reparation — the backup pref is the escape hatch.
+- **Pre-v4 migration**: Any state without a valid `state.note` (v2/v3) is written verbatim to `zen.notes.dataBackup` and replaced by `createInitialV4State()`. No concatenation, no reparation — the backup pref is the escape hatch for multi-note content.
+- **v1 exception**: `createInitialV4State()` also reads the legacy `zen.notes.content` / `.color` / `.lastEdited` prefs. If either content or a last-edited label is present, that text becomes the new note's body and it is titled "Migrated note". So a v1 user's content is preserved in the widget, unlike a v2/v3 user's. Note this runs on *any* fresh-state path, including a corrupt-JSON reset.
 - **Workspace tracking**: `state.lastWorkspaceId` is recorded for reference but no longer switches note content.
 
 ### Storage Limits
