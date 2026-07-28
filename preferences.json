@@ -7,7 +7,7 @@
   },
   {
     "type": "text",
-    "label": "Sine-first global notes library for Zen. Workspaces pin an active note, while creation, rename, delete, and ordering live in the in-browser manager.",
+    "label": "Simple in-sidebar notes widget for Zen. One note, persistent across sessions.",
     "margin": "0 0 18px 0"
   },
   {
@@ -42,19 +42,8 @@
   },
   {
     "type": "dropdown",
-    "property": "zen.notes.colorMode",
-    "label": "Color mode",
-    "defaultValue": "classic",
-    "options": [
-      { "label": "Classic (five pastels)", "value": "classic" },
-      { "label": "Adapt to browser theme", "value": "adapt" },
-      { "label": "Color preset", "value": "preset" }
-    ]
-  },
-  {
-    "type": "dropdown",
     "property": "zen.notes.preset",
-    "label": "Color preset",
+    "label": "Color scheme",
     "defaultValue": "catppuccin-latte",
     "options": [
       { "label": "Catppuccin Latte (light)", "value": "catppuccin-latte" },
@@ -75,11 +64,6 @@
     ]
   },
   {
-    "type": "text",
-    "label": "Color mode determines how the note surface looks. Classic uses the five original pastels. Adapt follows your active browser theme (Nebula, Natsumi, Zen default, etc.). Preset picks a hardcoded palette from popular color schemes.",
-    "margin": "0 0 18px 0"
-  },
-  {
     "type": "separator",
     "label": "Workspace"
   },
@@ -92,7 +76,7 @@
   },
   {
     "type": "text",
-    "label": "Workspace pinned-note state depends on Zen exposing a stable active workspace identifier. Zen Notes keeps migration data local and preserves legacy single-note prefs for recovery.",
+    "label": "Workspace state is tracked locally. Legacy prefs are preserved for recovery.",
     "margin": "8px 0 0 0"
   }
 ]

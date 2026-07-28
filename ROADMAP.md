@@ -6,7 +6,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Current Version
 
-**v2.4.0** — Modern flat redesign with a segmented toolbar; three colour modes (`classic`, `adapt`, `preset`) with 15 hardcoded palettes; link support with a scheme allowlist; the multi-note library collapsed to a single note; Sine-only install; and the script split into three modules loaded by `loadOrder`.
+**v2.4.1** — Fixes for the v2.4.0 release: toolbar mask icons now paint correctly, the toolbar wraps instead of forcing a wide sidebar, the header shows a static title, and the redundant colour-mode layer is removed in favour of a single `zen.notes.preset` colour scheme.
 
 ## Release Channels
 

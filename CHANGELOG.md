@@ -5,6 +5,19 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.1] — 2026-07-28
+
+### Fixed
+- **Icon rendering**: all 8 toolbar SVGs now declare `fill="none" stroke="white"` so mask-icons render in browser and sidebar contexts. Circle and text elements inside icon SVGs are explicitly filled for legibility.
+- **Sidebar width**: toolbar `flex-wrap: wrap` prevents 8 buttons + dividers from imposing a ~240px minimum width. `MIN_HEIGHT` raised 160→190 to accommodate a potential second toolbar row. The classic white-space / overflow / text-wrap width bug does not affect this version.
+- **"Migrated note" header label**: title is static "Zen Notes" — the widget no longer reads `state.note.title` to render the header. The migration code also creates notes titled "Zen Notes" instead of "Migrated note".
+- **Color mode dropdown removed**: `zen.notes.colorMode` pref and its `preferences.json` dropdown are gone. Adapt mode CSS blocks, classic-mode five-pastel CSS, the manager overlay color-swatch picker, and all associated JS plumbing (`PREF_COLOR_MODE`, `COLORS`, `COLOR_MODES`, `DEFAULT_COLOR`, `isColorValid`, `ensureManagerUI`, `renderManager`) are deleted. The widget always applies `data-preset` from `zen.notes.preset` (configuration → "Color scheme").
+- **Escape key crash**: `onDocumentKeydown` no longer dereferences `managerOverlay` unguarded on fresh-window loads.
+- Stale multi-note and workspace descriptions in `preferences.json` rewritten.
+
+### Removed
+- `zen.notes.colorMode` preference, adapt/classic CSS blocks, color-swatch picker, and all `COLORS`/`COLOR_MODES` plumbing.
+
 ## [2.4.0] — 2026-07-28
 
 ### Added
