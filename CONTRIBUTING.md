@@ -16,7 +16,7 @@ node scripts/validate-version.js
 node scripts/validate-theme.js
 node scripts/validate-header.js
 node scripts/validate-css.js
-node --check notes-widget.uc.js
+node --check zen-notes-core.uc.js && node --check zen-notes-editor.uc.js && node --check zen-notes-ui.uc.js
 ```
 
 ## Conventional Commits
@@ -60,7 +60,7 @@ refactor: extract drag logic into separate function
 
 Use a scope to clarify what part of the project changed:
 
-- `js` — `notes-widget.uc.js`
+- `js` — `zen-notes-core.uc.js`, `zen-notes-editor.uc.js`, `zen-notes-ui.uc.js`
 - `css` — `style.css`
 - `docs` — README, install.md, ROADMAP
 - `ci` — GitHub Actions workflows
@@ -87,13 +87,13 @@ This updates `theme.json`, `mod.json`, `// @version`, README badge, and ROADMAP.
 ## Testing in Zen Browser
 
 1. Make your changes
-2. Copy files to your Zen profile `chrome/` folder:
-   - `notes-widget.uc.js` → `chrome/JS/`
-   - `style.css` → `chrome/userChrome.css` (and `chrome/CSS/zen-notes.uc.css`)
-   - `preferences.json` → `chrome/`
-3. Clear startup cache: `about:support` → "Clear startup cache"
-4. Restart Zen Browser
-5. Open Browser Console (`Ctrl+Shift+J`) to check for errors
+2. Build a release ZIP: `node scripts/build-release.js`
+3. In Sine settings, reinstall the mod from the built ZIP (Sine → Install from file)
+4. Clear startup cache: `about:support` → "Clear startup cache"
+5. Restart Zen Browser
+6. Open Browser Console (`Ctrl+Shift+J`) to check for errors
+
+Alternatively, load the repo folder as an unpublished local mod in Sine for faster iteration.
 
 ## Code Style
 
@@ -108,7 +108,7 @@ This updates `theme.json`, `mod.json`, `// @version`, README badge, and ROADMAP.
 - [ ] `node scripts/validate-theme.js` passes
 - [ ] `node scripts/validate-header.js` passes
 - [ ] `node scripts/validate-css.js` passes
-- [ ] `node --check notes-widget.uc.js` passes
+- [ ] `node --check zen-notes-core.uc.js && node --check zen-notes-editor.uc.js && node --check zen-notes-ui.uc.js` passes
 - [ ] Tested in Zen Browser after clearing startup cache
 - [ ] Commit messages follow Conventional Commits format
 

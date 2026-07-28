@@ -2,7 +2,7 @@
 
 A lean, workspace-aware notes widget for [Zen Browser](https://zen-browser.app/), pinned to the bottom of the sidebar above the workspace indicators.
 
-![Version](https://img.shields.io/badge/version-2.3.9-blue)
+![Version](https://img.shields.io/badge/version-2.4.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## v2 Highlights
@@ -29,7 +29,7 @@ After marketplace acceptance, stable releases install from the Sine marketplace.
 
 ### Development / local testing
 
-Manual development testing can still use a `userChrome.js` loader such as [fx-autoconfig](https://github.com/MrOtherGuy/fx-autoconfig). See [install.md](./install.md).
+Install the built release ZIP via Sine, or clone the repo and load it as a local unpublished mod. See [install.md](./install.md).
 
 ## Usage
 
@@ -72,6 +72,28 @@ Manual development testing can still use a `userChrome.js` loader such as [fx-au
 - [ROADMAP.md](./ROADMAP.md)
 - [CHANGELOG.md](./CHANGELOG.md)
 - [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+## Theme Requests
+
+Zen Notes ships hardcoded color presets for popular schemes. Each preset is one CSS block defining five tokens (`--zen-notes-bg`, `--zen-notes-text`, `--zen-notes-border`, `--zen-notes-surface`, `--zen-notes-surface-strong`).
+
+To request or contribute a preset:
+
+1. **Open an issue** with the palette name, hex values, and the official source URL.
+2. Alternatively, **submit a PR** adding one CSS block to `style.css` under `[data-preset="your-palette"]` and one entry in `preferences.json` and `zen-notes-core.uc.js:PRESETS`.
+
+Presets must be from an established color scheme with a permissive license (MIT, Apache-2.0, etc.). Include an attribution comment in the CSS block.
+
+### Palette attributions
+
+- **Catppuccin** — MIT, © 2021 Catppuccin. All four flavors.
+- **Dracula** — MIT, Dracula Theme / Zeno Rocha.
+- **Nord** — MIT, © 2016-present Sven Greb.
+- **Gruvbox** — MIT/X11, morhetz.
+- **Tokyo Night** — Apache-2.0, folke. Apache-2.0 carries a NOTICE-preservation clause; see the [official repo](https://github.com/folke/tokyonight.nvim) for details.
+- **Rosé Pine** — MIT, mvllow.
+- **Solarized** — MIT, © 2011 Ethan Schoonover.
+- **Everforest** — MIT, © 2019 sainnhe.
 
 ## License
 

@@ -5,6 +5,32 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] — 2026-07-28
+
+### Added
+- **Color presets**: 15 handpicked palette families (Catppuccin 4, Dracula, Nord, Gruvbox 2, Tokyo Night, Rosé Pine 2, Solarized 2, Everforest 2) with hardcoded hex tokens — switch via `zen.notes.preset` in Sine settings.
+- **Adapt mode**: new `zen.notes.colorMode` three-way toggle (`classic` / `adapt` / `preset`). Adapt mode reads Zen-native `--zen-*` variables, with fallback chains over Nebula glass and Natsumi vars, terminating in CSS system colors — so the note surface always matches the browser chrome regardless of theme. Pure CSS, no JS probing.
+- **Links**: `<a>` is now an allowed tag. Paste a URL over a selection to wrap it; paste on a collapsed caret to insert linked text. Ctrl+K on a selection prompts for a URL. Clicking a link opens a new tab via Zen's tab API. `href` is validated on sanitize against `http:`/`https:`/`mailto:` only — `javascript:` and other schemes are stripped.
+- **Theme Requests** section in README with contribution contract (one CSS block, five tokens per preset) and separate Apache-2.0 attribution for Tokyo Night.
+- **Perf**: `normalizeEditorTree` debounced via `_normalizeDigests` WeakMap — skips redundant passes when content hasn't changed. Manager overlay DOM deferred to first open (`ensureManagerUI`). Only one `ResizeObserver` for the widget.
+
+### Changed
+- **Complete visual redesign**: toolbar converted to a single segmented control with inline SVG mask icons (bold, italic, underline, strikethrough, bullet, numbered, checklist, link). Header simplified to title + one settings button. Recessed toolbar surface, pill active state, hairline dividers. Editor flush with container, footer at 50% opacity. Radius sourced from `--zen-border-radius`.
+- **Single note**: the multi-note library, note selector, popover, and all note-management CRUD functions are removed. The widget holds exactly one note titled "Zen Notes". Pre-v4 state is backed up raw to `zen.notes.dataBackup` and replaced on first launch; legacy v1/v2/v3 content survives only as JSON in the backup pref.
+- **Sine-only install**: all `fx-autoconfig` / `_ucUtils` / `userChrome.js` documentation stripped from README, install guide, contributing guide, and AGENTS.md. Install is Sine-only via ZIP.
+- **Code splitting**: the monolithic `notes-widget.uc.js` is split into three Sine-loaded modules — `zen-notes-core.uc.js` (prefs, storage, state model), `zen-notes-editor.uc.js` (sanitizer, normalizer), `zen-notes-ui.uc.js` (DOM, lifecycle) — loaded in order via `theme.json` `scripts` map with `loadOrder`. Same behavior, smaller composable files.
+- `build-release.js` is now manifest-driven: it copies every file listed in `theme.json` `scripts` and a static set of support files, so any future module additions ship automatically.
+
+### Removed
+- Multi-note library, popover, note selector, note create/rename/delete/reorder, workspace-specific pinned notes.
+- `fx-autoconfig` documentation across all mod docs.
+- `notes-widget.uc.js` — replaced by the three split modules.
+
+### Fixed
+- No functional regressions in lists, checklists, markdown shortcuts, caret navigation, paste, formatting, or undo — all verified by `node --check` and manual test pass.
+- `style.css` banner corrected to `v2.4.0`.
+- `AGENTS.md` no longer claims `--zen-colors-*` matching existed before the token layer — now correctly describes the new variable contract.
+
 ## [2.3.9] — 2026-07-27
 
 ### Changed

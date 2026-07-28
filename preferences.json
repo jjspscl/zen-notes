@@ -42,17 +42,42 @@
   },
   {
     "type": "dropdown",
-    "property": "zen.notes.defaultColor",
-    "label": "Default note color",
-    "defaultValue": "yellow",
-    "placeholder": false,
+    "property": "zen.notes.colorMode",
+    "label": "Color mode",
+    "defaultValue": "classic",
     "options": [
-      { "label": "Yellow", "value": "yellow" },
-      { "label": "Orange", "value": "orange" },
-      { "label": "Purple", "value": "purple" },
-      { "label": "Green", "value": "green" },
-      { "label": "Blue", "value": "blue" }
+      { "label": "Classic (five pastels)", "value": "classic" },
+      { "label": "Adapt to browser theme", "value": "adapt" },
+      { "label": "Color preset", "value": "preset" }
     ]
+  },
+  {
+    "type": "dropdown",
+    "property": "zen.notes.preset",
+    "label": "Color preset",
+    "defaultValue": "catppuccin-latte",
+    "options": [
+      { "label": "Catppuccin Latte (light)", "value": "catppuccin-latte" },
+      { "label": "Catppuccin Frappé", "value": "catppuccin-frappe" },
+      { "label": "Catppuccin Macchiato", "value": "catppuccin-macchiato" },
+      { "label": "Catppuccin Mocha", "value": "catppuccin-mocha" },
+      { "label": "Dracula", "value": "dracula" },
+      { "label": "Nord", "value": "nord" },
+      { "label": "Gruvbox Dark", "value": "gruvbox-dark" },
+      { "label": "Gruvbox Light", "value": "gruvbox-light" },
+      { "label": "Tokyo Night", "value": "tokyo-night" },
+      { "label": "Rosé Pine", "value": "rose-pine" },
+      { "label": "Rosé Pine Dawn (light)", "value": "rose-pine-dawn" },
+      { "label": "Solarized Dark", "value": "solarized-dark" },
+      { "label": "Solarized Light", "value": "solarized-light" },
+      { "label": "Everforest Dark", "value": "everforest-dark" },
+      { "label": "Everforest Light", "value": "everforest-light" }
+    ]
+  },
+  {
+    "type": "text",
+    "label": "Color mode determines how the note surface looks. Classic uses the five original pastels. Adapt follows your active browser theme (Nebula, Natsumi, Zen default, etc.). Preset picks a hardcoded palette from popular color schemes.",
+    "margin": "0 0 18px 0"
   },
   {
     "type": "separator",
