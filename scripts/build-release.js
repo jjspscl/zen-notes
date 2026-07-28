@@ -32,12 +32,19 @@ function main() {
   const pkgDir = path.join(DIST, "zen-notes");
   fs.mkdirSync(pkgDir, { recursive: true });
 
-  cp("notes-widget.uc.js", path.join(pkgDir, "notes-widget.uc.js"));
-  cp("style.css", path.join(pkgDir, "style.css"));
-  cp("preferences.json", path.join(pkgDir, "preferences.json"));
-  cp("theme.json", path.join(pkgDir, "theme.json"));
-  cp("mod.json", path.join(pkgDir, "mod.json"));
-  cp("README.md", path.join(pkgDir, "README.md"));
+  const scripts = themeJson.scripts || {};
+  for (const filename of Object.keys(scripts)) {
+    if (fs.existsSync(path.join(ROOT, filename))) {
+      cp(filename, path.join(pkgDir, filename));
+    } else {
+      console.warn(`[build-release] script "${filename}" listed in theme.json not found, skipping`);
+    }
+  }
+
+  const supportFiles = ["style.css", "preferences.json", "theme.json", "mod.json", "README.md"];
+  for (const file of supportFiles) {
+    cp(file, path.join(pkgDir, file));
+  }
 
   if (fs.existsSync(path.join(ROOT, "install.md"))) {
     cp("install.md", path.join(pkgDir, "install.md"));

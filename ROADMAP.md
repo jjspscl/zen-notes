@@ -2,11 +2,11 @@
 
 ## Vision
 
-A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser's sidebar, with a global notes library and per-workspace pinned note state.
+A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser's sidebar, holding a single note that matches the browser's theme.
 
 ## Current Version
 
-**v2.3.9** — Keyboard fixes: arrow keys move the caret inside the editor instead of moving focus to the page, with word, line-boundary, and page movement plus shift-extend selection.
+**v2.4.0** — Modern flat redesign with a segmented toolbar; three colour modes (`classic`, `adapt`, `preset`) with 15 hardcoded palettes; link support with a scheme allowlist; the multi-note library collapsed to a single note; Sine-only install; and the script split into three modules loaded by `loadOrder`.
 
 ## Release Channels
 

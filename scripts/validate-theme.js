@@ -29,16 +29,20 @@ function main() {
     fail("theme.json must define style.chrome");
   }
 
-  if (!theme.scripts || !theme.scripts["notes-widget.uc.js"]) {
-    fail("theme.json must define notes-widget.uc.js in scripts");
+  if (!theme.scripts || Object.keys(theme.scripts).length === 0) {
+    fail("theme.json must define at least one script in scripts");
   }
 
-  const scriptMeta = theme.scripts["notes-widget.uc.js"];
-  if (!Array.isArray(scriptMeta.include) || scriptMeta.include.length === 0) {
-    fail("theme.json script include list must be non-empty");
+  for (const [filename, meta] of Object.entries(theme.scripts)) {
+    if (!Array.isArray(meta.include) || meta.include.length === 0) {
+      fail(`theme.json script "${filename}" must have a non-empty include list`);
+    }
+    if (!fs.existsSync(path.join(ROOT, filename))) {
+      fail(`theme.json script "${filename}" not found on disk`);
+    }
   }
 
-  const localFiles = [theme.style.chrome, theme.preferences, "notes-widget.uc.js", "README.md"];
+  const localFiles = [theme.style.chrome, theme.preferences, "README.md"];
   for (const file of localFiles) {
     if (!fs.existsSync(path.join(ROOT, file))) {
       fail(`theme.json references missing file: ${file}`);

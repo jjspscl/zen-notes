@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * validate-header.js — Validates the UserScript block in notes-widget.uc.js
+ * validate-header.js — Validates UserScript blocks in all .uc.js files listed in theme.json
  *
  * Required fields:
  *   @name, @version, @description, @author, @include, @run-at
@@ -12,21 +12,19 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
-const FILE = "notes-widget.uc.js";
-
 const REQUIRED = ["name", "version", "description", "author", "include", "run-at"];
 
-function read() {
-  return fs.readFileSync(path.join(ROOT, FILE), "utf8");
+function read(file) {
+  return fs.readFileSync(path.join(ROOT, file), "utf8");
 }
 
-function main() {
-  const content = read();
+function validateFile(file) {
+  const content = read(file);
   const headerMatch = content.match(/\/\/ ==UserScript==([\s\S]*?)\/\/ ==\/UserScript==/);
 
   if (!headerMatch) {
-    console.error(`❌ UserScript header block not found in ${FILE}`);
-    process.exit(1);
+    console.error(`❌ UserScript header block not found in ${file}`);
+    return false;
   }
 
   const header = headerMatch[1];
@@ -43,21 +41,35 @@ function main() {
   const missing = REQUIRED.filter((f) => !fields[f]);
 
   if (missing.length > 0) {
-    console.error(`❌ Missing required UserScript fields: ${missing.join(", ")}`);
+    console.error(`❌ ${file}: Missing required UserScript fields: ${missing.join(", ")}`);
+    return false;
+  }
+
+  if (fields.include !== "main") {
+    console.warn(`⚠️  ${file}: @include is "${fields.include}", expected "main"`);
+  }
+
+  if (!["document-start", "document-end", "document-idle"].includes(fields["run-at"])) {
+    console.warn(`⚠️  ${file}: @run-at is "${fields["run-at"]}", expected one of: document-start, document-end, document-idle`);
+  }
+
+  console.log(`✅ ${file}: header valid (${Object.keys(fields).length} fields)`);
+  return true;
+}
+
+function main() {
+  const themeJson = JSON.parse(read("theme.json"));
+  const scripts = themeJson.scripts || {};
+  const files = Object.keys(scripts).filter(f => f.endsWith(".uc.js"));
+  if (!files.length) {
+    console.error(`❌ No .uc.js files found in theme.json scripts`);
     process.exit(1);
   }
-
-  // Validate @include is "main" (fx-autoconfig convention for browser chrome)
-  if (fields.include !== "main") {
-    console.warn(`⚠️  @include is "${fields.include}", expected "main" for browser chrome scripts`);
+  let allPassed = true;
+  for (const file of files) {
+    if (!validateFile(file)) allPassed = false;
   }
-
-  // Validate @run-at
-  if (!["document-start", "document-end", "document-idle"].includes(fields["run-at"])) {
-    console.warn(`⚠️  @run-at is "${fields["run-at"]}", expected one of: document-start, document-end, document-idle`);
-  }
-
-  console.log(`✅ UserScript header valid (${Object.keys(fields).length} fields)`);
+  if (!allPassed) process.exit(1);
 }
 
 main();

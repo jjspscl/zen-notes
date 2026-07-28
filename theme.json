@@ -3,7 +3,7 @@
   "name": "Zen Notes",
   "description": "Workspace-aware multi-note sidebar widget with rich text formatting, drag-to-resize, and global color themes",
   "author": "jjspscl",
-  "version": "2.3.9",
+  "version": "2.4.0",
   "createdAt": "2025-06-02",
   "updatedAt": "2026-06-26",
   "homepage": "https://github.com/jjspscl/zen-notes",
@@ -24,11 +24,23 @@
     "chrome": "style.css"
   },
   "scripts": {
-    "notes-widget.uc.js": {
-      "name": "Zen Notes Widget",
-      "description": "Injects a lean multi-note workspace widget into the Zen sidebar.",
+    "zen-notes-core.uc.js": {
+      "name": "Zen Notes Core",
+      "description": "Storage, preferences, state model, and shared utilities for Zen Notes.",
       "include": ["chrome://browser/content/browser.xhtml"],
       "loadOrder": 10
+    },
+    "zen-notes-editor.uc.js": {
+      "name": "Zen Notes Editor",
+      "description": "HTML sanitizer, content-tree normalizer, and editing utilities for Zen Notes.",
+      "include": ["chrome://browser/content/browser.xhtml"],
+      "loadOrder": 20
+    },
+    "zen-notes-ui.uc.js": {
+      "name": "Zen Notes UI",
+      "description": "Widget DOM, event listeners, and lifecycle for Zen Notes.",
+      "include": ["chrome://browser/content/browser.xhtml"],
+      "loadOrder": 30
     }
   },
   "preferences": "preferences.json"

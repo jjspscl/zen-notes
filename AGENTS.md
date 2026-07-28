@@ -4,13 +4,13 @@
 
 ## Project Context
 
-Zen Browser mod that injects a persistent, collapsible notes widget into the sidebar, with a global notes library and per-workspace pinned note state.
+Zen Browser mod that injects a persistent, collapsible notes widget into the sidebar with a single note instance.
 
-- **Mechanism**: `userChrome.js` + `userChrome.css` with Sine-first repo metadata
-- **Loader Required for local development testing**: `fx-autoconfig` (or compatible `userChrome.js` loader)
-- **Storage**: versioned `Services.prefs` JSON store (`zen.notes.data`) — schema v3 (global `notes[]` + per-workspace `workspaceState`); legacy v1/v2 prefs preserved for migration
+- **Mechanism**: Sine-loaded mod with `theme.json`-driven script injection (3 modules with `loadOrder`) and chrome CSS sheet
+- **Development**: install as an unpublished local Sine mod, or build a release ZIP with `node scripts/build-release.js` and install via Sine → Install from file
+- **Storage**: versioned `Services.prefs` JSON store (`zen.notes.data`) — schema v4 (single note); v2/v3 state is backed up to `zen.notes.dataBackup` and replaced, while v1 single-note content is carried forward
 - **Target Browser**: Zen Browser v1.7x+
-- **Current Version**: v2.3.9
+- **Current Version**: v2.4.0
 - **License**: MIT
 
 ## Quick Links
@@ -26,13 +26,8 @@ Zen Browser mod that injects a persistent, collapsible notes widget into the sid
 
 ### Local Development (WSL)
 
-1. Edit `notes-widget.uc.js` or `style.css` in project directory
-2. Copy to Zen Browser profile:
-   ```bash
-   cp notes-widget.uc.js "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/JS/"
-   cp style.css "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/userChrome.css"
-   cp style.css "/mnt/c/Users/jpascual/AppData/Roaming/zen/Profiles/y22xqyfw.Default (release)/chrome/CSS/zen-notes.uc.css"
-   ```
+1. Edit the relevant file in the project directory (`zen-notes-core.uc.js` for prefs/storage, `zen-notes-editor.uc.js` for sanitizer/normalizer, `zen-notes-ui.uc.js` for widget DOM/lifecycle, or `style.css`)
+2. Make the mod available via Sine (reload the mod or run `node scripts/build-release.js` and install the ZIP)
 3. Clear startup cache (via `about:support` or delete `startupCache/` folder)
 4. Restart Zen Browser
 5. Verify widget appears between tabs and workspace indicators
@@ -49,7 +44,7 @@ node scripts/validate-version.js
 node scripts/validate-theme.js
 node scripts/validate-header.js
 node scripts/validate-css.js
-node --check notes-widget.uc.js
+node --check zen-notes-core.uc.js && node --check zen-notes-editor.uc.js && node --check zen-notes-ui.uc.js
 
 # Commit & tag
 git add -A && git commit -m "chore: bump version to vX.Y.Z"
@@ -91,11 +86,9 @@ git push origin vX.Y.Z
 - [ ] Word/character count updates live and is hidden on empty notes
 - [ ] `data-checklist="true"` persists on save/reload; old `class="zen-notes-checklist"` migrates on load
 - [ ] Caret does not jump to editor end after formatting
-- [ ] Color picker changes card color and persists
-- [ ] Workspace-specific pinned note state switches correctly
-- [ ] Manager New note adds to global library without auto-pinning
-- [ ] Popover and manager can pin/open notes per workspace
-- [ ] Manager screen can rename, reorder, and hard-delete notes
+- [ ] Color picker changes default color and persists
+- [ ] Manager screen has settings (default color) only — no note list
+- [ ] Single note survives browser restart without data loss
 - [ ] Auto-save interval flushes on crash (test with forced shutdown)
 - [ ] Browser console shows no errors or warnings
 
@@ -113,14 +106,14 @@ git push origin vX.Y.Z
 - All global listeners must be removable in cleanup
 
 ### CSS (`style.css`)
-- Theme matching: `light-dark(black, white)` and `--zen-colors-*` vars
+- Theme matching uses custom property tokens (`--zen-notes-bg`, `--zen-notes-text`, `--zen-notes-border`, `--zen-notes-surface-strong`) resolved through `data-color-mode` (adapt/preset/classic). Adapt mode chains over `--zen-*`, `--nebula-*`, and `--natsumi-*` vars. Presets are hardcoded hex blocks.
 - No inline styles — all widget styling in this file
 - Sidebar-safe: `flex-shrink: 0`, avoid `position: absolute` inside sidebar
 - Prefix all selectors with `#zen-notes-widget` to avoid collisions
 - Test CSS changes individually in browser before committing — full CSS changes can silently break rendering
 
 ### File Naming
-- JS: `*.uc.js` (required by `fx-autoconfig` loader)
+- JS: `*.uc.js` (loaded by Sine from `theme.json` scripts map with `loadOrder`)
 - CSS: `style.css`
 - Prefs: `preferences.json`
 
@@ -136,17 +129,11 @@ This places the widget between the tab list and the bottom toolbar (workspace in
 - `tabsToolbar` = `document.getElementById("TabsToolbar")`
 - `footButtons` = `document.getElementById("zen-sidebar-foot-buttons")`
 
-### Storage Model (schema v3)
-- **Global notes library**: Single `state.notes[]` array shared across all workspaces.
-- **Per-workspace pinned state**: `state.workspaceState[workspaceId].pinnedActiveNoteId` stores which global note is active for that workspace.
-- **Migration Path**: v1 (single note prefs) → v3 (global notes). v2 (per-workspace note sets) → v3 detected and flattened with ID collision resolution.
-- **Delete reparation**: Removing a note repairs all workspace pinned refs that pointed at it, redirecting them to the first remaining global note.
-
-### Title Trigger + Popover
-- Header shows a button (`.zen-notes-title-trigger`) with current pinned note title + chevron.
-- Click opens an anchored popover (`.zen-notes-popover`) with the full note list.
-- Popover keyboard: Arrow Up/Down, Enter/Space to select, Home/End, Escape to close.
-- Focus management: selected row auto-focused on open; trigger re-focused on close.
+### Storage Model (schema v4)
+- **Single note**: `state.note` holds one note object with `id`, `title`, `contentHTML`, `color`, `createdAt`, `updatedAt`.
+- **Pre-v4 migration**: Any state without a valid `state.note` (v2/v3) is written verbatim to `zen.notes.dataBackup` and replaced by `createInitialV4State()`. No concatenation, no reparation — the backup pref is the escape hatch for multi-note content.
+- **v1 exception**: `createInitialV4State()` also reads the legacy `zen.notes.content` / `.color` / `.lastEdited` prefs. If either content or a last-edited label is present, that text becomes the new note's body and it is titled "Migrated note". So a v1 user's content is preserved in the widget, unlike a v2/v3 user's. Note this runs on *any* fresh-state path, including a corrupt-JSON reset.
+- **Workspace tracking**: `state.lastWorkspaceId` is recorded for reference but no longer switches note content.
 
 ### Storage Limits
 `Services.prefs` string prefs have a soft limit around 1MB. This is still workable for a small global note library, but larger future features (search/export/history) should watch payload growth.
@@ -158,18 +145,19 @@ This places the widget between the tab list and the bottom toolbar (workspace in
 
 ## Distribution
 
-### Release ZIP Structure (Namespaced)
+### Release ZIP Structure
 ```
-zen-notes-1.0.0.zip
-├── zen-notes/
-│   ├── chrome/
-│   │   ├── JS/
-│   │   │   └── notes-widget.uc.js
-│   │   └── preferences.json
-│   ├── userChrome.css
-│   ├── mod.json
-│   └── install.md
-└── README.md
+zen-notes-2.4.0.zip
+└── zen-notes/
+    ├── zen-notes-core.uc.js
+    ├── zen-notes-editor.uc.js
+    ├── zen-notes-ui.uc.js
+    ├── style.css
+    ├── preferences.json
+    ├── theme.json
+    ├── mod.json
+    ├── README.md
+    └── install.md
 ```
 
 ### GitHub Actions CI/CD
@@ -192,7 +180,7 @@ zen-notes-1.0.0.zip
 
 1. Choose channel: stable from `main` (`vX.Y.Z`) or beta from `beta` (`vX.Y.Z-beta.N`)
 2. Run `node scripts/bump.js <patch|minor|major|version>`
-3. Validate: `node scripts/validate-version.js && node scripts/validate-theme.js && node scripts/validate-header.js && node scripts/validate-css.js && node --check notes-widget.uc.js`
+3. Validate: `node scripts/validate-version.js && node scripts/validate-theme.js && node scripts/validate-header.js && node scripts/validate-css.js && node --check zen-notes-core.uc.js && node --check zen-notes-editor.uc.js && node --check zen-notes-ui.uc.js`
 4. Update `ROADMAP.md` status if needed
 5. Commit: `git add -A && git commit -m "chore: release vX.Y.Z"`
 6. Tag: `git tag vX.Y.Z && git push origin vX.Y.Z`
@@ -202,16 +190,17 @@ zen-notes-1.0.0.zip
 ## Troubleshooting
 
 ### Widget doesn't appear after restart
-1. Check `chrome/utils/boot.sys.mjs` exists (fx-autoconfig installed)
-2. Open Browser Console (`Ctrl+Shift+J`) for `[ZenNotes]` messages
-3. Clear startup cache (`about:support`)
-4. Verify files in correct locations
+1. Confirm Sine is installed and the mod is enabled in Sine settings
+2. Reinstall the mod ZIP in Sine if files changed recently
+3. Open Browser Console (`Ctrl+Shift+J`) for `[ZenNotes]` messages
+4. Clear startup cache (`about:support`)
+5. Verify `theme.json` is at the mod root and references the correct files
 
 ### DOM changes break widget
 - Check `#TabsToolbar` and `#zen-sidebar-foot-buttons` still exist in Zen DOM
-- Update selectors in `notes-widget.uc.js` if Zen changed IDs
+- Update selectors in `zen-notes-ui.uc.js` if Zen changed IDs
 
 ### CSS changes silently break widget
 - Test CSS changes individually — do not batch large CSS refactors without browser testing
 - `mask-image`, `:root` vars, `@media` blocks all need validation in Zen context
-- CSS is loaded as AUTHOR_SHEET via fx-autoconfig — some properties behave differently than in content
+- CSS in userChrome context can behave differently than in content pages — test every change in-browser

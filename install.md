@@ -6,7 +6,7 @@ Zen Notes v2 ships Sine-first metadata:
 
 - `theme.json` at repo root
 - Sine UI controls in `preferences.json`
-- root `notes-widget.uc.js` and `style.css`
+- root `zen-notes-core.uc.js`, `zen-notes-editor.uc.js`, `zen-notes-ui.uc.js`, and `style.css`
 
 Zen Notes is Sine-ready. Until the marketplace listing is accepted, install it in [Sine](https://github.com/CosmoCreeper/Sine) as an unpublished/custom mod from `https://github.com/jjspscl/zen-notes`.
 
@@ -33,20 +33,16 @@ Beta builds may include forward-only storage migrations. Do not use beta as a si
 
 ## Local development / manual testing
 
-Manual testing can still use a `userChrome.js` loader when developing outside Sine.
-
-### Prerequisites
-
-Install [fx-autoconfig](https://github.com/MrOtherGuy/fx-autoconfig) or another compatible `userChrome.js` loader.
+Test changes by loading the mod locally in Sine.
 
 ### Load from source
 
 1. Clone the repository.
-2. Copy `notes-widget.uc.js` to your Zen profile `chrome/JS/` folder.
-3. Copy `style.css` into `chrome/userChrome.css` or import it from there.
-4. Copy `preferences.json` if you want local reference for Sine-facing settings metadata.
-5. Clear startup cache from `about:support`.
-6. Restart Zen Browser.
+2. In Sine settings, add the cloned folder as an unpublished/custom mod.
+3. Clear startup cache from `about:support`.
+4. Restart Zen Browser.
+
+To build a release ZIP for testing: `node scripts/build-release.js` and install the resulting ZIP via Sine → Install from file.
 
 ## Notes on migration
 
@@ -58,10 +54,11 @@ Install [fx-autoconfig](https://github.com/MrOtherGuy/fx-autoconfig) or another 
 
 ### Widget does not appear
 
-1. Confirm your loader is installed correctly.
+1. Confirm Sine is installed and the mod is enabled.
 2. Open Browser Console (`Ctrl+Shift+J`) and look for `[ZenNotes]` logs.
 3. Clear startup cache and restart.
-4. Verify `#TabsToolbar` and `#zen-sidebar-foot-buttons` still exist in your Zen build.
+4. Reinstall the mod ZIP in Sine if files changed.
+5. Verify `#TabsToolbar` and `#zen-sidebar-foot-buttons` still exist in your Zen build.
 
 ### Workspace switching does not pin the expected note
 

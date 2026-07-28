@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * validate-version.js — Ensures version strings are synchronized
- * across theme.json, mod.json, notes-widget.uc.js, README.md, and ROADMAP.md.
+ * across theme.json, mod.json, all .uc.js scripts, README.md, and ROADMAP.md.
  */
 
 const fs = require("fs");
@@ -17,13 +17,13 @@ function extractJsonVersion(file) {
   return JSON.parse(read(file)).version;
 }
 
-function extractUserScriptHeaderVersion() {
-  const match = read("notes-widget.uc.js").match(/\/\/\s*@version\s+(.+)/);
+function extractUserScriptHeaderVersion(file) {
+  const match = read(file).match(/\/\/\s*@version\s+(.+)/);
   return match ? match[1].trim() : null;
 }
 
-function extractRuntimeVersion() {
-  const match = read("notes-widget.uc.js").match(/const VERSION = "([^"]+)";/);
+function extractRuntimeVersion(file) {
+  const match = read(file).match(/const VERSION = "([^"]+)";/);
   return match ? match[1] : null;
 }
 
@@ -37,15 +37,24 @@ function extractRoadmapVersion() {
   return match ? match[1] : null;
 }
 
+function getScriptFiles() {
+  const theme = JSON.parse(read("theme.json"));
+  const scripts = theme.scripts || {};
+  return Object.keys(scripts).filter(f => f.endsWith(".uc.js"));
+}
+
 function main() {
   const versions = {
     "theme.json": extractJsonVersion("theme.json"),
     "mod.json": extractJsonVersion("mod.json"),
-    "notes-widget.uc.js (@version)": extractUserScriptHeaderVersion(),
-    "notes-widget.uc.js (VERSION)": extractRuntimeVersion(),
     "README.md (badge)": extractReadmeVersion(),
     "ROADMAP.md (header)": extractRoadmapVersion(),
   };
+  for (const file of getScriptFiles()) {
+    versions[`${file} (@version)`] = extractUserScriptHeaderVersion(file);
+    const runtime = extractRuntimeVersion(file);
+    if (runtime !== null) versions[`${file} (VERSION)`] = runtime;
+  }
 
   const values = Object.values(versions);
   const uniqueValues = [...new Set(values)];

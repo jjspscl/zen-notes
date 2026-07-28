@@ -33,7 +33,17 @@ jobs:
         run: node scripts/validate-css.js
 
       - name: Check JS syntax
-        run: node --check notes-widget.uc.js
+        run: |
+          node -p "Object.keys(require('./theme.json').scripts).filter(f=>f.endsWith('.uc.js')).join('\n')" > /tmp/uc-files
+          if [ ! -s /tmp/uc-files ]; then
+            echo "❌ theme.json lists no .uc.js scripts"
+            exit 1
+          fi
+          while IFS= read -r f; do
+            [ -n "$f" ] || continue
+            echo "→ node --check $f"
+            node --check "$f"
+          done < /tmp/uc-files
 
       - name: Ensure no uncommitted changes after bump
         run: |

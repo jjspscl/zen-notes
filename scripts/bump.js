@@ -52,12 +52,20 @@ function updateJsonVersion(file, newVersion) {
 }
 
 function updateUserScriptHeader(newVersion) {
-  const file = "notes-widget.uc.js";
-  const content = read(file)
-    .replace(/\/\/ @version\s+.+/, `// @version         ${newVersion}`)
-    .replace(/const VERSION = "[^"]+";/, `const VERSION = "${newVersion}";`);
-  write(file, content);
-  console.log(`  ${file}: header + runtime version updated`);
+  const themeJson = JSON.parse(read("theme.json"));
+  const scripts = themeJson.scripts || {};
+  for (const filename of Object.keys(scripts)) {
+    if (!filename.endsWith(".uc.js")) continue;
+    try {
+      const content = read(filename)
+        .replace(/\/\/ @version\s+.+/, `// @version         ${newVersion}`)
+        .replace(/const VERSION = "[^"]+";/, `const VERSION = "${newVersion}";`);
+      write(filename, content);
+      console.log(`  ${filename}: header + runtime version updated`);
+    } catch (err) {
+      console.warn(`  ${filename}: not found, skipping`);
+    }
+  }
 }
 
 function updateReadmeBadge(newVersion) {

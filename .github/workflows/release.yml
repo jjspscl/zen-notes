@@ -42,7 +42,16 @@ jobs:
           node scripts/validate-theme.js
           node scripts/validate-header.js
           node scripts/validate-css.js
-          node --check notes-widget.uc.js
+          node -p "Object.keys(require('./theme.json').scripts).filter(f=>f.endsWith('.uc.js')).join('\n')" > /tmp/uc-files
+          if [ ! -s /tmp/uc-files ]; then
+            echo "❌ theme.json lists no .uc.js scripts"
+            exit 1
+          fi
+          while IFS= read -r f; do
+            [ -n "$f" ] || continue
+            echo "→ node --check $f"
+            node --check "$f"
+          done < /tmp/uc-files
 
       - name: Build release package
         run: node scripts/build-release.js
@@ -75,6 +84,6 @@ jobs:
             ### Installation
             See [install.md](./install.md) for detailed setup instructions.
 
-            > **Requires**: Zen Browser 1.7+ and `fx-autoconfig` loader.
+            > **Requires**: Zen Browser 1.7+ and [Sine](https://github.com/CosmoCreeper/Sine).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
