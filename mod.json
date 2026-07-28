@@ -1,20 +1,21 @@
 {
   "name": "zen-notes-widget",
   "displayName": "Zen Notes Widget",
-  "version": "2.4.0",
-  "description": "A lean notes widget for the Zen Browser sidebar with a global notes library and per-workspace pinned active note state",
+  "version": "2.4.1",
+  "description": "A lean single-note widget for the Zen Browser sidebar with rich text formatting and link support",
   "author": "jjspscl",
   "license": "MIT",
   "compatibility": {
     "zen": ">=1.7.0"
   },
   "features": [
-    "Global notes library with per-workspace pinned active note",
+    "Single persistent note with autosave",
     "Lean pinned sidebar widget above workspace indicators",
-    "Title trigger popover for note selection",
-    "Manager screen for create, rename, reorder, and hard delete",
-    "Bullet and numbered list formatting",
-    "Legacy v1/v2 migration into the schema v3 data model",
+    "Bold, italic, underline, and strikethrough formatting",
+    "Bullet, numbered, and checklist formatting with markdown shortcuts",
+    "Links with an http/https/mailto scheme allowlist",
+    "15 built-in colour schemes",
+    "Legacy v1 migration into the schema v4 data model",
     "Dark/light theme matching"
   ],
   "files": {
@@ -25,9 +26,10 @@
   "preferences": {
     "enabled": true,
     "configurable": [
+      "zen.notes.appearance",
       "zen.notes.collapsed",
       "zen.notes.height",
-      "zen.notes.defaultColor",
+      "zen.notes.preset",
       "zen.notes.showWorkspaceKey"
     ]
   },
@@ -35,7 +37,6 @@
     "sidebar",
     "notes",
     "productivity",
-    "workspace",
     "sticky-note"
   ],
   "marketplace": {

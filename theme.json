@@ -1,14 +1,16 @@
 {
   "id": "zen-notes",
   "name": "Zen Notes",
-  "description": "Workspace-aware multi-note sidebar widget with rich text formatting, drag-to-resize, and global color themes",
+  "description": "Single-note sidebar widget with rich text formatting, links, drag-to-resize, and colour schemes",
   "author": "jjspscl",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "createdAt": "2025-06-02",
-  "updatedAt": "2026-06-26",
+  "updatedAt": "2026-07-28",
   "homepage": "https://github.com/jjspscl/zen-notes",
   "readme": "https://raw.githubusercontent.com/jjspscl/zen-notes/main/README.md",
-  "fork": ["zen"],
+  "fork": [
+    "zen"
+  ],
   "ai": "yes",
   "supportsUnload": true,
   "tags": [
@@ -16,9 +18,9 @@
     "Notes",
     "Sidebar",
     "Productivity",
-    "Workspace",
     "Formatting",
-    "Rich Text"
+    "Rich Text",
+    "Links"
   ],
   "style": {
     "chrome": "style.css"
@@ -27,19 +29,25 @@
     "zen-notes-core.uc.js": {
       "name": "Zen Notes Core",
       "description": "Storage, preferences, state model, and shared utilities for Zen Notes.",
-      "include": ["chrome://browser/content/browser.xhtml"],
+      "include": [
+        "chrome://browser/content/browser.xhtml"
+      ],
       "loadOrder": 10
     },
     "zen-notes-editor.uc.js": {
       "name": "Zen Notes Editor",
       "description": "HTML sanitizer, content-tree normalizer, and editing utilities for Zen Notes.",
-      "include": ["chrome://browser/content/browser.xhtml"],
+      "include": [
+        "chrome://browser/content/browser.xhtml"
+      ],
       "loadOrder": 20
     },
     "zen-notes-ui.uc.js": {
       "name": "Zen Notes UI",
       "description": "Widget DOM, event listeners, and lifecycle for Zen Notes.",
-      "include": ["chrome://browser/content/browser.xhtml"],
+      "include": [
+        "chrome://browser/content/browser.xhtml"
+      ],
       "loadOrder": 30
     }
   },

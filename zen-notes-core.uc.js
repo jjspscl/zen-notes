@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Core
-// @version         2.4.0
+// @version         2.4.1
 // @description     Storage, prefs, state model, migration, and shared utilities for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -16,7 +16,6 @@
   const PREF_COLLAPSED = "zen.notes.collapsed";
   const PREF_HEIGHT = "zen.notes.height";
   const PREF_DEFAULT_COLOR = "zen.notes.defaultColor";
-  const PREF_COLOR_MODE = "zen.notes.colorMode";
   const PREF_PRESET = "zen.notes.preset";
   const PREF_SHOW_WORKSPACE_KEY = "zen.notes.showWorkspaceKey";
   const PREF_APPEARANCE = "zen.notes.appearance";
@@ -30,14 +29,11 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 4;
-  const VERSION = "2.4.0";
+  const VERSION = "2.4.1";
 
   const DEFAULT_HEIGHT = 220;
-  const MIN_HEIGHT = 160;
+  const MIN_HEIGHT = 190;
   const MAX_HEIGHT = 460;
-  const DEFAULT_COLOR = "yellow";
-  const COLORS = ["yellow", "orange", "purple", "green", "blue"];
-  const COLOR_MODES = ["classic", "adapt", "preset"];
   const PRESETS = ["catppuccin-latte", "catppuccin-frappe", "catppuccin-macchiato", "catppuccin-mocha", "dracula", "nord", "gruvbox-dark", "gruvbox-light", "tokyo-night", "rose-pine", "rose-pine-dawn", "solarized-dark", "solarized-light", "everforest-dark", "everforest-light"];
   const DEFAULT_WORKSPACE_ID = "global-default";
   const DEFAULT_WORKSPACE_LABEL = "Current workspace";
@@ -129,10 +125,8 @@
     return doc ? doc.createElement(tag) : createXHTMLElement(tag);
   }
   function nowISOString() { return new Date().toISOString(); }
-  function isColorValid(color) { return COLORS.includes(color); }
   function getDefaultColor() {
-    const color = getPrefString(PREF_DEFAULT_COLOR, DEFAULT_COLOR);
-    return isColorValid(color) ? color : DEFAULT_COLOR;
+    return getPrefString(PREF_DEFAULT_COLOR, "yellow");
   }
   function createId(prefix) {
     if (Services.uuid && typeof Services.uuid.generateUUID === "function") {
@@ -206,7 +200,7 @@
 
   /* ── State model ──────────────────────────────────────────── */
   function createNote(title, overrides = {}) {
-    const color = isColorValid(overrides.color) ? overrides.color : getDefaultColor();
+    const color = overrides.color || getDefaultColor();
     const timestamp = nowISOString();
     return {
       id: overrides.id || createId("note"),
@@ -230,10 +224,9 @@
   function createInitialV4State(initialWorkspaceId) {
     const wsId = initialWorkspaceId || DEFAULT_WORKSPACE_ID;
     const legacyContent = getPrefString(LEGACY_PREF_CONTENT, "");
-    const legacyColor = getPrefString(LEGACY_PREF_COLOR, getDefaultColor());
     const legacyLastEditedLabel = getPrefString(LEGACY_PREF_LAST_EDITED, "");
     const hasLegacyContent = Boolean(legacyContent || legacyLastEditedLabel);
-    const note = createNote(hasLegacyContent ? "Migrated note" : "Zen Notes", { color: isColorValid(legacyColor) ? legacyColor : getDefaultColor() });
+    const note = createNote("Zen Notes", { color: getDefaultColor() });
     if (hasLegacyContent) {
       note.contentHTML = legacyContent;
       note.updatedAt = nowISOString();
@@ -279,12 +272,12 @@
   /* ── Export to shared namespace ────────────────────────────── */
   window.ZenNotes = {
     PREF_DATA, PREF_SCHEMA_VERSION, PREF_COLLAPSED, PREF_HEIGHT,
-    PREF_DEFAULT_COLOR, PREF_COLOR_MODE, PREF_PRESET,
+    PREF_DEFAULT_COLOR, PREF_PRESET,
     PREF_SHOW_WORKSPACE_KEY, PREF_APPEARANCE, PREF_ACTIVE_WORKSPACE,
     PREF_DATA_BACKUP, PREF_DEBUG_KEYNAV,
     LEGACY_PREF_CONTENT, LEGACY_PREF_COLOR, LEGACY_PREF_LAST_EDITED,
     SCHEMA_VERSION, VERSION,
-    DEFAULT_HEIGHT, MIN_HEIGHT, MAX_HEIGHT, DEFAULT_COLOR, COLORS, COLOR_MODES, PRESETS,
+    DEFAULT_HEIGHT, MIN_HEIGHT, MAX_HEIGHT, PRESETS,
     DEFAULT_WORKSPACE_ID, DEFAULT_WORKSPACE_LABEL,
     WORKSPACE_EVENT_NAME, WORKSPACE_DATA_EVENT_NAME,
     DEBOUNCE_MS, FOCUS_DELAY_MS, AUTO_SAVE_INTERVAL,
@@ -294,7 +287,7 @@
     getPrefString, setPrefString, getPrefBool, setPrefBool, getPrefInt,
     getNumericPref, setPrefInt, setNumericPref,
     createXHTMLElement, createXULElement, getScratchDocument, createScratchElement,
-    nowISOString, isColorValid, getDefaultColor, createId, clampHeight,
+    nowISOString, getDefaultColor, createId, clampHeight,
     stripLegacyNamespaceAttrs, formatDate, formatNoteEditedLabel, getDisplayTitle,
     getWorkspaceDebugLabel, resolveWorkspaceContext, extractWorkspaceIdFromEvent,
     createNote, updateNote, createInitialV4State, persistState, loadState,

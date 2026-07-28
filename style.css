@@ -23,87 +23,20 @@
 #zen-notes-widget[data-appearance="light"] { color-scheme: light; }
 #zen-notes-widget[data-appearance="dark"] { color-scheme: dark; }
 
-/* === Adapt mode — pure CSS fallback chain, no JS probing === */
-#zen-notes-widget[data-color-mode="adapt"] {
-  --zen-notes-bg: var(--nebula-color-glass, var(--zen-branding-bg, var(--zen-main-browser-background, Canvas)));
-  --zen-notes-text: var(--zen-colors-primary-foreground, CanvasText);
-  --zen-notes-border: var(--zen-colors-border, color-mix(in srgb, CanvasText 12%, transparent));
-  --zen-notes-surface: color-mix(in srgb, var(--zen-notes-text) 6%, var(--zen-notes-bg));
-  --zen-notes-surface-strong: color-mix(in srgb, var(--zen-notes-text) 12%, var(--zen-notes-bg));
-}
 
-/* === Classic mode — five original pastels, unchanged === */
-#zen-notes-widget[data-color-mode="classic"][data-color="yellow"],
-#zen-notes-widget:not([data-color-mode]) {
-  --zen-notes-bg: light-dark(#fef3c7, #2a2010);
-  --zen-notes-text: light-dark(#78350f, #fbbf24);
-  --zen-notes-border: light-dark(rgba(120, 53, 15, 0.15), rgba(251, 191, 36, 0.2));
-  --zen-notes-surface: light-dark(
-    color-mix(in srgb, #78350f 6%, white),
-    color-mix(in srgb, #fbbf24 10%, #1a1a1a)
-  );
-  --zen-notes-surface-strong: light-dark(
-    color-mix(in srgb, #78350f 12%, white),
-    color-mix(in srgb, #fbbf24 16%, #1a1a1a)
-  );
-}
-#zen-notes-widget[data-color-mode="classic"][data-color="orange"] {
-  --zen-notes-bg: light-dark(#ffedd5, #2a1a0e);
-  --zen-notes-text: light-dark(#9a3412, #fb923c);
-  --zen-notes-border: light-dark(rgba(154, 52, 18, 0.15), rgba(251, 146, 60, 0.2));
-  --zen-notes-surface: light-dark(
-    color-mix(in srgb, #9a3412 6%, white),
-    color-mix(in srgb, #fb923c 10%, #1a1a1a)
-  );
-  --zen-notes-surface-strong: light-dark(
-    color-mix(in srgb, #9a3412 12%, white),
-    color-mix(in srgb, #fb923c 16%, #1a1a1a)
-  );
-}
-#zen-notes-widget[data-color-mode="classic"][data-color="purple"] {
-  --zen-notes-bg: light-dark(#f3e8ff, #1e1528);
-  --zen-notes-text: light-dark(#6b21a8, #c084fc);
-  --zen-notes-border: light-dark(rgba(107, 33, 168, 0.15), rgba(192, 132, 252, 0.2));
-  --zen-notes-surface: light-dark(
-    color-mix(in srgb, #6b21a8 6%, white),
-    color-mix(in srgb, #c084fc 10%, #1a1a1a)
-  );
-  --zen-notes-surface-strong: light-dark(
-    color-mix(in srgb, #6b21a8 12%, white),
-    color-mix(in srgb, #c084fc 16%, #1a1a1a)
-  );
-}
-#zen-notes-widget[data-color-mode="classic"][data-color="green"] {
-  --zen-notes-bg: light-dark(#d1fae5, #0f2318);
-  --zen-notes-text: light-dark(#065f46, #34d399);
-  --zen-notes-border: light-dark(rgba(6, 95, 70, 0.15), rgba(52, 211, 153, 0.2));
-  --zen-notes-surface: light-dark(
-    color-mix(in srgb, #065f46 6%, white),
-    color-mix(in srgb, #34d399 10%, #1a1a1a)
-  );
-  --zen-notes-surface-strong: light-dark(
-    color-mix(in srgb, #065f46 12%, white),
-    color-mix(in srgb, #34d399 16%, #1a1a1a)
-  );
-}
-#zen-notes-widget[data-color-mode="classic"][data-color="blue"] {
-  --zen-notes-bg: light-dark(#dbeafe, #111827);
-  --zen-notes-text: light-dark(#1e40af, #60a5fa);
-  --zen-notes-border: light-dark(rgba(30, 64, 175, 0.15), rgba(96, 165, 250, 0.2));
-  --zen-notes-surface: light-dark(
-    color-mix(in srgb, #1e40af 6%, white),
-    color-mix(in srgb, #60a5fa 10%, #1a1a1a)
-  );
-  --zen-notes-surface-strong: light-dark(
-    color-mix(in srgb, #1e40af 12%, white),
-    color-mix(in srgb, #60a5fa 16%, #1a1a1a)
-  );
+/* Default — system-aware fallback (no preset set) */
+#zen-notes-widget:not([data-preset]) {
+  --zen-notes-bg: light-dark(#eff1f5, #1e1e2e);
+  --zen-notes-text: light-dark(#4c4f69, #cdd6f4);
+  --zen-notes-border: light-dark(#ccd0da, #313244);
+  --zen-notes-surface: light-dark(#e6e9ef, #181825);
+  --zen-notes-surface-strong: light-dark(#bcc0cc, #45475a);
 }
 
 /* === Preset mode — hardcoded hex palettes === */
 
 /* Catppuccin Latte (light) — MIT, © 2021 Catppuccin */
-#zen-notes-widget[data-color-mode="preset"][data-preset="catppuccin-latte"] {
+#zen-notes-widget[data-preset="catppuccin-latte"] {
   --zen-notes-bg: #eff1f5;
   --zen-notes-text: #4c4f69;
   --zen-notes-border: #ccd0da;
@@ -111,7 +44,7 @@
   --zen-notes-surface-strong: #bcc0cc;
 }
 /* Catppuccin Frappé (dark) */
-#zen-notes-widget[data-color-mode="preset"][data-preset="catppuccin-frappe"] {
+#zen-notes-widget[data-preset="catppuccin-frappe"] {
   --zen-notes-bg: #303446;
   --zen-notes-text: #c6d0f5;
   --zen-notes-border: #414559;
@@ -119,7 +52,7 @@
   --zen-notes-surface-strong: #51576d;
 }
 /* Catppuccin Macchiato (dark) */
-#zen-notes-widget[data-color-mode="preset"][data-preset="catppuccin-macchiato"] {
+#zen-notes-widget[data-preset="catppuccin-macchiato"] {
   --zen-notes-bg: #24273a;
   --zen-notes-text: #cad3f5;
   --zen-notes-border: #363a4f;
@@ -127,7 +60,7 @@
   --zen-notes-surface-strong: #494d64;
 }
 /* Catppuccin Mocha (dark) */
-#zen-notes-widget[data-color-mode="preset"][data-preset="catppuccin-mocha"] {
+#zen-notes-widget[data-preset="catppuccin-mocha"] {
   --zen-notes-bg: #1e1e2e;
   --zen-notes-text: #cdd6f4;
   --zen-notes-border: #313244;
@@ -136,7 +69,7 @@
 }
 
 /* Dracula — MIT, Dracula Theme / Zeno Rocha */
-#zen-notes-widget[data-color-mode="preset"][data-preset="dracula"] {
+#zen-notes-widget[data-preset="dracula"] {
   --zen-notes-bg: #282a36;
   --zen-notes-text: #f8f8f2;
   --zen-notes-border: #44475a;
@@ -145,7 +78,7 @@
 }
 
 /* Nord — MIT, © 2016-present Sven Greb */
-#zen-notes-widget[data-color-mode="preset"][data-preset="nord"] {
+#zen-notes-widget[data-preset="nord"] {
   --zen-notes-bg: #2e3440;
   --zen-notes-text: #d8dee9;
   --zen-notes-border: #4c566a;
@@ -154,7 +87,7 @@
 }
 
 /* Gruvbox dark (medium) — MIT/X11, morhetz */
-#zen-notes-widget[data-color-mode="preset"][data-preset="gruvbox-dark"] {
+#zen-notes-widget[data-preset="gruvbox-dark"] {
   --zen-notes-bg: #282828;
   --zen-notes-text: #ebdbb2;
   --zen-notes-border: #504945;
@@ -162,7 +95,7 @@
   --zen-notes-surface-strong: #504945;
 }
 /* Gruvbox light (medium) */
-#zen-notes-widget[data-color-mode="preset"][data-preset="gruvbox-light"] {
+#zen-notes-widget[data-preset="gruvbox-light"] {
   --zen-notes-bg: #fbf1c7;
   --zen-notes-text: #3c3836;
   --zen-notes-border: #d5c4a1;
@@ -171,7 +104,7 @@
 }
 
 /* Tokyo Night — Apache-2.0, folke */
-#zen-notes-widget[data-color-mode="preset"][data-preset="tokyo-night"] {
+#zen-notes-widget[data-preset="tokyo-night"] {
   --zen-notes-bg: #1a1b26;
   --zen-notes-text: #c0caf5;
   --zen-notes-border: #3b4261;
@@ -180,7 +113,7 @@
 }
 
 /* Rosé Pine (dark) — MIT, mvllow */
-#zen-notes-widget[data-color-mode="preset"][data-preset="rose-pine"] {
+#zen-notes-widget[data-preset="rose-pine"] {
   --zen-notes-bg: #191724;
   --zen-notes-text: #e0def4;
   --zen-notes-border: #403d52;
@@ -188,7 +121,7 @@
   --zen-notes-surface-strong: #26233a;
 }
 /* Rosé Pine Dawn (light) */
-#zen-notes-widget[data-color-mode="preset"][data-preset="rose-pine-dawn"] {
+#zen-notes-widget[data-preset="rose-pine-dawn"] {
   --zen-notes-bg: #faf4ed;
   --zen-notes-text: #575279;
   --zen-notes-border: #dfdad9;
@@ -197,7 +130,7 @@
 }
 
 /* Solarized dark — MIT, © 2011 Ethan Schoonover */
-#zen-notes-widget[data-color-mode="preset"][data-preset="solarized-dark"] {
+#zen-notes-widget[data-preset="solarized-dark"] {
   --zen-notes-bg: #002b36;
   --zen-notes-text: #839496;
   --zen-notes-border: #073642;
@@ -205,7 +138,7 @@
   --zen-notes-surface-strong: #586e75;
 }
 /* Solarized light */
-#zen-notes-widget[data-color-mode="preset"][data-preset="solarized-light"] {
+#zen-notes-widget[data-preset="solarized-light"] {
   --zen-notes-bg: #fdf6e3;
   --zen-notes-text: #657b83;
   --zen-notes-border: #eee8d5;
@@ -214,7 +147,7 @@
 }
 
 /* Everforest dark (medium) — MIT, © 2019 sainnhe */
-#zen-notes-widget[data-color-mode="preset"][data-preset="everforest-dark"] {
+#zen-notes-widget[data-preset="everforest-dark"] {
   --zen-notes-bg: #2d353b;
   --zen-notes-text: #d3c6aa;
   --zen-notes-border: #475258;
@@ -222,7 +155,7 @@
   --zen-notes-surface-strong: #3d484d;
 }
 /* Everforest light (medium) */
-#zen-notes-widget[data-color-mode="preset"][data-preset="everforest-light"] {
+#zen-notes-widget[data-preset="everforest-light"] {
   --zen-notes-bg: #fdf6e3;
   --zen-notes-text: #5c6a72;
   --zen-notes-border: #e6e2cc;
@@ -255,43 +188,18 @@
   border-bottom: 1px solid var(--zen-notes-border);
 }
 
-/* Title trigger button */
-.zen-notes-title-trigger {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  flex: 1;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: var(--zen-notes-surface);
-  color: var(--zen-notes-text);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 6px 12px;
-  cursor: pointer;
-  box-sizing: border-box;
-  transition: background 0.15s ease, border-color 0.15s ease;
-  text-align: left;
-}
-.zen-notes-title-trigger:hover,
-.zen-notes-title-trigger:focus-visible {
-  background: var(--zen-notes-surface-strong);
-  border-color: var(--zen-notes-border);
-  outline: none;
-}
-.zen-notes-title-trigger[aria-expanded="true"] {
-  background: var(--zen-notes-surface-strong);
-  border-color: var(--zen-notes-border);
-}
-
-.zen-notes-trigger-title {
+/* Static title label */
+.zen-notes-title-label {
   flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--zen-notes-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 0;
 }
 
 /* ── Header actions ──────────────────────────────────────────── */
@@ -369,8 +277,11 @@
 }
 .zen-notes-toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 2px;
+  row-gap: 4px;
   padding: 4px 0;
   flex-shrink: 0;
   background: var(--zen-notes-surface);
@@ -422,36 +333,36 @@
   -webkit-mask-position: center;
 }
 .zen-notes-tb-icon[data-icon="bold"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 4h6a4 4 0 0 1 3.5 6A4 4 0 0 1 13 16H6z M6 4v12"/></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 4h6a4 4 0 0 1 3.5 6A4 4 0 0 1 13 16H6z M6 4v12"/></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h6a4 4 0 0 1 3.5 6A4 4 0 0 1 13 16H6z M6 4v12"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h6a4 4 0 0 1 3.5 6A4 4 0 0 1 13 16H6z M6 4v12"/></svg>');
 }
 .zen-notes-tb-icon[data-icon="italic"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 4H10m1 16h7M14 4l-4 16"/></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 4H10m1 16h7M14 4l-4 16"/></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 4H10m1 16h7M14 4l-4 16"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 4H10m1 16h7M14 4l-4 16"/></svg>');
 }
 .zen-notes-tb-icon[data-icon="underline"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 4v7a6 6 0 0 0 12 0V4M4 20h16"/></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 4v7a6 6 0 0 0 12 0V4M4 20h16"/></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v7a6 6 0 0 0 12 0V4M4 20h16"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v7a6 6 0 0 0 12 0V4M4 20h16"/></svg>');
 }
 .zen-notes-tb-icon[data-icon="strikethrough"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 4h4M12 4v8m-6-2h12"/></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 4h4M12 4v8m-6-2h12"/></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4h4M12 4v8m-6-2h12"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4h4M12 4v8m-6-2h12"/></svg>');
 }
 .zen-notes-tb-icon[data-icon="bullet"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="4" cy="18" r="1.5"/></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="4" cy="18" r="1.5"/></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1.5" fill="white" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="white" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="white" stroke="none"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1.5" fill="white" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="white" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="white" stroke="none"/></svg>');
 }
 .zen-notes-tb-icon[data-icon="numbered"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 6h11M10 12h11M10 18h11"/><text x="2" y="8" font-size="10" font-weight="bold">1</text><text x="2" y="14" font-size="10" font-weight="bold">2</text><text x="2" y="20" font-size="10" font-weight="bold">3</text></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 6h11M10 12h11M10 18h11"/><text x="2" y="8" font-size="10" font-weight="bold">1</text><text x="2" y="14" font-size="10" font-weight="bold">2</text><text x="2" y="20" font-size="10" font-weight="bold">3</text></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11M10 12h11M10 18h11"/><text x="2" y="8" font-size="10" font-weight="bold" fill="white" stroke="none">1</text><text x="2" y="14" font-size="10" font-weight="bold" fill="white" stroke="none">2</text><text x="2" y="20" font-size="10" font-weight="bold" fill="white" stroke="none">3</text></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11M10 12h11M10 18h11"/><text x="2" y="8" font-size="10" font-weight="bold" fill="white" stroke="none">1</text><text x="2" y="14" font-size="10" font-weight="bold" fill="white" stroke="none">2</text><text x="2" y="20" font-size="10" font-weight="bold" fill="white" stroke="none">3</text></svg>');
 }
 .zen-notes-tb-icon[data-icon="link"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>');
 }
 .zen-notes-tb-icon[data-icon="checklist"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 6h11"/><path d="M10 12h11"/><path d="M10 18h11"/><path d="m2 6 2 2 4-4"/><path d="m2 12 2 2 4-4"/><path d="m2 18 2 2 4-4"/></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 6h11"/><path d="M10 12h11"/><path d="M10 18h11"/><path d="m2 6 2 2 4-4"/><path d="m2 12 2 2 4-4"/><path d="m2 18 2 2 4-4"/></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11"/><path d="M10 12h11"/><path d="M10 18h11"/><path d="m2 6 2 2 4-4"/><path d="m2 12 2 2 4-4"/><path d="m2 18 2 2 4-4"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11"/><path d="M10 12h11"/><path d="M10 18h11"/><path d="m2 6 2 2 4-4"/><path d="m2 12 2 2 4-4"/><path d="m2 18 2 2 4-4"/></svg>');
 }
 
 .zen-notes-editor {
@@ -627,110 +538,3 @@
 .zen-notes-save-status[data-state="saving"] {
   font-style: italic;
 }
-
-/* ── Manager overlay ─────────────────────────────────────────── */
-#zen-notes-manager-overlay {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(15, 23, 42, 0.26);
-  z-index: 2147483646;
-  padding: 24px;
-  box-sizing: border-box;
-}
-#zen-notes-manager-overlay[data-open="true"] { display: flex; }
-
-.zen-notes-manager-panel {
-  width: min(760px, 92vw);
-  max-height: min(78vh, 760px);
-  overflow: auto;
-  border-radius: 18px;
-  background: light-dark(rgba(255, 255, 255, 0.98), rgba(24, 24, 27, 0.98));
-  color: light-dark(#18181b, #fafafa);
-  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.28);
-  border: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08));
-  padding: 20px;
-  box-sizing: border-box;
-}
-
-.zen-notes-manager-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-.zen-notes-manager-title-group { min-width: 0; }
-.zen-notes-manager-title {
-  margin: 0;
-  font-size: 22px;
-  line-height: 1.2;
-}
-.zen-notes-manager-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.zen-notes-manager-close-btn {
-  min-height: 34px;
-  padding: 0 12px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-@media (max-width: 720px) {
-  .zen-notes-manager-header { flex-direction: column; align-items: stretch; }
-  .zen-notes-manager-header-actions { justify-content: flex-start; }
-}
-
-/* ── Manager settings section ────────────────────────────────── */
-.zen-notes-manager-settings {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding-bottom: 4px;
-}
-.zen-notes-manager-settings-title {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 700;
-  opacity: 0.85;
-}
-.zen-notes-manager-settings-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.zen-notes-manager-settings-label {
-  font-size: 13px;
-  opacity: 0.75;
-}
-.zen-notes-manager-color-swatches {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.zen-notes-manager-color-swatch {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-  cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease;
-  flex-shrink: 0;
-}
-.zen-notes-manager-color-swatch:hover { transform: scale(1.2); }
-.zen-notes-manager-color-swatch[data-active="true"] {
-  border-color: light-dark(rgba(0, 0, 0, 0.5), rgba(255, 255, 255, 0.6));
-  transform: scale(1.15);
-}
-.zen-notes-manager-color-swatch[data-color="yellow"] { background: #fef3c7; }
-.zen-notes-manager-color-swatch[data-color="orange"] { background: #ffedd5; }
-.zen-notes-manager-color-swatch[data-color="purple"] { background: #f3e8ff; }
-.zen-notes-manager-color-swatch[data-color="green"]  { background: #d1fae5; }
-.zen-notes-manager-color-swatch[data-color="blue"]   { background: #dbeafe; }

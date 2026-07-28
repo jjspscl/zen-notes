@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes UI
-// @version         2.4.0
+// @version         2.4.1
 // @description     Widget DOM, event listeners, and lifecycle for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -12,12 +12,12 @@
 
   const {
     PREF_DATA, PREF_SCHEMA_VERSION, PREF_COLLAPSED, PREF_HEIGHT,
-    PREF_DEFAULT_COLOR, PREF_COLOR_MODE, PREF_PRESET,
+    PREF_DEFAULT_COLOR, PREF_PRESET,
     PREF_SHOW_WORKSPACE_KEY, PREF_APPEARANCE,
     PREF_ACTIVE_WORKSPACE, PREF_DATA_BACKUP, PREF_DEBUG_KEYNAV,
     LEGACY_PREF_CONTENT, LEGACY_PREF_COLOR, LEGACY_PREF_LAST_EDITED,
     SCHEMA_VERSION, VERSION,
-    DEFAULT_HEIGHT, MIN_HEIGHT, MAX_HEIGHT, DEFAULT_COLOR, COLORS, COLOR_MODES, PRESETS,
+    DEFAULT_HEIGHT, MIN_HEIGHT, MAX_HEIGHT, PRESETS,
     DEFAULT_WORKSPACE_ID, DEFAULT_WORKSPACE_LABEL,
     WORKSPACE_EVENT_NAME, WORKSPACE_DATA_EVENT_NAME,
     DEBOUNCE_MS, FOCUS_DELAY_MS, AUTO_SAVE_INTERVAL,
@@ -27,7 +27,7 @@
     getPrefString, setPrefString, getPrefBool, setPrefBool, getPrefInt,
     getNumericPref, setPrefInt, setNumericPref,
     createXHTMLElement, createXULElement, getScratchDocument, createScratchElement,
-    nowISOString, isColorValid, getDefaultColor, createId, clampHeight,
+    nowISOString, getDefaultColor, createId, clampHeight,
     stripLegacyNamespaceAttrs, formatDate, formatNoteEditedLabel, getDisplayTitle,
     getWorkspaceDebugLabel, resolveWorkspaceContext, extractWorkspaceIdFromEvent,
     createNote, updateNote, createInitialV4State, persistState, loadState,
@@ -67,31 +67,20 @@
     header.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
     header.setAttribute("aria-label", "Notes widget");
 
-    const titleTrigger = createXHTMLElement("span");
-    titleTrigger.className = "zen-notes-title-trigger";
-
-    const triggerTitle = createXHTMLElement("span");
-    triggerTitle.className = "zen-notes-trigger-title";
-
-    titleTrigger.appendChild(triggerTitle);
+    const titleLabel = createXHTMLElement("span");
+    titleLabel.className = "zen-notes-title-label";
+    titleLabel.textContent = "Zen Notes";
 
     const headerActions = createXULElement("hbox");
     headerActions.className = "zen-notes-header-actions";
-
-    const managerBtn = createXHTMLElement("button");
-    managerBtn.className = "zen-notes-icon-btn";
-    managerBtn.textContent = "\u2261";
-    managerBtn.setAttribute("title", "Notes settings");
-    managerBtn.setAttribute("aria-label", "Notes settings");
 
     const toggle = createXHTMLElement("span");
     toggle.className = "zen-notes-toggle";
     toggle.setAttribute("aria-hidden", "true");
 
-    headerActions.appendChild(managerBtn);
     headerActions.appendChild(toggle);
 
-    header.appendChild(titleTrigger);
+    header.appendChild(titleLabel);
     header.appendChild(headerActions);
 
     /* ── Body ────────────────────────────────────────────────── */
@@ -172,101 +161,19 @@
     dragBar.className = "zen-notes-drag-bar";
 
     let managerOverlay = null;
-    let colorSwatches = null;
-    let managerCloseBtn = null;
-    function ensureManagerUI() {
-      if (managerOverlay) return;
-      managerOverlay = createXHTMLElement("div");
-      managerOverlay.id = "zen-notes-manager-overlay";
-      managerOverlay.setAttribute("data-open", "false");
-
-      const panel = createXHTMLElement("div");
-      panel.className = "zen-notes-manager-panel";
-
-      const panelHeader = createXHTMLElement("div");
-      panelHeader.className = "zen-notes-manager-header";
-
-      const titleGroup = createXHTMLElement("div");
-      titleGroup.className = "zen-notes-manager-title-group";
-      const titleEl = createXHTMLElement("h2");
-      titleEl.className = "zen-notes-manager-title";
-      titleEl.textContent = "Notes settings";
-      titleGroup.appendChild(titleEl);
-
-      const headerActions = createXHTMLElement("div");
-      headerActions.className = "zen-notes-manager-header-actions";
-      managerCloseBtn = createXHTMLElement("button");
-      managerCloseBtn.className = "zen-notes-manager-close-btn";
-      managerCloseBtn.textContent = "Close";
-      headerActions.appendChild(managerCloseBtn);
-      panelHeader.appendChild(titleGroup);
-      panelHeader.appendChild(headerActions);
-      panel.appendChild(panelHeader);
-
-      const settingsSection = createXHTMLElement("div");
-      settingsSection.className = "zen-notes-manager-settings";
-
-      const settingsTitle = createXHTMLElement("h3");
-      settingsTitle.className = "zen-notes-manager-settings-title";
-      settingsTitle.textContent = "Settings";
-      settingsSection.appendChild(settingsTitle);
-
-      const colorRow = createXHTMLElement("div");
-      colorRow.className = "zen-notes-manager-settings-row";
-      const colorLabel = createXHTMLElement("span");
-      colorLabel.className = "zen-notes-manager-settings-label";
-      colorLabel.textContent = "Default color";
-      colorRow.appendChild(colorLabel);
-
-      colorSwatches = createXHTMLElement("div");
-      colorSwatches.className = "zen-notes-manager-color-swatches";
-      COLORS.forEach((color) => {
-        const swatch = createXHTMLElement("span");
-        swatch.className = "zen-notes-manager-color-swatch";
-        swatch.setAttribute("data-color", color);
-        swatch.setAttribute("role", "button");
-        swatch.setAttribute("aria-label", `${color} color`);
-        swatch.setAttribute("tabindex", "0");
-        swatch.addEventListener("click", (e) => {
-          e.stopPropagation();
-          flushCurrentEditorImmediately();
-          setPrefString(PREF_DEFAULT_COLOR, color);
-          if (state.note) state.note.color = color;
-          persistState(state);
-          renderAll();
-          renderManager();
-        });
-        colorSwatches.appendChild(swatch);
-      });
-      colorRow.appendChild(colorSwatches);
-      settingsSection.appendChild(colorRow);
-      panel.appendChild(settingsSection);
-      managerOverlay.appendChild(panel);
-
-      managerCloseBtn.addEventListener("click", (e) => { e.stopPropagation(); managerOverlay.setAttribute("data-open", "false"); });
-      managerOverlay.addEventListener("click", (e) => { if (e.target === managerOverlay) managerOverlay.setAttribute("data-open", "false"); });
-      (document.body || document.documentElement).appendChild(managerOverlay);
-    }
 
     tabsToolbar.insertBefore(widget, footButtons);
     tabsToolbar.insertBefore(dragBar, widget);
 
     /* ── Core functions ──────────────────────────────────────── */
     function execFormat(command) { document.execCommand(command, false, null); }
-    function applyColorMode(noteColor) {
-      const mode = getPrefString(PREF_COLOR_MODE, "classic");
-      widget.setAttribute("data-color-mode", mode);
-      if (mode === "classic") {
-        widget.setAttribute("data-color", isColorValid(noteColor) ? noteColor : getDefaultColor());
-        widget.removeAttribute("data-preset");
-      } else if (mode === "preset") {
-        const preset = getPrefString(PREF_PRESET, "catppuccin-latte");
-        widget.setAttribute("data-preset", preset);
-        widget.removeAttribute("data-color");
-      } else {
-        widget.removeAttribute("data-color");
-        widget.removeAttribute("data-preset");
-      }
+    function applyColorMode() {
+      // Only set data-preset for a known preset. An unrecognised value would
+      // still match no selector in style.css while defeating the
+      // :not([data-preset]) default, leaving --zen-notes-* unset.
+      const preset = getPrefString(PREF_PRESET, "");
+      if (PRESETS.includes(preset)) widget.setAttribute("data-preset", preset);
+      else widget.removeAttribute("data-preset");
     }
     function applyAppearanceMode() {
       const mode = getPrefString(PREF_APPEARANCE, "system");
@@ -351,7 +258,7 @@
       setSaveStatus("Saving\u2026");
       pendingSave = { html };
       if (saveTimeout) clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(() => { flushPendingSave(); renderManager(); }, DEBOUNCE_MS);
+      saveTimeout = setTimeout(() => { flushPendingSave(); }, DEBOUNCE_MS);
     }
 
     function flushCurrentEditorImmediately() {
@@ -360,28 +267,9 @@
       flushPendingSave();
     }
 
-    /* ── Title trigger ────────────────────────────────────────── */
-    function updateTitleTrigger() {
-      const titleText = state.note ? getDisplayTitle(state.note.title) : "No note";
-      triggerTitle.textContent = titleText;
-      titleTrigger.setAttribute("title", titleText);
-    }
-
-    /* ── Manager ──────────────────────────────────────────────── */
-    function renderManager() {
-      ensureManagerUI();
-      const currentColor = getDefaultColor();
-      if (colorSwatches) {
-        colorSwatches.querySelectorAll(".zen-notes-manager-color-swatch").forEach((sw) => {
-          sw.setAttribute("data-active", sw.getAttribute("data-color") === currentColor ? "true" : "false");
-        });
-      }
-    }
-
     function renderActiveNote() {
-      updateTitleTrigger();
       if (!state.note) { editor.innerHTML = ""; updateDateLabel(null); updateCountLabel(); return; }
-      applyColorMode(state.note.color);
+      applyColorMode();
       editor.innerHTML = sanitizeHTML(state.note.contentHTML || "");
       updateDateLabel(state.note);
       updateToolbarState();
@@ -392,7 +280,6 @@
     function renderAll() {
       applyAppearanceMode();
       renderActiveNote();
-      renderManager();
     }
 
     function syncWorkspace(nextWorkspaceId, source) {
@@ -585,7 +472,7 @@
 
     const onDocumentKeydown = (e) => {
       if (e.key === "Escape") {
-        managerOverlay.setAttribute("data-open", "false");
+        if (managerOverlay) managerOverlay.setAttribute("data-open", "false");
         widget.setAttribute("data-collapsed", "true");
         header.setAttribute("aria-expanded", "false");
         setPrefBool(PREF_COLLAPSED, true);
@@ -593,8 +480,6 @@
       }
     };
     document.addEventListener("keydown", onDocumentKeydown);
-
-    managerBtn.addEventListener("click", (e) => { e.stopPropagation(); ensureManagerUI(); renderManager(); managerOverlay.setAttribute("data-open", "true"); });
 
     const onEditorSelectionActivity = () => { updateToolbarState(); rememberEditorSelection(); };
     editor.addEventListener("keyup", onEditorSelectionActivity);
@@ -638,7 +523,6 @@
 
     header.addEventListener("click", (e) => {
       if (e.target.closest("button") || e.target.closest("input")) return;
-      if (e.target === titleTrigger || titleTrigger.contains(e.target)) return;
       const currentlyCollapsed = widget.getAttribute("data-collapsed") === "true";
       const nextCollapsed = !currentlyCollapsed;
       widget.setAttribute("data-collapsed", nextCollapsed ? "true" : "false");
@@ -938,7 +822,6 @@
 
     editor.addEventListener("blur", () => {
       flushCurrentEditorImmediately();
-      renderManager();
       if (state.note) {
         const current = sanitizeHTML(editor.innerHTML || "");
         const stored = sanitizeHTML(state.note.contentHTML || "");
@@ -1006,17 +889,16 @@
       if (topic === "nsPref:changed") {
         if (data === PREF_ACTIVE_WORKSPACE) requeryWorkspace();
         if (data === PREF_APPEARANCE) applyAppearanceMode();
-        if (data === PREF_COLOR_MODE || data === PREF_PRESET) renderAll();
+        if (data === PREF_PRESET) renderAll();
       }
     } };
     Services.prefs.addObserver(PREF_ACTIVE_WORKSPACE, prefObserver);
     Services.prefs.addObserver(PREF_APPEARANCE, prefObserver);
-    Services.prefs.addObserver(PREF_COLOR_MODE, prefObserver);
     Services.prefs.addObserver(PREF_PRESET, prefObserver);
     window.addEventListener(WORKSPACE_EVENT_NAME, onWorkspaceEvent);
     window.addEventListener(WORKSPACE_DATA_EVENT_NAME, onWorkspaceEvent);
 
-    const autoSaveInterval = setInterval(() => { if (pendingSave) { flushPendingSave(); renderManager(); } }, AUTO_SAVE_INTERVAL);
+    const autoSaveInterval = setInterval(() => { if (pendingSave) { flushPendingSave(); } }, AUTO_SAVE_INTERVAL);
 
     /* ── Cleanup ──────────────────────────────────────────────── */
     widget._zenNotesCleanup = () => {
@@ -1040,12 +922,11 @@
       }
       Services.prefs.removeObserver(PREF_ACTIVE_WORKSPACE, prefObserver);
       Services.prefs.removeObserver(PREF_APPEARANCE, prefObserver);
-      Services.prefs.removeObserver(PREF_COLOR_MODE, prefObserver);
       Services.prefs.removeObserver(PREF_PRESET, prefObserver);
       clearInterval(autoSaveInterval);
       if (saveTimeout) clearTimeout(saveTimeout);
       if (workspaceRequeryTimeout) clearTimeout(workspaceRequeryTimeout);
-      if (managerOverlay && managerOverlay.parentNode) managerOverlay.parentNode.removeChild(managerOverlay);
+      /* manager overlay block removed in 2.4.1 */
       if (dragBar && dragBar.parentNode) dragBar.parentNode.removeChild(dragBar);
       if (widget && widget.parentNode) widget.parentNode.removeChild(widget);
     };
