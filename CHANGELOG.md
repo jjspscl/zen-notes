@@ -5,6 +5,11 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.2] — 2026-07-28
+
+### Fixed
+- **Widget width**: added `min-width: min(300px, calc(100% - 16px))` to `#zen-notes-widget` so the editor never drops below ~38 characters per line, while the clamp prevents overflow in collapsed/compact sidebar modes (the floor self-disables when the sidebar is narrower than 300px). The 300px value is the largest safe floor: editor content width = widget − 44px (margins + padding + editor padding), yielding ~256px editor width. At 13px Inter that is ~38 chars/line — below Butterick's 45-char ideal but above the hostile-wrapping threshold, and it does not exceed narrow real-world Zen sidebar configurations.
+
 ## [2.4.1] — 2026-07-28
 
 ### Fixed

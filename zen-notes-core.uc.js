@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Core
-// @version         2.4.1
+// @version         2.4.2
 // @description     Storage, prefs, state model, migration, and shared utilities for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -29,11 +29,12 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 4;
-  const VERSION = "2.4.1";
+  const VERSION = "2.4.2";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 190;
   const MAX_HEIGHT = 460;
+  const MIN_WIDTH = 300;   // floor mirrors style.css #zen-notes-widget min-width
   const PRESETS = ["catppuccin-latte", "catppuccin-frappe", "catppuccin-macchiato", "catppuccin-mocha", "dracula", "nord", "gruvbox-dark", "gruvbox-light", "tokyo-night", "rose-pine", "rose-pine-dawn", "solarized-dark", "solarized-light", "everforest-dark", "everforest-light"];
   const DEFAULT_WORKSPACE_ID = "global-default";
   const DEFAULT_WORKSPACE_LABEL = "Current workspace";
@@ -277,7 +278,7 @@
     PREF_DATA_BACKUP, PREF_DEBUG_KEYNAV,
     LEGACY_PREF_CONTENT, LEGACY_PREF_COLOR, LEGACY_PREF_LAST_EDITED,
     SCHEMA_VERSION, VERSION,
-    DEFAULT_HEIGHT, MIN_HEIGHT, MAX_HEIGHT, PRESETS,
+    DEFAULT_HEIGHT, MIN_HEIGHT, MAX_HEIGHT, MIN_WIDTH, PRESETS,
     DEFAULT_WORKSPACE_ID, DEFAULT_WORKSPACE_LABEL,
     WORKSPACE_EVENT_NAME, WORKSPACE_DATA_EVENT_NAME,
     DEBOUNCE_MS, FOCUS_DELAY_MS, AUTO_SAVE_INTERVAL,

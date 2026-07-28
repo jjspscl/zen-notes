@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Editor
-// @version         2.4.1
+// @version         2.4.2
 // @description     Sanitizer, normalizer, and content-tree utilities for Zen Notes
 // @author          jjspscl
 // @include         main

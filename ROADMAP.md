@@ -6,7 +6,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Current Version
 
-**v2.4.1** — Fixes for the v2.4.0 release: toolbar mask icons now paint correctly, the toolbar wraps instead of forcing a wide sidebar, the header shows a static title, and the redundant colour-mode layer is removed in favour of a single `zen.notes.preset` colour scheme.
+**v2.4.2** — Adds a clamped minimum-width floor to the widget so it stays readable in narrow sidebars without forcing the sidebar wider.
 
 ## Release Channels
 
