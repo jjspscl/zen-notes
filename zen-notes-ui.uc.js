@@ -168,8 +168,12 @@
     /* ── Core functions ──────────────────────────────────────── */
     function execFormat(command) { document.execCommand(command, false, null); }
     function applyColorMode() {
-      const preset = getPrefString(PREF_PRESET, "catppuccin-latte");
-      widget.setAttribute("data-preset", preset);
+      // Only set data-preset for a known preset. An unrecognised value would
+      // still match no selector in style.css while defeating the
+      // :not([data-preset]) default, leaving --zen-notes-* unset.
+      const preset = getPrefString(PREF_PRESET, "");
+      if (PRESETS.includes(preset)) widget.setAttribute("data-preset", preset);
+      else widget.removeAttribute("data-preset");
     }
     function applyAppearanceMode() {
       const mode = getPrefString(PREF_APPEARANCE, "system");

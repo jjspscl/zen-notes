@@ -224,7 +224,6 @@
   function createInitialV4State(initialWorkspaceId) {
     const wsId = initialWorkspaceId || DEFAULT_WORKSPACE_ID;
     const legacyContent = getPrefString(LEGACY_PREF_CONTENT, "");
-    const legacyColor = getPrefString(LEGACY_PREF_COLOR, getDefaultColor());
     const legacyLastEditedLabel = getPrefString(LEGACY_PREF_LAST_EDITED, "");
     const hasLegacyContent = Boolean(legacyContent || legacyLastEditedLabel);
     const note = createNote("Zen Notes", { color: getDefaultColor() });
