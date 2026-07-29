@@ -1,11 +1,11 @@
-/* Zen Notes Widget — v2.4.2 */
+/* Zen Notes Widget — v2.4.3 */
 
 #zen-notes-widget {
   display: flex !important;
   flex-direction: column !important;
   flex-shrink: 0 !important;
   position: relative;
-  min-width: min(300px, calc(100% - 16px));
+  min-width: 0;
   width: calc(100% - 16px);
   box-sizing: border-box;
   margin: 8px;
