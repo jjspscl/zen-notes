@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes UI
-// @version         2.4.3
+// @version         2.4.4
 // @description     Widget DOM, event listeners, and lifecycle for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -51,9 +51,8 @@
     let saveTimeout = null;
     let pendingSave = null;
     let saveStatusClearTimer = null;
-    const widget = createXULElement("vbox");
+    const widget = createXHTMLElement("div");
     widget.id = "zen-notes-widget";
-    widget.setAttribute("flex", "0");
     widget.setAttribute("keyNav", "false");
     const isCollapsed = getPrefBool(PREF_COLLAPSED, false);
     widget.setAttribute("data-collapsed", isCollapsed ? "true" : "false");
@@ -869,16 +868,6 @@
         if (h >= MIN_HEIGHT && h <= MAX_HEIGHT) setNumericPref(PREF_HEIGHT, h);
       }
     });
-    const narrowWidthHandler = (entries) => {
-      for (const entry of entries) {
-        const w = entry.contentRect.width;
-        const narrow = w < 140;
-        if (narrow !== (widget.getAttribute("data-narrow") === "true"))
-          widget.setAttribute("data-narrow", narrow ? "true" : "false");
-      }
-    };
-    const narrowObserver = new ResizeObserver(narrowWidthHandler);
-    narrowObserver.observe(widget);
     resizeObserver.observe(widget);
 
     /* ── Workspace ────────────────────────────────────────────── */
@@ -914,7 +903,6 @@
     widget._zenNotesCleanup = () => {
       flushPendingSave();
       resizeObserver.disconnect();
-      narrowObserver.disconnect();
       workspaceObserver.disconnect();
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);

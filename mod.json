@@ -1,7 +1,7 @@
 {
   "name": "zen-notes-widget",
   "displayName": "Zen Notes Widget",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "description": "A lean single-note widget for the Zen Browser sidebar with rich text formatting and link support",
   "author": "jjspscl",
   "license": "MIT",

@@ -1,9 +1,9 @@
 /* Zen Notes Widget — v2.4.3 */
 
 #zen-notes-widget {
-  display: flex !important;
-  flex-direction: column !important;
-  flex-shrink: 0 !important;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
   position: relative;
   min-width: 0;
   width: calc(100% - 16px);
@@ -480,15 +480,6 @@
   transform: scaleX(1.15);
 }
 
-/* ── Narrow sidebar — compress or hide non-essential chrome ─── */
-#zen-notes-widget[data-narrow="true"] .zen-notes-count,
-#zen-notes-widget[data-narrow="true"] .zen-notes-save-status {
-  display: none;
-}
-#zen-notes-widget[data-narrow="true"] .zen-notes-tb-divider {
-  display: none;
-}
-
 /* ── Footer row (date + count) ──────────────────────────────── */
 .zen-notes-footer-row {
   display: flex;
@@ -505,8 +496,7 @@
   margin-top: 4px;
   padding-bottom: 2px;
   padding-left: 4px;
-  flex-shrink: 1;
-  min-width: 0;
+  flex-shrink: 0;
 }
 
 /* ── Date ────────────────────────────────────────────────────── */
@@ -517,8 +507,7 @@
   margin-top: 4px;
   padding-bottom: 2px;
   padding-right: 4px;
-  flex-shrink: 1;
-  min-width: 0;
+  flex-shrink: 0;
   text-align: right;
   overflow: hidden;
   white-space: nowrap;

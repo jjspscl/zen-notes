@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Core
-// @version         2.4.3
+// @version         2.4.4
 // @description     Storage, prefs, state model, migration, and shared utilities for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -29,7 +29,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 4;
-  const VERSION = "2.4.3";
+  const VERSION = "2.4.4";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 190;
