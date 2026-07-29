@@ -7,7 +7,7 @@
 Zen Browser mod that injects a persistent, collapsible notes widget into the sidebar with a single note instance.
 
 - **Mechanism**: Sine-loaded mod with `theme.json`-driven script injection (3 modules with `loadOrder`) and chrome CSS sheet
-- **Development**: install as an unpublished local Sine mod, or build a release ZIP with `node scripts/build-release.js` and install via Sine → Install from file
+- **Development**: install from a GitHub branch via Sine, then edit the installed mod folder in place with auto-update disabled and reload by toggling the mod off/on in Sine settings. Sine has no local-folder or ZIP install path — see `install.md`
 - **Storage**: versioned `Services.prefs` JSON store (`zen.notes.data`) — schema v4 (single note); v2/v3 state is backed up to `zen.notes.dataBackup` and replaced, while v1 single-note content is carried forward
 - **Target Browser**: Zen Browser v1.7x+
 - **Current Version**: v2.4.0
@@ -27,11 +27,15 @@ Zen Browser mod that injects a persistent, collapsible notes widget into the sid
 ### Local Development (WSL)
 
 1. Edit the relevant file in the project directory (`zen-notes-core.uc.js` for prefs/storage, `zen-notes-editor.uc.js` for sanitizer/normalizer, `zen-notes-ui.uc.js` for widget DOM/lifecycle, or `style.css`)
-2. Make the mod available via Sine (reload the mod or run `node scripts/build-release.js` and install the ZIP)
-3. Clear startup cache (via `about:support` or delete `startupCache/` folder)
-4. Restart Zen Browser
+2. Sync the edited files into the installed Sine mod folder (`<profile>/chrome/sine-mods/zen-notes/`) with auto-update disabled for the mod
+3. Reload by toggling the mod off/on in Sine settings; this runs `rebuildMods()`, re-executing JS as well as CSS, so no restart is needed. The dev palette (`sine.enable-dev`, Ctrl+Shift+Y) does the same, but that shortcut is hardcoded and extensions such as Bitwarden claim it first
+4. If the widget still misbehaves, clear startup cache (`about:support`) and restart Zen
 5. Verify widget appears between tabs and workspace indicators
 6. Test collapse/expand, text persistence, theme matching, text wrapping
+
+Symlinking the mod folder at the checkout does not work from WSL into a Windows
+profile (ext4 symlinks are unreadable by Windows, junctions cannot target
+`\\wsl.localhost`, and `mklink /D` to UNC needs elevation). Copy or sync instead.
 
 ### Release Build
 
@@ -185,13 +189,13 @@ zen-notes-2.4.0.zip
 5. Commit: `git add -A && git commit -m "chore: release vX.Y.Z"`
 6. Tag: `git tag vX.Y.Z && git push origin vX.Y.Z`
 7. CI auto-creates GitHub Release with ZIP
-8. Update local build if testing: copy files to Zen profile, clear cache, restart
+8. Users receive the update through Sine on browser start
 
 ## Troubleshooting
 
 ### Widget doesn't appear after restart
 1. Confirm Sine is installed and the mod is enabled in Sine settings
-2. Reinstall the mod ZIP in Sine if files changed recently
+2. Confirm the edited files actually reached `<profile>/chrome/sine-mods/zen-notes/`
 3. Open Browser Console (`Ctrl+Shift+J`) for `[ZenNotes]` messages
 4. Clear startup cache (`about:support`)
 5. Verify `theme.json` is at the mod root and references the correct files
