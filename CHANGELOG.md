@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.4.2] — 2026-07-28
 
+### Changed
+- **No width floor**: footer row children (`date`, `count`, `save-status`) now have `flex-shrink: 1` instead of `0`, so they cannot impose a hard minimum width on the sidebar. The count label previously grew the floor as the user wrote — a long note no longer widens the widget. The date gets `text-overflow: ellipsis` activated. Below 140px the count and save status are hidden entirely, keeping the date readable.
+- **Toolbar dividers hidden on wrap**: vertical separators between toolbar groups now `display: none` under the narrow-width rule, so wrapped rows don't start with a stray vertical mark.
+- `MIN_HEIGHT` is a height and had nothing to do with the width bug — the 2.4.1 CHANGELOG misattributed it. (The 160→190 bump in 2.4.1 was correct for its own purpose; this note just corrects the record.)
+
 ### Fixed
-- **Widget width**: added `min-width: min(300px, calc(100% - 16px))` to `#zen-notes-widget` so the editor never drops below ~38 characters per line, while the clamp prevents overflow in collapsed/compact sidebar modes (the floor self-disables when the sidebar is narrower than 300px). The 300px value is the largest safe floor: editor content width = widget − 44px (margins + padding + editor padding), yielding ~256px editor width. At 13px Inter that is ~38 chars/line — below Butterick's 45-char ideal but above the hostile-wrapping threshold, and it does not exceed narrow real-world Zen sidebar configurations.
+- Widget no longer imposes a width floor — the sidebar can be dragged to any width without fighting incompressible footer content. The binding constraint moves from ~155–178px (the footer, growing with note length) to roughly 50px (the wrapped toolbar).
 
 ## [2.4.1] — 2026-07-28
 

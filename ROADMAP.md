@@ -6,7 +6,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Current Version
 
-**v2.4.2** — Adds a clamped minimum-width floor to the widget so it stays readable in narrow sidebars without forcing the sidebar wider.
+**v2.4.2** — Removes the widget's intrinsic width floor: footer row children are now compressible so the sidebar can be dragged to any width. Count and save-status are hidden below 140px. Toolbar dividers are hidden on wrap.
 
 ## Release Channels
 

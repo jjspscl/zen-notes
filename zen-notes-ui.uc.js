@@ -869,6 +869,16 @@
         if (h >= MIN_HEIGHT && h <= MAX_HEIGHT) setNumericPref(PREF_HEIGHT, h);
       }
     });
+    const narrowWidthHandler = (entries) => {
+      for (const entry of entries) {
+        const w = entry.contentRect.width;
+        const narrow = w < 140;
+        if (narrow !== (widget.getAttribute("data-narrow") === "true"))
+          widget.setAttribute("data-narrow", narrow ? "true" : "false");
+      }
+    };
+    const narrowObserver = new ResizeObserver(narrowWidthHandler);
+    narrowObserver.observe(widget);
     resizeObserver.observe(widget);
 
     /* ── Workspace ────────────────────────────────────────────── */
@@ -904,6 +914,7 @@
     widget._zenNotesCleanup = () => {
       flushPendingSave();
       resizeObserver.disconnect();
+      narrowObserver.disconnect();
       workspaceObserver.disconnect();
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
