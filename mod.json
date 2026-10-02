@@ -1,8 +1,8 @@
 {
   "name": "zen-notes-widget",
   "displayName": "Zen Notes Widget",
-  "version": "2.4.6",
-  "description": "A lean single-note widget for the Zen Browser sidebar with rich text formatting and link support",
+  "version": "2.5.0-beta.1",
+  "description": "A block-based notes widget for the Zen Browser sidebar with nested lists and atomic local storage",
   "author": "jjspscl",
   "license": "MIT",
   "compatibility": {
@@ -12,10 +12,11 @@
     "Single persistent note with autosave",
     "Lean pinned sidebar widget above workspace indicators",
     "Bold, italic, underline, and strikethrough formatting",
-    "Bullet, numbered, and checklist formatting with markdown shortcuts",
+    "Nested bullet, numbered, and to-do blocks with markdown shortcuts",
     "Links with an http/https/mailto scheme allowlist",
     "15 built-in colour schemes",
-    "Legacy v1 migration into the schema v4 data model",
+    "Legacy HTML migration into the schema v5 block data model",
+    "Atomic profile-file storage with backups and 2.4.x compatibility mirror",
     "Dark/light theme matching"
   ],
   "files": {

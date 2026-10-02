@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Core
-// @version         2.4.6
+// @version         2.5.0-beta.1
 // @description     Storage, prefs, state model, migration, and shared utilities for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -28,8 +28,8 @@
   const LEGACY_PREF_LAST_EDITED = "zen.notes.lastEdited";
 
   /* ── Constants ─────────────────────────────────────────────── */
-  const SCHEMA_VERSION = 4;
-  const VERSION = "2.4.6";
+  const SCHEMA_VERSION = 5;
+  const VERSION = "2.5.0-beta.1";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 190;
@@ -55,6 +55,7 @@
   const ALLOWED_HREF_SCHEMES = ["http:", "https:", "mailto:"];
   const CHECKLIST_ATTR = "data-checklist";
   const MAX_LIST_DEPTH = 4;
+  const MAX_BLOCK_INDENT = 5;
   const MARKDOWN_SHORTCUTS = Object.freeze({
     "-": "insertUnorderedList",
     "*": "insertUnorderedList",
@@ -215,61 +216,6 @@
     };
   }
 
-  function updateNote(state, updater) {
-    if (!state.note) return null;
-    updater(state.note);
-    persistState(state);
-    return state.note;
-  }
-
-  function createInitialV4State(initialWorkspaceId) {
-    const wsId = initialWorkspaceId || DEFAULT_WORKSPACE_ID;
-    const legacyContent = getPrefString(LEGACY_PREF_CONTENT, "");
-    const legacyLastEditedLabel = getPrefString(LEGACY_PREF_LAST_EDITED, "");
-    const hasLegacyContent = Boolean(legacyContent || legacyLastEditedLabel);
-    const note = createNote("Zen Notes", { color: getDefaultColor() });
-    if (hasLegacyContent) {
-      note.contentHTML = legacyContent;
-      note.updatedAt = nowISOString();
-      note.legacyLastEditedLabel = legacyLastEditedLabel;
-    }
-    return {
-      version: SCHEMA_VERSION,
-      lastMigratedAt: nowISOString(),
-      note,
-      lastWorkspaceId: wsId,
-    };
-  }
-
-  function persistState(state) {
-    setPrefString(PREF_DATA, JSON.stringify(state));
-    setPrefInt(PREF_SCHEMA_VERSION, SCHEMA_VERSION);
-  }
-
-  function loadState(initialWorkspaceId) {
-    const serialized = getPrefString(PREF_DATA, "");
-    let state = null;
-    if (serialized) {
-      try { state = JSON.parse(serialized); } catch (e) { console.warn("[ZenNotes] Failed to parse state.", e); }
-    }
-    if (!state || typeof state !== "object") {
-      if (serialized) setPrefString(PREF_DATA_BACKUP, serialized);
-      state = createInitialV4State(initialWorkspaceId);
-      persistState(state);
-      return state;
-    }
-    if (state.version !== SCHEMA_VERSION || !state.note || typeof state.note !== "object") {
-      if (serialized) setPrefString(PREF_DATA_BACKUP, serialized);
-      state = createInitialV4State(initialWorkspaceId);
-      persistState(state);
-      return state;
-    }
-    let changed = false;
-    if (!state.lastWorkspaceId) { state.lastWorkspaceId = initialWorkspaceId || DEFAULT_WORKSPACE_ID; changed = true; }
-    if (changed) persistState(state);
-    return state;
-  }
-
   /* ── Export to shared namespace ────────────────────────────── */
   window.ZenNotes = {
     PREF_DATA, PREF_SCHEMA_VERSION, PREF_COLLAPSED, PREF_HEIGHT,
@@ -283,7 +229,7 @@
     WORKSPACE_EVENT_NAME, WORKSPACE_DATA_EVENT_NAME,
     DEBOUNCE_MS, FOCUS_DELAY_MS, AUTO_SAVE_INTERVAL,
     SIDEBAR_MARGIN, SIDEBAR_PADDING, SCROLL_FADE_HEIGHT, SCROLL_BOTTOM_TOLERANCE,
-    XHTML_NS, XUL_NS, ALLOWED_TAGS, ALLOWED_HREF_SCHEMES, CHECKLIST_ATTR, MAX_LIST_DEPTH,
+    XHTML_NS, XUL_NS, ALLOWED_TAGS, ALLOWED_HREF_SCHEMES, CHECKLIST_ATTR, MAX_LIST_DEPTH, MAX_BLOCK_INDENT,
     MARKDOWN_SHORTCUTS, CARET_NAV_KEYS, CARET_NAV_MOVES, CARET_NAV_WORD_MOVES, PAGE_NAV_LINE_COUNT,
     getPrefString, setPrefString, getPrefBool, setPrefBool, getPrefInt,
     getNumericPref, setPrefInt, setNumericPref,
@@ -291,6 +237,6 @@
     nowISOString, getDefaultColor, createId, clampHeight,
     stripLegacyNamespaceAttrs, formatDate, formatNoteEditedLabel, getDisplayTitle,
     getWorkspaceDebugLabel, resolveWorkspaceContext, extractWorkspaceIdFromEvent,
-    createNote, updateNote, createInitialV4State, persistState, loadState,
+    createNote,
   };
 })();

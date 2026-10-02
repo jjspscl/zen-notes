@@ -1,4 +1,4 @@
-/* Zen Notes Widget — v2.4.3 */
+/* Zen Notes Widget — v2.5.0-beta.1 */
 
 #zen-notes-widget {
   display: flex;
@@ -320,8 +320,8 @@
 }
 .zen-notes-tb-icon {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
   background-color: var(--zen-notes-text);
   mask-size: contain;
@@ -332,28 +332,28 @@
   -webkit-mask-position: center;
 }
 .zen-notes-tb-icon[data-icon="bold"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 2.5h5.5a4.5 4.5 0 0 1 3 7.5 4.5 4.5 0 0 1-3 7.5H6.5z M6.5 2.5v15"/></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 2.5h5.5a4.5 4.5 0 0 1 3 7.5 4.5 4.5 0 0 1-3 7.5H6.5z M6.5 2.5v15"/></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8"/></svg>');
 }
 .zen-notes-tb-icon[data-icon="italic"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3H9m2 18h8M14 3l-5 18"/></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3H9m2 18h8M14 3l-5 18"/></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4H10M14 20H5M15 4L9 20"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4H10M14 20H5M15 4L9 20"/></svg>');
 }
 .zen-notes-tb-icon[data-icon="underline"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v7a6 6 0 0 0 12 0V4M3 20h18"/></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v7a6 6 0 0 0 12 0V4M3 20h18"/></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v6a6 6 0 0 0 12 0V4M4 20h16"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v6a6 6 0 0 0 12 0V4M4 20h16"/></svg>');
 }
 .zen-notes-tb-icon[data-icon="strikethrough"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4h4M12 4v12M5 12h14"/></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4h4M12 4v12M5 12h14"/></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4H9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><path d="M4 12h16"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4H9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><path d="M4 12h16"/></svg>');
 }
 .zen-notes-tb-icon[data-icon="bullet"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1.5" fill="white" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="white" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="white" stroke="none"/></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1.5" fill="white" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="white" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="white" stroke="none"/></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></svg>');
 }
 .zen-notes-tb-icon[data-icon="numbered"] {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11M10 12h11M10 18h11"/><text x="2" y="8" font-size="10" font-weight="bold" fill="white" stroke="none">1</text><text x="2" y="14" font-size="10" font-weight="bold" fill="white" stroke="none">2</text><text x="2" y="20" font-size="10" font-weight="bold" fill="white" stroke="none">3</text></svg>');
-  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11M10 12h11M10 18h11"/><text x="2" y="8" font-size="10" font-weight="bold" fill="white" stroke="none">1</text><text x="2" y="14" font-size="10" font-weight="bold" fill="white" stroke="none">2</text><text x="2" y="20" font-size="10" font-weight="bold" fill="white" stroke="none">3</text></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5h10"/><path d="M11 12h10"/><path d="M11 19h10"/><path d="M4 4h1v5"/><path d="M4 9h2"/><path d="M6.5 20H3.4c0-1 2.6-1.925 2.6-3.5a1.5 1.5 0 0 0-2.6-1.02"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5h10"/><path d="M11 12h10"/><path d="M11 19h10"/><path d="M4 4h1v5"/><path d="M4 9h2"/><path d="M6.5 20H3.4c0-1 2.6-1.925 2.6-3.5a1.5 1.5 0 0 0-2.6-1.02"/></svg>');
 }
 .zen-notes-tb-icon[data-icon="link"] {
   mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>');
@@ -538,3 +538,114 @@
 .zen-notes-save-status[data-state="saving"] {
   font-style: italic;
 }
+
+/* ── Block editor ─────────────────────────────────────────────── */
+#zen-notes-widget .zen-notes-editor {
+  white-space: normal;
+  -moz-user-select: text;
+  user-select: text;
+}
+#zen-notes-widget .zen-notes-block {
+  position: relative;
+  min-height: 1.5em;
+  padding: 0 2px;
+  margin: 1px 0;
+  outline: none;
+  border-radius: 3px;
+}
+#zen-notes-widget .zen-notes-block[data-indent="1"] { margin-left: 16px; }
+#zen-notes-widget .zen-notes-block[data-indent="2"] { margin-left: 32px; }
+#zen-notes-widget .zen-notes-block[data-indent="3"] { margin-left: 48px; }
+#zen-notes-widget .zen-notes-block[data-indent="4"] { margin-left: 64px; }
+#zen-notes-widget .zen-notes-block[data-indent="5"] { margin-left: 80px; }
+#zen-notes-widget .zen-notes-block-content { min-width: 0; overflow-wrap: anywhere; }
+#zen-notes-widget .zen-notes-block[data-empty="true"] .zen-notes-block-content::before { content: "Type your note..."; opacity: 0.4; pointer-events: none; }
+#zen-notes-widget .zen-notes-block[data-type="heading1"] { font-size: 1.45em; line-height: 1.3; font-weight: 700; margin-top: 0.55em; }
+#zen-notes-widget .zen-notes-block[data-type="heading2"] { font-size: 1.25em; line-height: 1.35; font-weight: 700; margin-top: 0.45em; }
+#zen-notes-widget .zen-notes-block[data-type="heading3"] { font-size: 1.1em; line-height: 1.4; font-weight: 650; margin-top: 0.35em; }
+#zen-notes-widget .zen-notes-block[data-type="bullet"]::before,
+#zen-notes-widget .zen-notes-block[data-type="numbered"]::before {
+  position: absolute;
+  left: 0;
+  width: 14px;
+  text-align: center;
+  opacity: 0.72;
+}
+#zen-notes-widget .zen-notes-block[data-type="bullet"],
+#zen-notes-widget .zen-notes-block[data-type="numbered"] { padding-left: 18px; }
+#zen-notes-widget .zen-notes-block[data-type="bullet"]::before { content: "•"; }
+#zen-notes-widget .zen-notes-block[data-type="numbered"] { counter-increment: zen-notes-number; }
+#zen-notes-widget .zen-notes-block[data-type="numbered"]::before { content: counter(zen-notes-number) "."; }
+#zen-notes-widget .zen-notes-block:not([data-type="numbered"]) { counter-reset: zen-notes-number; }
+#zen-notes-widget .zen-notes-block[data-type="todo"],
+#zen-notes-widget .zen-notes-block[data-type="toggle"] { display: flex; align-items: flex-start; gap: 5px; }
+#zen-notes-widget .zen-notes-block[data-type="todo"] { list-style: none; }
+#zen-notes-widget .zen-notes-block[data-type="todo"]::before { content: none; display: none; }
+#zen-notes-widget .zen-notes-control {
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  background: transparent;
+  vertical-align: baseline;
+}
+#zen-notes-widget .zen-notes-todo-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  padding: 0;
+  border: 1px solid var(--zen-notes-border);
+  border-radius: 4px;
+}
+#zen-notes-widget .zen-notes-todo-control[aria-checked="true"] { background: var(--zen-notes-surface-strong); }
+#zen-notes-widget .zen-notes-todo-control[aria-checked="true"]::after { content: "✓"; display: block; line-height: 16px; }
+#zen-notes-widget .zen-notes-block[data-checked="true"] .zen-notes-block-content { opacity: 0.6; text-decoration: line-through; }
+#zen-notes-widget .zen-notes-toggle-btn { flex: 0 0 18px; width: 18px; padding: 0; opacity: 0.7; }
+#zen-notes-widget .zen-notes-block[data-type="todo"] .zen-notes-block-content,
+#zen-notes-widget .zen-notes-block[data-type="toggle"] .zen-notes-block-content { display: block; flex: 1 1 auto; width: auto; min-width: 0; }
+#zen-notes-widget .zen-notes-block[data-type="quote"] { border-left: 3px solid var(--zen-notes-border); padding-left: 9px; font-style: italic; opacity: 0.9; }
+#zen-notes-widget .zen-notes-block[data-type="callout"] { padding: 7px 9px; border-radius: 6px; background: var(--zen-notes-surface); }
+#zen-notes-widget .zen-notes-block[data-type="divider"] hr { border: 0; border-top: 1px solid var(--zen-notes-border); margin: 0.65em 0; }
+#zen-notes-widget .zen-notes-block[data-type="code"] .zen-notes-block-content {
+  display: block;
+  padding: 7px 9px;
+  border-radius: 5px;
+  background: var(--zen-notes-surface);
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+#zen-notes-widget .zen-notes-block-content strong { font-weight: 700; }
+#zen-notes-widget .zen-notes-block-content em { font-style: italic; }
+#zen-notes-widget .zen-notes-block-content code { padding: 0 2px; border-radius: 3px; background: var(--zen-notes-surface); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+#zen-notes-widget[data-read-only="true"] .zen-notes-editor { opacity: 0.8; }
+#zen-notes-widget[data-read-only="true"]::after {
+  content: "Read-only — update Zen Notes to edit this note";
+  display: block;
+  color: var(--zen-notes-text);
+  font-size: 10px;
+  padding: 2px 8px 5px;
+}
+#zen-notes-widget .zen-notes-slash-menu {
+  position: fixed;
+  z-index: 2147483647;
+  max-height: 220px;
+  min-width: 150px;
+  max-width: min(240px, 80vw);
+  overflow: auto;
+  padding: 4px;
+  border: 1px solid var(--zen-notes-border);
+  border-radius: 7px;
+  color: var(--zen-notes-text);
+  background: var(--zen-notes-bg);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+}
+#zen-notes-widget .zen-notes-slash-item { padding: 5px 8px; border-radius: 4px; cursor: pointer; }
+#zen-notes-widget .zen-notes-slash-item:hover,
+#zen-notes-widget .zen-notes-slash-item[data-active="true"] { background: var(--zen-notes-surface-strong); }
+#zen-notes-widget .zen-notes-save-status[data-state="error"] { opacity: 1; color: #e64553; font-weight: 700; }
+#zen-notes-widget .zen-notes-save-status[data-state="warning"] { opacity: 1; color: #c08212; }

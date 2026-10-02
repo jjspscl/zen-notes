@@ -1,21 +1,18 @@
 # Zen Notes Widget
 
-A lean, workspace-aware notes widget for [Zen Browser](https://zen-browser.app/), pinned to the bottom of the sidebar above the workspace indicators.
+A lean, persistent block-notes widget for [Zen Browser](https://zen-browser.app/), pinned to the sidebar above the workspace indicators.
 
-![Version](https://img.shields.io/badge/version-2.4.6-blue)
+![Version](https://img.shields.io/badge/version-2.5.0--beta.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-## v2 Highlights
+## v2.5 beta highlights
 
-- **Global notes library** — a single shared `notes[]` across workspaces; each workspace pins its active note
-- **Title trigger popover** — click the current note title in the header to open an anchored note selector
-- **Central manager** — rename, reorder, open, and hard-delete notes from a dedicated manager screen
-- **Rich formatting** — bold, italic, underline, strikethrough, bullet, numbered, and checkbox/todo lists
-- **Keyboard shortcuts** — full shortcut set for all formatting commands (see below)
-- **Smart paste** — external paste strips foreign HTML; internal paste preserves formatting
-- **Save indicator** — subtle "Saved" / "Saving…" feedback with aria-live
-- **Legacy migration** — v1 single-note and v2 per-workspace data migrates into v3 global model with ID collision resolution
-- **Lean pinned UX** — compact card stays in the sidebar while management moves into a central overlay
+- **Notion-like blocks** — paragraph, headings, bullets, numbered lists, nested to-dos, toggles, quotes, callouts, dividers, and code blocks
+- **Inline formatting** — bold, italic, underline, strikethrough, inline code, and links
+- **Safer editing** — flat block model, structural operations without `execCommand`, custom undo/redo, and IME-aware updates
+- **More resilient storage** — atomic JSON file writes, rolling backups, cross-window updates, and a v4 preference mirror for rollback
+- **Keyboard tools** — markdown shortcuts, `/` block menu, Tab indentation, and Alt+Shift+Up/Down block movement
+- **Focus-scoped shortcuts** — editor shortcuts do not affect the browser when focus is outside the widget
 
 ## Installation
 
@@ -29,15 +26,14 @@ After marketplace acceptance, stable releases install from the Sine marketplace.
 
 ### Development / local testing
 
-Install the built release ZIP via Sine, or clone the repo and load it as a local unpublished mod. See [install.md](./install.md).
+For development, run `npm ci`, `npm test`, then `npm run zen` to open a live-reloading XHTML harness in Windows Zen with a disposable profile. The harness uses stubbed storage; test actual file persistence using a Sine-installed beta. Sine does not support a local-folder mod install, and files must not be copied into a browser profile. Set `ZEN_PATH` if Zen is not at its default Windows location.
 
 ## Usage
 
-- **Switch notes** — click the title button in the header to open the popover; click any note to pin it
-- **Create note** — open the manager (`≡`) and click "New note"
-- **Manage notes** with the `≡` button to rename, reorder, open, or hard-delete
-- **Format text** with bold, italic, underline, strikethrough, bullet list, numbered list, and checkbox/todo list controls
-- **Change color** with the header color dot
+- **Format text** with the toolbar or keyboard shortcuts
+- **Change block type** by typing `/` at a block start and choosing a type
+- **Create lists** with `- `, `1. `, or `[] `, then use Tab / Shift+Tab to indent or outdent
+- **Move blocks** with Alt+Shift+Up/Down
 - **Collapse or expand** by clicking the header
 
 ## Keyboard shortcuts
@@ -51,13 +47,15 @@ Install the built release ZIP via Sine, or clone the repo and load it as a local
 | Bullet list | `Ctrl+Shift+L` |
 | Numbered list | `Ctrl+Shift+O` |
 | Checklist | `Ctrl+Shift+C` |
-| Indent (in list) | `Tab` |
-| Outdent (in list) | `Shift+Tab` |
-| Exit list | `Enter` on empty list item |
+| Indent block | `Tab` |
+| Outdent block | `Shift+Tab` |
+| Move block | `Alt+Shift+↑` / `Alt+Shift+↓` |
+| Undo / redo | `Ctrl+Z` / `Ctrl+Shift+Z` |
+| Change block | `/` at start of block |
 
 ## Release status
 
-`2.1.0` adds editor robustness improvements: plain-text paste by default, selection preservation across formatting, save status indicator, underline support, list toggle shortcuts, Tab indent/outdent, and zoom-safe checklist clicking.
+`2.5.0-beta.1` is the first block-editor beta. The XHTML harness exercises editing in Zen, but real storage, migration and multi-window behavior still need verification with the beta mod installed through Sine.
 
 ## Release channels
 
