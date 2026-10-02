@@ -5,6 +5,14 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.7] — 2026-07-30
+
+### Fixed
+- **Toolbar icons clipped and visually inconsistent**: Bold, Italic, Underline and Strikethrough were hand-drawn paths that did not use the full `0 0 24 24` viewBox, so they read as cut off. Earlier attempts compensated by enlarging the icon element to 16px and inflating `stroke-width` to 4/4.5, which made Bold render as a blob while the simpler paths stayed thin. All four now use the official [Lucide](https://lucide.dev) path data at `stroke-width="2"`, which is drawn to fill the viewBox, and the icon element returns to 14px.
+- **`numbered` list icon depended on font rendering**: it drew "1 2 3" with SVG `<text>` elements inside a `mask-image` data URI, where font availability and metrics are not guaranteed and differ from the surrounding stroke-only icons. Replaced with Lucide `list-ordered`, which strokes the numerals as paths. `bullet` likewise moves to Lucide `list`, dropping its `<circle>` markers.
+- All 8 toolbar icons now share one `stroke-width` and one drawing style. No `<text>` or `<circle>` elements remain in any mask.
+- Corrected the `style.css` banner, which was stranded at v2.4.3. No validator checks it.
+
 ## [2.4.3] — 2026-07-28
 
 ### Fixed

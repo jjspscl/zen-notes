@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes UI
-// @version         2.4.6
+// @version         2.4.7
 // @description     Widget DOM, event listeners, and lifecycle for Zen Notes
 // @author          jjspscl
 // @include         main
