@@ -20,6 +20,12 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Install test dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
       - name: Validate version sync
         run: node scripts/validate-version.js
 

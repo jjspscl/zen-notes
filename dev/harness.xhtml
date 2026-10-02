@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <title>Zen Notes local editor harness</title>
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    body { margin: 24px; color: #333; font: 14px system-ui, sans-serif; }
+    #TabsToolbar { width: 340px; height: 620px; display: flex; flex-direction: column; border: 1px solid #999; }
+    #zen-sidebar-foot-buttons { margin-top: auto; min-height: 24px; }
+    #test-status { margin-bottom: 12px; }
+    #zen-notes-widget { align-self: flex-start; }
+  </style>
+  <script type="text/javascript"><![CDATA[
+    (function () {
+      const prefs = new Map([["zen.notes.data", ""], ["zen.notes.preset", "catppuccin-mocha"], ["zen.notes.appearance", "system"]]);
+      const prefObservers = new Map();
+      const files = new Map();
+      window.Services = {
+        prefs: {
+          getStringPref(key, fallback = "") { return prefs.has(key) ? prefs.get(key) : fallback; },
+          setStringPref(key, value) { prefs.set(key, value); }, getBoolPref(key, fallback = false) { return prefs.has(key) ? prefs.get(key) : fallback; },
+          setBoolPref(key, value) { prefs.set(key, value); }, getIntPref(key, fallback = 0) { return prefs.has(key) ? prefs.get(key) : fallback; },
+          setIntPref(key, value) { prefs.set(key, value); }, addObserver(key, observer) { prefObservers.set(key, observer); }, removeObserver(key) { prefObservers.delete(key); },
+        },
+        uuid: { generateUUID() { return `{${crypto.randomUUID()}}`; } },
+        obs: { addObserver() {}, removeObserver() {}, notifyObservers() {} },
+      };
+      window.PathUtils = { profileDir: "/harness-profile", join: (...parts) => parts.join("/") };
+      window.IOUtils = {
+        async makeDirectory() {}, async exists(path) { return files.has(path); },
+        async readJSON(path) { return JSON.parse(files.get(path)); },
+        async writeJSON(path, value) { files.set(path, JSON.stringify(value)); }, async writeUTF8(path, text) { files.set(path, text); },
+        async getChildren(dir) { return [...files.keys()].filter((key) => key.startsWith(dir)); }, async remove(path) { files.delete(path); },
+      };
+    })();
+  ]]></script>
+</head>
+<body>
+  <p id="test-status">Local editor harness. This uses stubbed prefs and file storage; validate actual persistence in Zen before release.</p>
+  <div id="TabsToolbar">
+    <div style="flex:1"></div>
+    <div id="zen-sidebar-foot-buttons">Sidebar footer placeholder</div>
+  </div>
+  <script type="text/javascript" src="/zen-notes-core.uc.js"></script>
+  <script type="text/javascript" src="/zen-notes-model.uc.js"></script>
+  <script type="text/javascript" src="/zen-notes-store.uc.js"></script>
+  <script type="text/javascript" src="/zen-notes-editor.uc.js"></script>
+  <script type="text/javascript" src="/zen-notes-ui.uc.js"></script>
+  <script type="text/javascript" src="/__reload.js"></script>
+</body>
+</html>

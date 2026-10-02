@@ -5,6 +5,24 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0-beta.1] — 2026-10-02
+
+### Added
+- Flat, serialized block model for text, headings, bulleted/numbered/to-do lists, toggles, quotes, callouts, dividers, and code blocks. Nested list children are represented by bounded indentation.
+- Block type slash menu, markdown input shortcuts, Tab/Shift+Tab indentation, and Alt+Shift+Up/Down block movement.
+- Custom snapshot undo/redo and inline code formatting.
+- Atomic profile JSON storage with dated backups, migration from preference-backed HTML, cross-window revision notifications, and a schema-v4 preference mirror for rollback.
+- Node tests plus `npm run zen` / `npm run harness` local XHTML editor harness with live reload.
+
+### Changed
+- Replaced `execCommand` and nested-HTML repair with model-based block editing.
+- Tab/Shift+Tab now indents or outdents an entire block subtree, preserving each child list/to-do type and checked state. To-do rows use a dedicated flex layout to prevent child bullets from overlapping checkbox controls.
+- Keyboard handling is scoped to the editor/widget; Escape outside the widget no longer affects notes.
+- Unsupported future data opens read-only rather than resetting.
+
+### Validation note
+- Automated unit, conversion, storage-stub, and editor-render tests run in CI. Real Zen/Sine profile persistence and multi-window behavior still require manual beta validation before stable release.
+
 ## [2.4.7] — 2026-07-30
 
 ### Fixed

@@ -86,21 +86,26 @@ This updates `theme.json`, `mod.json`, `// @version`, README badge, and ROADMAP.
 
 ## Testing in Zen Browser
 
-1. Make your changes
-2. Build a release ZIP: `node scripts/build-release.js`
-3. In Sine settings, reinstall the mod from the built ZIP (Sine → Install from file)
-4. Clear startup cache: `about:support` → "Clear startup cache"
-5. Restart Zen Browser
-6. Open Browser Console (`Ctrl+Shift+J`) to check for errors
+Run the automated tests and launch the live XHTML harness:
 
-Alternatively, load the repo folder as an unpublished local mod in Sine for faster iteration.
+```bash
+npm ci
+npm test
+npm run zen
+```
+
+The harness serves source files from the checkout and reloads on save in a
+disposable Zen profile. It uses stubbed storage, so it does not verify actual
+profile IO. For end-to-end checks, install the beta branch through Sine in a
+separate test profile and verify migration, restart, rollback, and multiple
+windows. Do not manually copy mod files into a profile; Sine manages that folder.
 
 ## Code Style
 
 - **JavaScript**: 2-space indentation, single quotes, semicolons
 - **CSS**: 2-space indentation, kebab-case selectors prefixed with `#zen-notes-widget`
 - **No inline styles** — all widget styling in `style.css`
-- **No external dependencies** — Zen chrome APIs only
+- **No runtime dependencies** — Node tooling dependencies are dev-only and excluded from release packages
 
 ## Before Submitting a PR
 
@@ -108,8 +113,10 @@ Alternatively, load the repo folder as an unpublished local mod in Sine for fast
 - [ ] `node scripts/validate-theme.js` passes
 - [ ] `node scripts/validate-header.js` passes
 - [ ] `node scripts/validate-css.js` passes
-- [ ] `node --check zen-notes-core.uc.js && node --check zen-notes-editor.uc.js && node --check zen-notes-ui.uc.js` passes
-- [ ] Tested in Zen Browser after clearing startup cache
+- [ ] `npm test` passes
+- [ ] All five `.uc.js` modules pass `node --check`
+- [ ] Tested the XHTML harness in Zen
+- [ ] Tested file persistence and migrations through Sine before stable promotion
 - [ ] Commit messages follow Conventional Commits format
 
 ## Questions?

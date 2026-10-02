@@ -52,10 +52,16 @@ function main() {
 
   const archivePath = path.join(ROOT, zipName);
   if (fs.existsSync(archivePath)) fs.rmSync(archivePath);
-  execSync(`zip -r "${archivePath}" .`, { cwd: DIST, stdio: "pipe" });
-  const archiveSize = fs.statSync(archivePath).size;
-
-  fs.rmSync(DIST, { recursive: true });
+  let archiveSize;
+  try {
+    execSync(`zip -r "${archivePath}" .`, { cwd: DIST, stdio: "pipe" });
+    archiveSize = fs.statSync(archivePath).size;
+  } catch (error) {
+    if (fs.existsSync(archivePath)) fs.rmSync(archivePath);
+    throw error;
+  } finally {
+    if (fs.existsSync(DIST)) fs.rmSync(DIST, { recursive: true });
+  }
 
   console.log(`\n✅ Release package: ${archivePath}`);
   console.log(`   Version: ${version}`);
