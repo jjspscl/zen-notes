@@ -2,7 +2,7 @@
 
 A lean, persistent block-notes widget for [Zen Browser](https://zen-browser.app/), pinned to the sidebar above the workspace indicators.
 
-![Version](https://img.shields.io/badge/version-2.5.0--beta.1-blue)
+![Version](https://img.shields.io/badge/version-2.5.0--beta.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## v2.5 beta highlights

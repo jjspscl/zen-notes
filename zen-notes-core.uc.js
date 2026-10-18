@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Core
-// @version         2.5.0-beta.1
+// @version         2.5.0-beta.2
 // @description     Storage, prefs, state model, migration, and shared utilities for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -29,7 +29,7 @@
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 5;
-  const VERSION = "2.5.0-beta.1";
+  const VERSION = "2.5.0-beta.2";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 190;
@@ -152,6 +152,13 @@
     if (note.updatedAt) return formatDate(note.updatedAt);
     return note.legacyLastEditedLabel || "";
   }
+  function formatFooterMeta(dateLabel, text) {
+    const trimmed = String(text || "").trim();
+    const parts = [];
+    if (dateLabel) parts.push(`Edited ${dateLabel}`);
+    if (trimmed) { const words = trimmed.split(/\s+/).length; parts.push(`${words} ${words === 1 ? "word" : "words"}`); }
+    return parts.join(" · ");
+  }
   function getDisplayTitle(title) { const cleaned = String(title || "").trim(); return cleaned || "Untitled note"; }
 
   function getWorkspaceDebugLabel(workspaceContext) {
@@ -235,7 +242,7 @@
     getNumericPref, setPrefInt, setNumericPref,
     createXHTMLElement, createXULElement, getScratchDocument, createScratchElement,
     nowISOString, getDefaultColor, createId, clampHeight,
-    stripLegacyNamespaceAttrs, formatDate, formatNoteEditedLabel, getDisplayTitle,
+    stripLegacyNamespaceAttrs, formatDate, formatFooterMeta, formatNoteEditedLabel, getDisplayTitle,
     getWorkspaceDebugLabel, resolveWorkspaceContext, extractWorkspaceIdFromEvent,
     createNote,
   };

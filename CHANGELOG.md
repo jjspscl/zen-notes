@@ -5,6 +5,15 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0-beta.2] — 2026-10-19
+
+### Changed
+- Refreshed widget UI: lighter card with a hairline border, shared spacing/radius/control-size tokens, and a compact 36px header with a save-state dot.
+- Formatting toolbar is now a single borderless row shown only while the widget has focus; controls that do not fit move behind a "More" button instead of wrapping.
+- Resize grip sits on the card's top edge and appears on hover.
+- Footer combines edited date and word count ("Edited 19 Oct 2026 · 120 words") with save status on the right.
+- "Type / for commands…" placeholder, heading/to-do placeholders, consistent heading sizes, focus rings, and reduced-motion support.
+
 ## [2.5.0-beta.1] — 2026-10-02
 
 ### Added

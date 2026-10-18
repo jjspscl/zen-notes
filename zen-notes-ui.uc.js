@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes UI
-// @version         2.5.0-beta.1
+// @version         2.5.0-beta.2
 // @description     Sidebar widget shell, storage lifecycle, and focus-scoped controls for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -41,14 +41,14 @@
     header.setAttribute("tabindex", "0"); header.setAttribute("aria-expanded", String(!collapsed)); header.setAttribute("aria-label", "Zen Notes. Click to collapse or expand.");
     const title = createXHTMLElement("span"); title.className = "zen-notes-title-label"; title.textContent = "Zen Notes";
     const headerActions = createXULElement("hbox"); headerActions.className = "zen-notes-header-actions";
-    const status = createXHTMLElement("span"); status.className = "zen-notes-save-status"; status.setAttribute("aria-live", "polite"); status.setAttribute("role", "status");
+    const statusDot = createXHTMLElement("span"); statusDot.className = "zen-notes-status-dot"; statusDot.setAttribute("aria-hidden", "true");
     const chevron = createXHTMLElement("span"); chevron.className = "zen-notes-toggle"; chevron.setAttribute("aria-hidden", "true");
-    headerActions.appendChild(status); headerActions.appendChild(chevron); header.appendChild(title); header.appendChild(headerActions);
+    headerActions.appendChild(statusDot); headerActions.appendChild(chevron); header.appendChild(title); header.appendChild(headerActions);
 
     const body = createXHTMLElement("div"); body.className = "zen-notes-body";
     const toolbar = createXHTMLElement("div"); toolbar.className = "zen-notes-toolbar";
     function button(icon, label, action) {
-      const btn = createXHTMLElement("button"); btn.type = "button"; btn.className = "zen-notes-toolbar-btn";
+      const btn = createXHTMLElement("button"); btn.type = "button"; btn.className = `zen-notes-toolbar-btn${action === "more" ? " zen-notes-toolbar-more" : ""}`;
       btn.title = label; btn.setAttribute("aria-label", label); btn.dataset.action = action;
       const glyph = createXHTMLElement("span"); glyph.className = "zen-notes-tb-icon"; glyph.dataset.icon = icon; btn.appendChild(glyph);
       btn.addEventListener("mousedown", (event) => event.preventDefault());
@@ -62,6 +62,24 @@
       button("checklist", "To-do list (Ctrl+Shift+C)", "todo"), button("link", "Insert link (Ctrl+K)", "link"),
     ];
     toolbarButtons.forEach((btn, index) => { if (index === 4 || index === 7) { const divider = createXHTMLElement("span"); divider.className = "zen-notes-tb-divider"; toolbar.appendChild(divider); } toolbar.appendChild(btn); });
+    const moreButton = button("more", "More formatting", "more"); moreButton.hidden = true; moreButton.setAttribute("aria-expanded", "false");
+    toolbar.appendChild(moreButton);
+    // Keep the toolbar on one row: hide trailing controls behind "more" instead of wrapping.
+    function layoutToolbar() {
+      const items = [...toolbar.children].filter((item) => item !== moreButton);
+      items.forEach((item) => { item.hidden = false; });
+      moreButton.hidden = true;
+      if (toolbar.dataset.expanded === "true" || !toolbar.clientWidth) { moreButton.hidden = toolbar.dataset.expanded !== "true"; return; }
+      if (toolbar.scrollWidth <= toolbar.clientWidth) return;
+      moreButton.hidden = false;
+      for (let i = items.length - 1; i >= 0 && toolbar.scrollWidth > toolbar.clientWidth; i--) items[i].hidden = true;
+      for (let i = items.length - 1; i >= 0 && (items[i].hidden || items[i].classList.contains("zen-notes-tb-divider")); i--) items[i].hidden = true;
+    }
+    function toggleToolbarOverflow() {
+      const next = toolbar.dataset.expanded !== "true";
+      toolbar.dataset.expanded = String(next); moreButton.setAttribute("aria-expanded", String(next));
+      layoutToolbar();
+    }
 
     const editor = createXHTMLElement("div"); editor.className = "zen-notes-editor"; editor.setAttribute("contenteditable", "true");
     editor.setAttribute("role", "textbox"); editor.setAttribute("aria-multiline", "true"); editor.setAttribute("aria-label", "Notes editor");
@@ -71,18 +89,20 @@
     }
     editor.addEventListener("scroll", onEditorScroll);
     const footerRow = createXHTMLElement("div"); footerRow.className = "zen-notes-footer-row";
-    const date = createXHTMLElement("span"); date.className = "zen-notes-date";
-    const count = createXHTMLElement("span"); count.className = "zen-notes-count";
-    footerRow.appendChild(date); footerRow.appendChild(count);
-    body.appendChild(toolbar); body.appendChild(editor); body.appendChild(footerRow); widget.appendChild(header); widget.appendChild(body);
-    const dragBar = createXHTMLElement("div"); dragBar.className = "zen-notes-drag-bar";
-    tabsToolbar.insertBefore(widget, footButtons); tabsToolbar.insertBefore(dragBar, widget);
+    const meta = createXHTMLElement("span"); meta.className = "zen-notes-meta";
+    const status = createXHTMLElement("span"); status.className = "zen-notes-save-status"; status.setAttribute("aria-live", "polite"); status.setAttribute("role", "status");
+    footerRow.appendChild(meta); footerRow.appendChild(status);
+    body.appendChild(toolbar); body.appendChild(editor); body.appendChild(footerRow);
+    const dragBar = createXHTMLElement("div"); dragBar.className = "zen-notes-drag-bar"; dragBar.setAttribute("aria-hidden", "true"); dragBar.title = "Drag to resize";
+    widget.appendChild(dragBar); widget.appendChild(header); widget.appendChild(body);
+    tabsToolbar.insertBefore(widget, footButtons);
 
     function setStatus(message, kind = "saved", persistent = false) {
       status.textContent = message;
-      status.dataset.state = message ? kind : "idle";
+      status.dataset.state = message ? kind : "idle"; statusDot.dataset.state = status.dataset.state;
+      header.title = message || "";
       if (statusTimer) clearTimeout(statusTimer);
-      if (message && !persistent) statusTimer = setTimeout(() => { status.textContent = ""; status.dataset.state = "idle"; }, 1700);
+      if (message && !persistent) statusTimer = setTimeout(() => { status.textContent = ""; status.dataset.state = "idle"; statusDot.dataset.state = "idle"; header.title = ""; }, 1700);
     }
     function applyAppearance() {
       const preset = getPrefString(PREF_PRESET, "");
@@ -92,8 +112,7 @@
     }
     function updateFooter() {
       const text = state?.note?.blocks?.map((block) => N.getPlainText(block)).join("\n") || "";
-      if (text.trim()) count.textContent = `${text.trim().split(/\s+/).length}w · ${text.length}c`; else count.textContent = "";
-      date.textContent = state?.note?.updatedAt ? `Last edited: ${formatDate(state.note.updatedAt)}` : "";
+      meta.textContent = N.formatFooterMeta(state?.note?.updatedAt ? formatDate(state.note.updatedAt) : "", text);
     }
     function scheduleSave() {
       if (!state || state.readOnly || destroyed) return;
@@ -130,6 +149,7 @@
       return saveQueue;
     }
     function handleToolbarAction(action) {
+      if (action === "more") { toggleToolbarOverflow(); return; }
       if (!editorApi || state?.readOnly) return;
       if (action === "bold" || action === "italic" || action === "underline" || action === "strike") editorApi.format(({ bold: "b", italic: "i", underline: "u", strike: "s" })[action]);
       else if (action === "link") editorApi.link();
@@ -163,6 +183,8 @@
     window.addEventListener("mousemove", onMouseMove); window.addEventListener("mouseup", onMouseUp);
     const resizeObserver = typeof ResizeObserver === "function" ? new ResizeObserver((entries) => { if (resizeActive) return; for (const entry of entries) { const value = Math.round(entry.contentRect.height); if (value >= MIN_HEIGHT && value <= MAX_HEIGHT) setNumericPref(PREF_HEIGHT, value); } }) : null;
     resizeObserver?.observe(widget);
+    const toolbarObserver = typeof ResizeObserver === "function" ? new ResizeObserver(() => layoutToolbar()) : null;
+    toolbarObserver?.observe(toolbar);
 
     const prefObserver = { observe(_subject, topic, data) {
       if (topic !== "nsPref:changed") return;
@@ -193,12 +215,12 @@
     function cleanup() {
       if (destroyed) return; destroyed = true;
       if (pendingSave) flushSave();
-      editorApi?.cleanup(); resizeObserver?.disconnect(); unsubscribe(); clearInterval(autoSave);
+      editorApi?.cleanup(); resizeObserver?.disconnect(); toolbarObserver?.disconnect(); unsubscribe(); clearInterval(autoSave);
       editor.removeEventListener("scroll", onEditorScroll);
       if (saveTimer) clearTimeout(saveTimer); if (statusTimer) clearTimeout(statusTimer);
       window.removeEventListener("mousemove", onMouseMove); window.removeEventListener("mouseup", onMouseUp);
       for (const key of [PREF_PRESET, PREF_APPEARANCE]) { try { Services.prefs.removeObserver(key, prefObserver); } catch (_) {} }
-      dragBar.remove(); widget.remove();
+      widget.remove();
     }
     widget._zenNotesCleanup = cleanup;
   }
