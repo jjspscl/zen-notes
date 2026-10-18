@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Editor
-// @version         2.5.0-beta.2
+// @version         2.5.0-beta.3
 // @description     Block editor, selection mapping, formatting, and undo for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -41,38 +41,45 @@
     let activeMarks = {};
 
     const getBlockEl = (id) => editor.querySelector(`[data-block-id="${CSS.escape(id)}"]`);
-    const getSelectionPoint = () => {
-      const selection = doc.defaultView.getSelection?.();
-      if (!selection || !selection.rangeCount) return null;
-      const range = selection.getRangeAt(0);
-      let node = range.startContainer;
+    const textLength = (content) => { const measure = doc.createRange(); measure.selectNodeContents(content); return measure.toString().length; };
+    // Maps a DOM boundary to a block offset. Boundaries on the editor or a block row
+    // (what Ctrl+A produces) snap to the start or end of the nearest block.
+    const pointFromBoundary = (container, offset, isEnd = false) => {
+      if (container === editor) {
+        const rows = Array.from(editor.children).filter((row) => row.dataset?.blockId);
+        if (!rows.length) return null;
+        const row = isEnd ? (offset > 0 ? editor.children[Math.min(offset, editor.children.length) - 1] : rows[0]) : (editor.children[offset] || rows[rows.length - 1]);
+        const content = row?.querySelector?.(".zen-notes-block-content");
+        if (!content) return null;
+        const atEnd = isEnd ? offset > 0 : !editor.children[offset];
+        return { blockId: row.dataset.blockId, offset: atEnd ? textLength(content) : 0 };
+      }
+      let node = container;
       if (node.nodeType === 3) node = node.parentElement;
       const blockEl = node?.closest?.("[data-block-id]");
       if (!blockEl || !editor.contains(blockEl)) return null;
       const content = blockEl.querySelector(".zen-notes-block-content");
       if (!content) return null;
-      const measure = doc.createRange();
-      try { measure.selectNodeContents(content); measure.setEnd(range.startContainer, range.startOffset); }
-      catch (_) { return { blockId: blockEl.dataset.blockId, offset: 0, collapsed: range.collapsed }; }
-      return { blockId: blockEl.dataset.blockId, offset: measure.toString().length, collapsed: range.collapsed };
-    };
-    const pointFromBoundary = (container, offset) => {
-      let node = container;
-      if (node.nodeType === 3) node = node.parentElement;
-      const blockEl = node?.closest?.("[data-block-id]");
-      const content = blockEl?.querySelector(".zen-notes-block-content");
-      if (!content) return null;
+      if (!content.contains(container)) return { blockId: blockEl.dataset.blockId, offset: isEnd ? textLength(content) : 0 };
       const measure = doc.createRange();
       try { measure.selectNodeContents(content); measure.setEnd(container, offset); }
       catch (_) { return { blockId: blockEl.dataset.blockId, offset: 0 }; }
       return { blockId: blockEl.dataset.blockId, offset: measure.toString().length };
+    };
+    const getSelectionPoint = () => {
+      const selection = doc.defaultView.getSelection?.();
+      if (!selection || !selection.rangeCount) return null;
+      const range = selection.getRangeAt(0);
+      if (!editor.contains(range.startContainer)) return null;
+      const point = pointFromBoundary(range.startContainer, range.startOffset);
+      return point ? { ...point, collapsed: range.collapsed } : null;
     };
     function getSelectedPoints() {
       const selection = doc.defaultView.getSelection?.();
       if (!selection?.rangeCount || selection.isCollapsed) return null;
       const range = selection.getRangeAt(0);
       const start = pointFromBoundary(range.startContainer, range.startOffset);
-      const end = pointFromBoundary(range.endContainer, range.endOffset);
+      const end = pointFromBoundary(range.endContainer, range.endOffset, true);
       return start && end ? { start, end } : null;
     }
     const getPointAtOffset = (content, target) => {
@@ -204,6 +211,7 @@
       const next = blocksState.slice();
       next[idx] = MODEL.createBlock(next[idx].type, { ...next[idx], text: readRuns(content) });
       blocksState = next;
+      if (MODEL.getPlainText(next[idx])) delete blockEl.dataset.empty; else blockEl.dataset.empty = "true";
       if (scheduleHistory) {
         if (typingTimer) clearTimeout(typingTimer);
         typingTimer = setTimeout(() => { commitHistory(true); onChange(blocksState); }, 500);
@@ -314,7 +322,7 @@
       const offset = backwards ? MODEL.getPlainText(first).length : current.point.offset;
       mutate(next, { blockId: merged.id, offset });
     }
-    function deleteSelection(event) {
+    function deleteSelection(event, insertedText = "") {
       const selected = getSelectedPoints();
       if (!selected) return false;
       const startIndex = blocksState.findIndex((block) => block.id === selected.start.blockId);
@@ -324,9 +332,10 @@
       const start = blocksState[startIndex], end = blocksState[endIndex];
       const [prefix] = MODEL.splitBlock(start, selected.start.offset);
       const [, suffix] = startIndex === endIndex ? MODEL.splitBlock(start, selected.end.offset) : MODEL.splitBlock(end, selected.end.offset);
-      const replacement = MODEL.mergeBlocks(prefix, suffix);
+      const middle = insertedText ? MODEL.createBlock(prefix.type, { text: [{ t: insertedText }] }) : null;
+      const replacement = MODEL.mergeBlocks(middle ? MODEL.mergeBlocks(prefix, middle) : prefix, suffix);
       const next = blocksState.slice(); next.splice(startIndex, endIndex - startIndex + 1, replacement);
-      mutate(next, { blockId: replacement.id, offset: MODEL.getPlainText(prefix).length });
+      mutate(next, { blockId: replacement.id, offset: MODEL.getPlainText(prefix).length + insertedText.length });
       return true;
     }
     function toggleFormat(mark) {
@@ -442,19 +451,40 @@
         event.preventDefault(); const current = getCurrentBlock(); if (!current) return;
         changeIndent(current.block.id, event.shiftKey ? -1 : 1); return;
       }
-      if (event.key === "Enter" && !event.shiftKey) { insertNewline(event); return; }
+      if (event.key === "Enter" && !event.shiftKey) { if (getSelectedPoints()) deleteSelection(event); insertNewline(event); return; }
       if ((event.key === "Backspace" || event.key === "Delete") && deleteSelection(event)) return;
       if (event.key === "Backspace") { deleteAtBoundary(event, true); return; }
       if (event.key === "Delete") deleteAtBoundary(event, false);
     }
     function onBeforeInput(event) {
+      if (/^insert/.test(event.inputType || "") && !composition && !event.isComposing && event.inputType !== "insertFromPaste") {
+        const selection = doc.defaultView.getSelection?.();
+        if (selection?.rangeCount && !selection.isCollapsed && editor.contains(selection.anchorNode)) {
+          // Never let the browser replace a selection itself: it can destroy block markup.
+          if (typeof event.data === "string" && event.data) deleteSelection(event, event.data);
+          else event.preventDefault();
+          return;
+        }
+      }
       if (!/^delete/.test(event.inputType || "")) return;
       if (deleteSelection(event)) return;
       if (event.inputType === "deleteContentBackward") deleteAtBoundary(event, true);
       else if (event.inputType === "deleteContentForward") deleteAtBoundary(event, false);
     }
+    function repairStrayDOM() {
+      const stray = Array.from(editor.childNodes).some((node) => !(node.nodeType === 1 && node.dataset?.blockId));
+      if (!stray) return false;
+      const rows = Array.from(editor.children).filter((row) => row.dataset?.blockId);
+      if (!rows.length) {
+        const text = editor.textContent || "";
+        blocksState = [MODEL.createBlock("paragraph", { text: text ? [{ t: text }] : [] })];
+        render({ blockId: blocksState[0].id, offset: text.length }); onChange(blocksState); commitHistory(true);
+      } else render(null);
+      return true;
+    }
     function onInput(event) {
       if (rendering || composition) return;
+      if (repairStrayDOM()) return;
       const point = getSelectionPoint();
       if (!point) return;
       const blockEl = getBlockEl(point.blockId); syncBlockFromDOM(blockEl);

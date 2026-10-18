@@ -5,6 +5,14 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0-beta.3] — 2026-10-19
+
+### Fixed
+- Select-all (Ctrl+A) followed by typing, Enter, or Backspace no longer lets the browser rewrite the editor DOM; selections that cover the editor or whole blocks are mapped to block offsets and replaced through the model.
+- Typing over any selection (including across blocks) is handled by the editor; stray DOM text is folded back into a block instead of desyncing from saved state.
+- Empty-block placeholders ("Type / for commands…", "Heading") now disappear as soon as you type.
+- Toolbar buttons no longer pick up Zen's default button chrome, so they fit on one row; the editor no longer shows a focus outline box.
+
 ## [2.5.0-beta.2] — 2026-10-19
 
 ### Changed
