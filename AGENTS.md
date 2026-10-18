@@ -4,13 +4,13 @@
 
 ## Project Context
 
-Zen Browser mod that injects a persistent, collapsible notes widget into the sidebar with a single note instance.
+Zen Browser mod that injects a persistent, collapsible block-based notes widget into the sidebar with a single note instance.
 
-- **Mechanism**: Sine-loaded mod with `theme.json`-driven script injection (3 modules with `loadOrder`) and chrome CSS sheet
-- **Development**: install from a GitHub branch via Sine, then edit the installed mod folder in place with auto-update disabled and reload by toggling the mod off/on in Sine settings. Sine has no local-folder or ZIP install path — see `install.md`
-- **Storage**: versioned `Services.prefs` JSON store (`zen.notes.data`) — schema v4 (single note); v2/v3 state is backed up to `zen.notes.dataBackup` and replaced, while v1 single-note content is carried forward
+- **Mechanism**: Sine-loaded mod with `theme.json`-driven script injection (5 modules with `loadOrder`) and one chrome CSS sheet
+- **Development**: `npm test` for unit and migration tests; `npm run zen` opens a live-reloading XHTML harness in Zen using a disposable profile. Test real persistence by installing a beta branch through Sine; never manually copy files into a Zen profile.
+- **Storage**: schema v5 JSON file at `<profile>/zen-notes/notes.json`, atomically written through `IOUtils`; legacy `zen.notes.data` preference mirror is kept for 2.4.x rollback
 - **Target Browser**: Zen Browser v1.7x+
-- **Current Version**: v2.4.0
+- **Current Version**: v2.5.0-beta.1
 - **License**: MIT
 
 ## Quick Links
@@ -24,18 +24,17 @@ Zen Browser mod that injects a persistent, collapsible notes widget into the sid
 
 ## Build Steps
 
-### Local Development (WSL)
+### Local Development (WSL / Windows Zen)
 
-1. Edit the relevant file in the project directory (`zen-notes-core.uc.js` for prefs/storage, `zen-notes-editor.uc.js` for sanitizer/normalizer, `zen-notes-ui.uc.js` for widget DOM/lifecycle, or `style.css`)
-2. Sync the edited files into the installed Sine mod folder (`<profile>/chrome/sine-mods/zen-notes/`) with auto-update disabled for the mod
-3. Reload by toggling the mod off/on in Sine settings; this runs `rebuildMods()`, re-executing JS as well as CSS, so no restart is needed. The dev palette (`sine.enable-dev`, Ctrl+Shift+Y) does the same, but that shortcut is hardcoded and extensions such as Bitwarden claim it first
-4. If the widget still misbehaves, clear startup cache (`about:support`) and restart Zen
-5. Verify widget appears between tabs and workspace indicators
-6. Test collapse/expand, text persistence, theme matching, text wrapping
+```bash
+npm ci
+npm test
+npm run zen       # starts Windows Zen with a disposable profile and local XHTML harness
+npm run harness   # opens the same harness in the default browser
+npm run zen:test  # runs automated tests, then opens the harness
+```
 
-Symlinking the mod folder at the checkout does not work from WSL into a Windows
-profile (ext4 symlinks are unreadable by Windows, junctions cannot target
-`\\wsl.localhost`, and `mklink /D` to UNC needs elevation). Copy or sync instead.
+The local harness stubs profile file storage; use a Sine-installed beta in a separate test profile to verify real `IOUtils` persistence, restart behavior, and multi-window syncing. Do not copy files into a Zen profile: Sine owns its installed mod directory. Set `ZEN_PATH` if Zen is installed outside the default Windows path.
 
 ### Release Build
 
@@ -48,7 +47,8 @@ node scripts/validate-version.js
 node scripts/validate-theme.js
 node scripts/validate-header.js
 node scripts/validate-css.js
-node --check zen-notes-core.uc.js && node --check zen-notes-editor.uc.js && node --check zen-notes-ui.uc.js
+npm test
+node --check zen-notes-core.uc.js && node --check zen-notes-model.uc.js && node --check zen-notes-store.uc.js && node --check zen-notes-editor.uc.js && node --check zen-notes-ui.uc.js
 
 # Commit & tag
 git add -A && git commit -m "chore: bump version to vX.Y.Z"
@@ -91,20 +91,29 @@ git push origin vX.Y.Z
 - [ ] `data-checklist="true"` persists on save/reload; old `class="zen-notes-checklist"` migrates on load
 - [ ] Caret does not jump to editor end after formatting
 - [ ] Color picker changes default color and persists
-- [ ] Manager screen has settings (default color) only — no note list
+- [ ] Read-only and save-conflict states display a clear recovery path
 - [ ] Single note survives browser restart without data loss
 - [ ] Auto-save interval flushes on crash (test with forced shutdown)
 - [ ] Browser console shows no errors or warnings
+- [ ] Block types: headings, quote, callout, divider, toggle, and code persist/reload
+- [ ] Nested bullet, numbered, and to-do children persist with indent and checked state
+- [ ] Ctrl+Z / Ctrl+Shift+Z undo and redo formatting and structure; typing groups into one step
+- [ ] `/` menu and markdown shortcuts select/convert all supported block types
+- [ ] Alt+Shift+Up/Down moves blocks with descendants
+- [ ] Keyboard shortcuts do nothing with focus outside the notes widget; Escape outside does not collapse it
+- [ ] Large note file saves atomically; file write failure shows error and retains in-memory edits
+- [ ] Newer schema opens read-only; 2.4.x pref mirror remains readable
+- [ ] Two Zen windows sync saves without overwriting pending local edits
 
 ## Coding Conventions
 
 ### JavaScript (`*.uc.js`)
 - **Never compare `Element.tagName` against uppercase literals.** The chrome document is `application/xhtml+xml`, where `tagName` is lowercase (`"ul"`), unlike HTML documents where it is uppercased (`"UL"`). Use `localName` (lowercase in both) or the `isTag`/`isListTag` helpers. This caused the list/checkbox failures in v2.3.0–v2.3.2, and it cannot be caught by tests running in an HTML page.
 - Preference prefix: `zen.notes.*`
-- Use `Services.prefs` for storage, not file I/O
+- Use `IOUtils.writeJSON` with a `tmpPath` for atomic writes to `<profile>/zen-notes/notes.json`. Keep a v4 HTML copy in `zen.notes.data` after saves for rollback compatibility. Fall back to pref-only storage when IOUtils is unavailable.
 - Wait for DOM ready before injection (`gBrowserInitialized` or `DOMContentLoaded`)
 - Clean up event listeners on window unload (named references required)
-- No external dependencies — Zen chrome APIs only
+- No runtime dependencies — Zen chrome APIs only; Node test dependencies are dev-only and never ship
 - Extract magic numbers to named constants with comments
 - Wrap init in try/catch error boundary
 - All global listeners must be removable in cleanup
@@ -133,27 +142,31 @@ This places the widget between the tab list and the bottom toolbar (workspace in
 - `tabsToolbar` = `document.getElementById("TabsToolbar")`
 - `footButtons` = `document.getElementById("zen-sidebar-foot-buttons")`
 
-### Storage Model (schema v4)
-- **Single note**: `state.note` holds one note object with `id`, `title`, `contentHTML`, `color`, `createdAt`, `updatedAt`.
-- **Pre-v4 migration**: Any state without a valid `state.note` (v2/v3) is written verbatim to `zen.notes.dataBackup` and replaced by `createInitialV4State()`. No concatenation, no reparation — the backup pref is the escape hatch for multi-note content.
-- **v1 exception**: `createInitialV4State()` also reads the legacy `zen.notes.content` / `.color` / `.lastEdited` prefs. If either content or a last-edited label is present, that text becomes the new note's body and it is titled "Migrated note". So a v1 user's content is preserved in the widget, unlike a v2/v3 user's. Note this runs on *any* fresh-state path, including a corrupt-JSON reset.
-- **Workspace tracking**: `state.lastWorkspaceId` is recorded for reference but no longer switches note content.
+### Storage Model (schema v5)
+- **Single note**: `state.note` stores metadata and a flat `blocks[]` list. Nesting is an `indent` value (0–5), not nested HTML.
+- **Primary file**: `<profile>/zen-notes/notes.json`, written through `IOUtils.writeJSON` with a temporary path and dated backups. Sine does not manage this directory.
+- **Compatibility mirror**: successful saves also write schema-v4 HTML to `zen.notes.data` for stable 2.4.x rollback. If IOUtils is unavailable, full schema-v5 state uses `zen.notes.dataV5Fallback` (subject to the preference size cap).
+- **Migration**: old note HTML, lists, checklist flags, formatting and nested lists are converted to blocks. Preserve source data in a legacy backup before migration.
+- **Newer schemas**: do not reset data; open read-only and display a notice.
+- **Cross-window**: writes use a profile lock and revision check, then broadcast a revision. A stale writer cannot overwrite a newer disk revision; preserve conflicted local state in a recovery backup.
 
 ### Storage Limits
-`Services.prefs` string prefs have a soft limit around 1MB. This is still workable for a small global note library, but larger future features (search/export/history) should watch payload growth.
+The compatibility pref mirror is capped near 1 MiB. The JSON file is the source of truth and supports larger notes; if the mirror cannot be updated, log/show that rollback compatibility is unavailable without failing the primary save.
 
 ### Compatibility Risks
 - Zen sidebar DOM changes between versions may break injection selector
 - Other sidebar mods may conflict if they manipulate the same parent node
-- `DOMParser` for HTML sanitization strips XUL namespace info and breaks widget rendering in chrome context
+- XHTML chrome DOM differs from regular HTML; test node/tag behavior in the XHTML harness and real Zen
 
 ## Distribution
 
 ### Release ZIP Structure
 ```
-zen-notes-2.4.0.zip
+zen-notes-2.5.0-beta.1.zip
 └── zen-notes/
     ├── zen-notes-core.uc.js
+    ├── zen-notes-model.uc.js
+    ├── zen-notes-store.uc.js
     ├── zen-notes-editor.uc.js
     ├── zen-notes-ui.uc.js
     ├── style.css

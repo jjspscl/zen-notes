@@ -5,6 +5,41 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0-beta.2] — 2026-10-19
+
+### Changed
+- Refreshed widget UI: lighter card with a hairline border, shared spacing/radius/control-size tokens, and a compact 36px header with a save-state dot.
+- Formatting toolbar is now a single borderless row shown only while the widget has focus; controls that do not fit move behind a "More" button instead of wrapping.
+- Resize grip sits on the card's top edge and appears on hover.
+- Footer combines edited date and word count ("Edited 19 Oct 2026 · 120 words") with save status on the right.
+- "Type / for commands…" placeholder, heading/to-do placeholders, consistent heading sizes, focus rings, and reduced-motion support.
+
+## [2.5.0-beta.1] — 2026-10-02
+
+### Added
+- Flat, serialized block model for text, headings, bulleted/numbered/to-do lists, toggles, quotes, callouts, dividers, and code blocks. Nested list children are represented by bounded indentation.
+- Block type slash menu, markdown input shortcuts, Tab/Shift+Tab indentation, and Alt+Shift+Up/Down block movement.
+- Custom snapshot undo/redo and inline code formatting.
+- Atomic profile JSON storage with dated backups, migration from preference-backed HTML, cross-window revision notifications, and a schema-v4 preference mirror for rollback.
+- Node tests plus `npm run zen` / `npm run harness` local XHTML editor harness with live reload.
+
+### Changed
+- Replaced `execCommand` and nested-HTML repair with model-based block editing.
+- Tab/Shift+Tab now indents or outdents an entire block subtree, preserving each child list/to-do type and checked state. To-do rows use a dedicated flex layout to prevent child bullets from overlapping checkbox controls.
+- Keyboard handling is scoped to the editor/widget; Escape outside the widget no longer affects notes.
+- Unsupported future data opens read-only rather than resetting.
+
+### Validation note
+- Automated unit, conversion, storage-stub, and editor-render tests run in CI. Real Zen/Sine profile persistence and multi-window behavior still require manual beta validation before stable release.
+
+## [2.4.7] — 2026-07-30
+
+### Fixed
+- **Toolbar icons clipped and visually inconsistent**: Bold, Italic, Underline and Strikethrough were hand-drawn paths that did not use the full `0 0 24 24` viewBox, so they read as cut off. Earlier attempts compensated by enlarging the icon element to 16px and inflating `stroke-width` to 4/4.5, which made Bold render as a blob while the simpler paths stayed thin. All four now use the official [Lucide](https://lucide.dev) path data at `stroke-width="2"`, which is drawn to fill the viewBox, and the icon element returns to 14px.
+- **`numbered` list icon depended on font rendering**: it drew "1 2 3" with SVG `<text>` elements inside a `mask-image` data URI, where font availability and metrics are not guaranteed and differ from the surrounding stroke-only icons. Replaced with Lucide `list-ordered`, which strokes the numerals as paths. `bullet` likewise moves to Lucide `list`, dropping its `<circle>` markers.
+- All 8 toolbar icons now share one `stroke-width` and one drawing style. No `<text>` or `<circle>` elements remain in any mask.
+- Corrected the `style.css` banner, which was stranded at v2.4.3. No validator checks it.
+
 ## [2.4.3] — 2026-07-28
 
 ### Fixed

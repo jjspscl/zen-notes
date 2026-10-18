@@ -6,7 +6,18 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Current Version
 
-**v2.4.6** — Removes the widget's intrinsic width floor: footer row children are now compressible so the sidebar can be dragged to any width. Count and save-status are hidden below 140px. Toolbar dividers are hidden on wrap.
+**v2.5.0-beta.2** — Introduces a flat block model, atomic profile-file storage, a compatibility mirror for 2.4.x rollback, custom editor history, and an XHTML local test harness. Browser-level checks against Zen and real Sine persistence remain before stable promotion.
+
+## v2.5 Block Editor
+
+- [x] Define flat block schema and pure block operations
+- [x] Migrate legacy v4 HTML, including nested list/checklist content
+- [x] Add file-backed schema v5 storage with pref compatibility mirror
+- [x] Add Node tests and XHTML local harness launcher
+- [x] Scope editing shortcuts to the widget/editor
+- [ ] Validate real Sine IOUtils persistence, restart, migration, rollback, and multi-window behavior in Zen
+- [ ] Verify IME, selection/undo, cross-block editing, and all block types manually in Zen
+- [ ] Promote beta to stable only after browser validation
 
 ## Release Channels
 

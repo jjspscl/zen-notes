@@ -1,9 +1,9 @@
 {
   "id": "zen-notes",
   "name": "Zen Notes",
-  "description": "Single-note sidebar widget with rich text formatting, links, drag-to-resize, and colour schemes",
+  "description": "A block-based sidebar notes widget with nested lists, rich text formatting, and persistent local storage",
   "author": "jjspscl",
-  "version": "2.4.6",
+  "version": "2.5.0-beta.2",
   "createdAt": "2025-06-02",
   "updatedAt": "2026-07-28",
   "homepage": "https://github.com/jjspscl/zen-notes",
@@ -34,9 +34,25 @@
       ],
       "loadOrder": 10
     },
+    "zen-notes-model.uc.js": {
+      "name": "Zen Notes Block Model",
+      "description": "Block document model, formatting operations, and legacy HTML migration.",
+      "include": [
+        "chrome://browser/content/browser.xhtml"
+      ],
+      "loadOrder": 15
+    },
+    "zen-notes-store.uc.js": {
+      "name": "Zen Notes Storage",
+      "description": "Atomic profile-file storage, migration, backups, and cross-window sync.",
+      "include": [
+        "chrome://browser/content/browser.xhtml"
+      ],
+      "loadOrder": 18
+    },
     "zen-notes-editor.uc.js": {
       "name": "Zen Notes Editor",
-      "description": "HTML sanitizer, content-tree normalizer, and editing utilities for Zen Notes.",
+      "description": "Block editor, selection mapping, formatting, and history for Zen Notes.",
       "include": [
         "chrome://browser/content/browser.xhtml"
       ],
