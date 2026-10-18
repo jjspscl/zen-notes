@@ -81,6 +81,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: zen-notes-*.zip
+          prerelease: ${{ contains(steps.version.outputs.tag, '-') }}
           body: |
             ## Zen Notes Widget ${{ steps.version.outputs.tag }}
 
