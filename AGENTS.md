@@ -190,13 +190,14 @@ zen-notes-2.5.0-beta.1.zip
 ### Release Channels
 - **Stable**: `main`, normal SemVer (`vX.Y.Z`), official GitHub releases, Sine marketplace users.
 - **Beta**: `beta`, prerelease SemVer (`vX.Y.Z-beta.N`), GitHub prereleases, tester/custom installs.
+- Beta testers install in Sine from `https://github.com/jjspscl/zen-notes/tree/beta`; keep the `beta` branch pushed at the latest beta commit.
 - Beta builds use the same mod ID (`zen-notes`) and `zen.notes.*` prefs as stable.
 - Any beta storage schema bump must include migration notes, rollback risk notes, and validation steps.
 
 ## Release Process
 
 1. Choose channel: stable from `main` (`vX.Y.Z`) or beta from `beta` (`vX.Y.Z-beta.N`)
-2. Run `node scripts/bump.js <patch|minor|major|version>`
+2. Run `node scripts/bump.js <patch|minor|major|version>` (also refreshes `theme.json` `updatedAt` and `homepage`: Sine only updates when `updatedAt` is newer, and re-reads from the branch in `homepage`; betas point at `/tree/beta`, stables at the plain repo URL)
 3. Validate: `node scripts/validate-version.js && node scripts/validate-theme.js && node scripts/validate-header.js && node scripts/validate-css.js && node --check zen-notes-core.uc.js && node --check zen-notes-editor.uc.js && node --check zen-notes-ui.uc.js`
 4. Update `ROADMAP.md` status if needed
 5. Commit: `git add -A && git commit -m "chore: release vX.Y.Z"`

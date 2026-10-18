@@ -80,6 +80,7 @@ Use the bump script before releasing:
 node scripts/bump.js patch   # 0.2.2 → 0.2.3
 node scripts/bump.js minor   # 0.2.2 → 0.3.0
 node scripts/bump.js major   # 0.2.2 → 1.0.0
+# bump.js also sets theme.json updatedAt/homepage; Sine needs a newer updatedAt to offer an update
 ```
 
 This updates `theme.json`, `mod.json`, `// @version`, README badge, and ROADMAP.

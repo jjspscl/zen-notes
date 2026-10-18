@@ -69,6 +69,17 @@ function main() {
     process.exit(1);
   }
 
+  const theme = JSON.parse(read("theme.json"));
+  const expectedHomepage = uniqueValues[0].includes("-") ? "https://github.com/jjspscl/zen-notes/tree/beta" : "https://github.com/jjspscl/zen-notes";
+  if (theme.homepage !== expectedHomepage) {
+    console.error(`\n❌ theme.json homepage is ${theme.homepage}; expected ${expectedHomepage} for ${uniqueValues[0]}`);
+    process.exit(1);
+  }
+  if (Number.isNaN(Date.parse(theme.updatedAt))) {
+    console.error("\n❌ theme.json updatedAt must be a valid ISO timestamp");
+    process.exit(1);
+  }
+
   console.log(`\n✅ All versions synchronized at ${uniqueValues[0]}`);
 }
 

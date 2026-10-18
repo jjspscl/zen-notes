@@ -6,7 +6,7 @@ A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser
 
 ## Current Version
 
-**v2.5.0-beta.3** — Introduces a flat block model, atomic profile-file storage, a compatibility mirror for 2.4.x rollback, custom editor history, and an XHTML local test harness. Browser-level checks against Zen and real Sine persistence remain before stable promotion.
+**v2.5.0-beta.4** — Introduces a flat block model, atomic profile-file storage, a compatibility mirror for 2.4.x rollback, custom editor history, and an XHTML local test harness. Browser-level checks against Zen and real Sine persistence remain before stable promotion.
 
 ## v2.5 Block Editor
 

@@ -5,6 +5,11 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0-beta.4] — 2026-10-19
+
+### Fixed
+- Sine now detects beta updates: `bump.js` refreshes `theme.json` `updatedAt`, and beta releases set `homepage` to the `beta` branch (stable keeps the plain repo URL). `validate-version.js` enforces both.
+
 ## [2.5.0-beta.3] — 2026-10-19
 
 ### Fixed

@@ -51,6 +51,20 @@ function updateJsonVersion(file, newVersion) {
   console.log(`  ${file}: ${newVersion}`);
 }
 
+const REPO_URL = "https://github.com/jjspscl/zen-notes";
+
+// Sine only updates when theme.json updatedAt is newer, and it re-reads theme.json from
+// the branch named in homepage, so both must follow every release.
+function updateSineMetadata(newVersion) {
+  const homepage = newVersion.includes("-") ? `${REPO_URL}/tree/beta` : REPO_URL;
+  const today = new Date().toISOString();
+  const content = read("theme.json")
+    .replace(/"homepage":\s*"[^"]*"/, `"homepage": "${homepage}"`)
+    .replace(/"updatedAt":\s*"[^"]*"/, `"updatedAt": "${today}"`);
+  write("theme.json", content);
+  console.log(`  theme.json: homepage ${homepage}, updatedAt ${today}`);
+}
+
 function updateUserScriptHeader(newVersion) {
   const themeJson = JSON.parse(read("theme.json"));
   const scripts = themeJson.scripts || {};
@@ -96,6 +110,7 @@ function main() {
   console.log(`Bumping ${currentVersion} → ${nextVersion}\n`);
   updateJsonVersion("theme.json", nextVersion);
   updateJsonVersion("mod.json", nextVersion);
+  updateSineMetadata(nextVersion);
   updateUserScriptHeader(nextVersion);
   updateReadmeBadge(nextVersion);
   updateRoadmapVersion(nextVersion);
