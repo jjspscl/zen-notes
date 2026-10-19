@@ -7,23 +7,12 @@
   },
   {
     "type": "text",
-    "label": "Simple in-sidebar notes widget for Zen. One note, persistent across sessions.",
+    "label": "A sticky-note style block editor in your Zen sidebar. One note, saved to your profile.",
     "margin": "0 0 18px 0"
   },
   {
     "type": "separator",
     "label": "Sidebar"
-  },
-  {
-    "type": "dropdown",
-    "property": "zen.notes.appearance",
-    "label": "Appearance",
-    "defaultValue": "system",
-    "options": [
-      { "label": "System (follow browser)", "value": "system" },
-      { "label": "Light", "value": "light" },
-      { "label": "Dark", "value": "dark" }
-    ]
   },
   {
     "type": "checkbox",
@@ -44,39 +33,76 @@
     "type": "dropdown",
     "property": "zen.notes.preset",
     "label": "Color scheme",
-    "defaultValue": "catppuccin-latte",
+    "defaultValue": "sticky",
     "options": [
-      { "label": "Catppuccin Latte (light)", "value": "catppuccin-latte" },
-      { "label": "Catppuccin Frappé", "value": "catppuccin-frappe" },
-      { "label": "Catppuccin Macchiato", "value": "catppuccin-macchiato" },
-      { "label": "Catppuccin Mocha", "value": "catppuccin-mocha" },
-      { "label": "Dracula", "value": "dracula" },
-      { "label": "Nord", "value": "nord" },
-      { "label": "Gruvbox Dark", "value": "gruvbox-dark" },
-      { "label": "Gruvbox Light", "value": "gruvbox-light" },
-      { "label": "Tokyo Night", "value": "tokyo-night" },
-      { "label": "Rosé Pine", "value": "rose-pine" },
-      { "label": "Rosé Pine Dawn (light)", "value": "rose-pine-dawn" },
-      { "label": "Solarized Dark", "value": "solarized-dark" },
-      { "label": "Solarized Light", "value": "solarized-light" },
-      { "label": "Everforest Dark", "value": "everforest-dark" },
-      { "label": "Everforest Light", "value": "everforest-light" }
+      {
+        "label": "Sticky note (yellow)",
+        "value": "sticky"
+      },
+      {
+        "label": "Sticky note (amber, dark)",
+        "value": "sticky-dark"
+      },
+      {
+        "label": "Catppuccin Latte (light)",
+        "value": "catppuccin-latte"
+      },
+      {
+        "label": "Catppuccin Frappé (dark)",
+        "value": "catppuccin-frappe"
+      },
+      {
+        "label": "Catppuccin Macchiato (dark)",
+        "value": "catppuccin-macchiato"
+      },
+      {
+        "label": "Catppuccin Mocha (dark)",
+        "value": "catppuccin-mocha"
+      },
+      {
+        "label": "Dracula (dark)",
+        "value": "dracula"
+      },
+      {
+        "label": "Nord (dark)",
+        "value": "nord"
+      },
+      {
+        "label": "Gruvbox Dark",
+        "value": "gruvbox-dark"
+      },
+      {
+        "label": "Gruvbox Light",
+        "value": "gruvbox-light"
+      },
+      {
+        "label": "Tokyo Night (dark)",
+        "value": "tokyo-night"
+      },
+      {
+        "label": "Rosé Pine (dark)",
+        "value": "rose-pine"
+      },
+      {
+        "label": "Rosé Pine Dawn (light)",
+        "value": "rose-pine-dawn"
+      },
+      {
+        "label": "Solarized Dark",
+        "value": "solarized-dark"
+      },
+      {
+        "label": "Solarized Light",
+        "value": "solarized-light"
+      },
+      {
+        "label": "Everforest Dark",
+        "value": "everforest-dark"
+      },
+      {
+        "label": "Everforest Light",
+        "value": "everforest-light"
+      }
     ]
-  },
-  {
-    "type": "separator",
-    "label": "Workspace"
-  },
-  {
-    "type": "checkbox",
-    "property": "zen.notes.showWorkspaceKey",
-    "label": "Show current workspace key inside the manager",
-    "defaultValue": false,
-    "margin": "12px 0"
-  },
-  {
-    "type": "text",
-    "label": "Workspace state is tracked locally. Legacy prefs are preserved for recovery.",
-    "margin": "8px 0 0 0"
   }
 ]

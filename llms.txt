@@ -1,0 +1,17 @@
+# Zen Notes
+
+> Sticky-note style block-notes widget for Zen Browser, distributed as a Sine mod. Plain chrome JS + CSS, no runtime dependencies. Source in `src/`; Sine manifest in `theme.json`.
+
+## Start here
+- [AGENTS.md](AGENTS.md): commands, conventions, hard rules for agents
+- [docs/architecture.md](docs/architecture.md): layout, module contract, runtime flow, Sine contract
+
+## Reference
+- [docs/storage.md](docs/storage.md): notes.json schema v5, locking, migration, deprecated v4 mirror
+- [docs/editor.md](docs/editor.md): selection mapping, rendering, history, IME
+- [docs/theming.md](docs/theming.md): tokens, Sticky default, adding a palette
+- [docs/release.md](docs/release.md): channels, bump, CI, why updatedAt/homepage matter
+- [docs/decisions/](docs/decisions/): short ADRs
+
+## Optional
+- [README.md](README.md), [install.md](install.md), [CHANGELOG.md](CHANGELOG.md), [ROADMAP.md](ROADMAP.md), [CONTRIBUTING.md](CONTRIBUTING.md)

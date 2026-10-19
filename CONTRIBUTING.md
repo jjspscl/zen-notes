@@ -4,20 +4,18 @@ Thank you for your interest in improving Zen Notes!
 
 ## Development Setup
 
-No build step required. This is a vanilla JS + CSS mod for Zen Browser.
+Vanilla JS + CSS mod, no build step. Dev tooling only: Node 22+, Biome, linkedom.
 
 ```bash
-# Clone
 git clone https://github.com/jjspscl/zen-notes.git
 cd zen-notes
-
-# Test scripts
-node scripts/validate-version.js
-node scripts/validate-theme.js
-node scripts/validate-header.js
-node scripts/validate-css.js
-node --check zen-notes-core.uc.js && node --check zen-notes-editor.uc.js && node --check zen-notes-ui.uc.js
+npm ci
+npm run check   # biome + validate + tests (what CI runs)
+npm run fmt     # format
+npm run zen     # live-reloading harness (Windows Zen from WSL, disposable profile)
 ```
+
+Layout and rules: [AGENTS.md](AGENTS.md) and [docs/architecture.md](docs/architecture.md). Never install by copying into a profile; use Sine.
 
 ## Conventional Commits
 
@@ -80,6 +78,7 @@ Use the bump script before releasing:
 node scripts/bump.js patch   # 0.2.2 → 0.2.3
 node scripts/bump.js minor   # 0.2.2 → 0.3.0
 node scripts/bump.js major   # 0.2.2 → 1.0.0
+# bump.js also sets theme.json updatedAt/homepage; Sine needs a newer updatedAt to offer an update
 ```
 
 This updates `theme.json`, `mod.json`, `// @version`, README badge, and ROADMAP.
@@ -104,17 +103,12 @@ windows. Do not manually copy mod files into a profile; Sine manages that folder
 
 - **JavaScript**: 2-space indentation, single quotes, semicolons
 - **CSS**: 2-space indentation, kebab-case selectors prefixed with `#zen-notes-widget`
-- **No inline styles** — all widget styling in `style.css`
+- **No inline styles** — all widget styling in `src/style.css`
 - **No runtime dependencies** — Node tooling dependencies are dev-only and excluded from release packages
 
 ## Before Submitting a PR
 
-- [ ] `node scripts/validate-version.js` passes
-- [ ] `node scripts/validate-theme.js` passes
-- [ ] `node scripts/validate-header.js` passes
-- [ ] `node scripts/validate-css.js` passes
-- [ ] `npm test` passes
-- [ ] All five `.uc.js` modules pass `node --check`
+- [ ] `npm run check` passes (Biome, release-contract validation, tests)
 - [ ] Tested the XHTML harness in Zen
 - [ ] Tested file persistence and migrations through Sine before stable promotion
 - [ ] Commit messages follow Conventional Commits format

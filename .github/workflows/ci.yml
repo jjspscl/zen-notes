@@ -2,59 +2,26 @@ name: CI
 
 on:
   push:
-    branches: [master, main]
+    branches: [main, beta, "feat/**"]
   pull_request:
-    branches: [master, main]
+    branches: [main, beta]
 
 jobs:
-  validate:
+  check:
+    name: Check
     runs-on: ubuntu-latest
-    name: Validate
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-
-      - name: Install test dependencies
-        run: npm ci
-
-      - name: Run tests
-        run: npm test
-
-      - name: Validate version sync
-        run: node scripts/validate-version.js
-
-      - name: Validate Sine theme metadata
-        run: node scripts/validate-theme.js
-
-      - name: Validate UserScript header
-        run: node scripts/validate-header.js
-
-      - name: Validate CSS syntax
-        run: node scripts/validate-css.js
-
-      - name: Check JS syntax
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Lint, validate and test
+        run: npm run check
+      - name: Release package contains only runtime files
         run: |
-          node -p "Object.keys(require('./theme.json').scripts).filter(f=>f.endsWith('.uc.js')).join('\n')" > /tmp/uc-files
-          if [ ! -s /tmp/uc-files ]; then
-            echo "❌ theme.json lists no .uc.js scripts"
-            exit 1
-          fi
-          while IFS= read -r f; do
-            [ -n "$f" ] || continue
-            echo "→ node --check $f"
-            node --check "$f"
-          done < /tmp/uc-files
-
-      - name: Ensure no uncommitted changes after bump
-        run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "❌ Uncommitted changes detected:" 
-            git status --short
-            exit 1
-          fi
+          npm run build
+          unzip -Z1 zen-notes-*.zip | tee /tmp/zip-list
+          ! grep -E '(^|/)(test|dev|scripts|node_modules|docs)/' /tmp/zip-list
+          grep -q 'src/zen-notes-ui.uc.js' /tmp/zip-list

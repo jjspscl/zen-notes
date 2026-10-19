@@ -3,68 +3,50 @@
   "name": "Zen Notes",
   "description": "A block-based sidebar notes widget with nested lists, rich text formatting, and persistent local storage",
   "author": "jjspscl",
-  "version": "2.5.0-beta.2",
+  "version": "2.5.0-beta.9",
   "createdAt": "2025-06-02",
-  "updatedAt": "2026-07-28",
-  "homepage": "https://github.com/jjspscl/zen-notes",
+  "updatedAt": "2026-10-19T00:48:28.015Z",
+  "homepage": "https://github.com/jjspscl/zen-notes/tree/beta",
   "readme": "https://raw.githubusercontent.com/jjspscl/zen-notes/main/README.md",
-  "fork": [
-    "zen"
-  ],
+  "fork": ["zen"],
   "ai": "yes",
   "supportsUnload": true,
-  "tags": [
-    "Zen Browser",
-    "Notes",
-    "Sidebar",
-    "Productivity",
-    "Formatting",
-    "Rich Text",
-    "Links"
-  ],
+  "tags": ["Zen Browser", "Notes", "Sidebar", "Productivity", "Formatting", "Rich Text", "Links"],
   "style": {
-    "chrome": "style.css"
+    "chrome": "src/style.css"
   },
   "scripts": {
-    "zen-notes-core.uc.js": {
-      "name": "Zen Notes Core",
-      "description": "Storage, preferences, state model, and shared utilities for Zen Notes.",
-      "include": [
-        "chrome://browser/content/browser.xhtml"
-      ],
-      "loadOrder": 10
-    },
-    "zen-notes-model.uc.js": {
-      "name": "Zen Notes Block Model",
-      "description": "Block document model, formatting operations, and legacy HTML migration.",
-      "include": [
-        "chrome://browser/content/browser.xhtml"
-      ],
-      "loadOrder": 15
-    },
-    "zen-notes-store.uc.js": {
-      "name": "Zen Notes Storage",
-      "description": "Atomic profile-file storage, migration, backups, and cross-window sync.",
-      "include": [
-        "chrome://browser/content/browser.xhtml"
-      ],
-      "loadOrder": 18
-    },
-    "zen-notes-editor.uc.js": {
-      "name": "Zen Notes Editor",
-      "description": "Block editor, selection mapping, formatting, and history for Zen Notes.",
-      "include": [
-        "chrome://browser/content/browser.xhtml"
-      ],
-      "loadOrder": 20
-    },
-    "zen-notes-ui.uc.js": {
-      "name": "Zen Notes UI",
-      "description": "Widget DOM, event listeners, and lifecycle for Zen Notes.",
-      "include": [
-        "chrome://browser/content/browser.xhtml"
-      ],
-      "loadOrder": 30
+    "src": {
+      "zen-notes-core.uc.js": {
+        "name": "Zen Notes Core",
+        "description": "Storage, preferences, state model, and shared utilities for Zen Notes.",
+        "include": ["chrome://browser/content/browser.xhtml"],
+        "loadOrder": 10
+      },
+      "zen-notes-model.uc.js": {
+        "name": "Zen Notes Block Model",
+        "description": "Block document model, formatting operations, and legacy HTML migration.",
+        "include": ["chrome://browser/content/browser.xhtml"],
+        "loadOrder": 15
+      },
+      "zen-notes-store.uc.js": {
+        "name": "Zen Notes Storage",
+        "description": "Atomic profile-file storage, migration, backups, and cross-window sync.",
+        "include": ["chrome://browser/content/browser.xhtml"],
+        "loadOrder": 18
+      },
+      "zen-notes-editor.uc.js": {
+        "name": "Zen Notes Editor",
+        "description": "Block editor, selection mapping, formatting, and history for Zen Notes.",
+        "include": ["chrome://browser/content/browser.xhtml"],
+        "loadOrder": 20
+      },
+      "zen-notes-ui.uc.js": {
+        "name": "Zen Notes UI",
+        "description": "Widget DOM, event listeners, and lifecycle for Zen Notes.",
+        "include": ["chrome://browser/content/browser.xhtml"],
+        "loadOrder": 30
+      }
     }
   },
   "preferences": "preferences.json"

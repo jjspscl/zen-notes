@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Zen Notes local editor harness</title>
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/src/style.css" />
   <style>
     body { margin: 24px; color: #333; font: 14px system-ui, sans-serif; }
     #TabsToolbar { width: 340px; height: 620px; display: flex; flex-direction: column; border: 1px solid #999; }
@@ -14,7 +14,7 @@
   </style>
   <script type="text/javascript"><![CDATA[
     (function () {
-      const prefs = new Map([["zen.notes.data", ""], ["zen.notes.preset", "catppuccin-mocha"], ["zen.notes.appearance", "system"]]);
+      const prefs = new Map([["zen.notes.data", ""], ["zen.notes.preset", new URLSearchParams(location.search).get("preset") || "sticky"], ["zen.notes.appearance", "system"]]);
       const prefObservers = new Map();
       const files = new Map();
       window.Services = {
@@ -38,16 +38,16 @@
   ]]></script>
 </head>
 <body>
-  <p id="test-status">Local editor harness. This uses stubbed prefs and file storage; validate actual persistence in Zen before release.</p>
+  <p id="test-status">Local editor harness (append ?preset=nord to preview another palette). This uses stubbed prefs and file storage; validate actual persistence in Zen before release.</p>
   <div id="TabsToolbar">
     <div style="flex:1"></div>
     <div id="zen-sidebar-foot-buttons">Sidebar footer placeholder</div>
   </div>
-  <script type="text/javascript" src="/zen-notes-core.uc.js"></script>
-  <script type="text/javascript" src="/zen-notes-model.uc.js"></script>
-  <script type="text/javascript" src="/zen-notes-store.uc.js"></script>
-  <script type="text/javascript" src="/zen-notes-editor.uc.js"></script>
-  <script type="text/javascript" src="/zen-notes-ui.uc.js"></script>
+  <script type="text/javascript" src="/src/zen-notes-core.uc.js"></script>
+  <script type="text/javascript" src="/src/zen-notes-model.uc.js"></script>
+  <script type="text/javascript" src="/src/zen-notes-store.uc.js"></script>
+  <script type="text/javascript" src="/src/zen-notes-editor.uc.js"></script>
+  <script type="text/javascript" src="/src/zen-notes-ui.uc.js"></script>
   <script type="text/javascript" src="/__reload.js"></script>
 </body>
 </html>

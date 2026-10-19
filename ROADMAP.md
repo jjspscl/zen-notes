@@ -1,92 +1,22 @@
-# Zen Notes Widget — Roadmap
+# Zen Notes — Roadmap
 
-## Vision
+Current: **v2.5.0-beta.9** — sticky-note theme, block editor, atomic file storage, modernized tooling and layout. Becomes 2.5.0 stable once validated in Zen.
 
-A persistent, collapsible, lean notes widget pinned to the bottom of Zen Browser's sidebar, holding a single note that matches the browser's theme.
+## 2.5.0 stable (next)
+- [ ] Validate in Zen via Sine: restart persistence, v4 migration, multi-window sync, newer-schema read-only
+- [ ] Verify IME, select-all/replace, cross-block editing, all block types
+- [ ] Tag `v2.5.0` from `main` (`homepage` returns to the plain repo URL)
 
-## Current Version
+## 2.6 (planned)
+- [ ] Remove the v4 preference mirror (`zen.notes.data`) used for 2.4.x rollback
+- [ ] Evaluate `.uc.mjs` ES modules once Sine exposes a stable unload contract for them
+- [ ] Sine store listing (`sineorg/store`)
 
-**v2.5.0-beta.2** — Introduces a flat block model, atomic profile-file storage, a compatibility mirror for 2.4.x rollback, custom editor history, and an XHTML local test harness. Browser-level checks against Zen and real Sine persistence remain before stable promotion.
+## Done in 2.5
+- [x] Flat block model (schema v5) and legacy HTML migration
+- [x] Atomic `notes.json` with backups, lock and revision checks
+- [x] Sticky default palette; unused workspace/colour features removed
+- [x] `src/` layout, Biome, consolidated validator, partial re-rendering, idle start
 
-## v2.5 Block Editor
-
-- [x] Define flat block schema and pure block operations
-- [x] Migrate legacy v4 HTML, including nested list/checklist content
-- [x] Add file-backed schema v5 storage with pref compatibility mirror
-- [x] Add Node tests and XHTML local harness launcher
-- [x] Scope editing shortcuts to the widget/editor
-- [ ] Validate real Sine IOUtils persistence, restart, migration, rollback, and multi-window behavior in Zen
-- [ ] Verify IME, selection/undo, cross-block editing, and all block types manually in Zen
-- [ ] Promote beta to stable only after browser validation
-
-## Release Channels
-
-- **Stable channel**: `main` branch, normal SemVer (`vX.Y.Z`), official GitHub releases, and Sine marketplace installs.
-- **Beta channel**: `beta` branch, prerelease SemVer (`vX.Y.Z-beta.N`), GitHub prereleases, and tester/custom installs.
-- **Install behavior**: beta keeps the same mod ID (`zen-notes`) and preference namespace as stable, so beta replaces stable in a profile instead of running side-by-side.
-- **Storage policy**: beta storage migrations must be forward-safe or explicitly documented as forward-only before release.
-
-## v2 Major Release Tracks
-
-### M0 — Workspace Contract Validation
-- [x] Research likely workspace selectors, events, and pref hooks
-- [ ] Verify runtime workspace UUID source in Zen directly
-- [ ] Verify switch behavior across restart, rename, and reorder
-- [ ] Confirm release blocker if runtime contract is unstable
-
-### M1 — Sine Foundation
-- [x] Add root `theme.json`
-- [x] Convert `preferences.json` to Sine UI schema
-- [x] Move version/source-of-truth validation toward Sine metadata
-- [ ] Submit stable `main` to `sineorg/store`
-
-### M2 — Global Notes Library (schema v3)
-- [x] Add versioned `zen.notes.data` store
-- [x] Preserve legacy single-note prefs for migration/debugging
-- [x] Refactor from per-workspace note sets to single global `notes[]` library
-- [x] Each workspace stores only `pinnedActiveNoteId` in `workspaceState`
-- [x] v2→v3 migration flattens workspace buckets with ID collision detection
-- [x] Delete reparation: deleting a note repairs all workspace refs
-- [ ] Validate migration behavior against real v1/v2 user data
-
-### M3 — Note Management Screen
-- [x] Add central manager overlay for rename, reorder, open, and hard delete
-- [ ] Add richer settings and future search/export hooks
-
-### M4 — Sidebar UX
-- [x] Title trigger button with chevron, anchored popover note selector
-- [x] Popover keyboard navigation (arrows, Enter, Home/End, Escape)
-- [x] Focus management: auto-focus selected row, return focus on close
-- [x] Keep compact pinned widget feel
-
-### M5 — Lists
-- [x] Add bullet list formatting
-- [x] Add numbered list formatting
-- [x] Add checkbox/todo list formatting
-- [x] Decide whether explicit nesting UX belongs in a later release
-
-### M6 — Editor Robustness & Polish (v2.1.0)
-- [x] Fix paste handling (strip foreign HTML, preserve internal formatting)
-- [x] Add selection save/restore utilities
-- [x] Remove destructive innerHTML re-sync on blur
-- [x] Fix checklist click target (zoom-safe via computed style)
-- [x] Add save status indicator
-- [x] Add keyboard shortcut hints to tooltips
-- [x] Add underline button + Ctrl+U shortcut
-- [x] Add Ctrl+Shift+L/O/C for list toggles
-- [x] Improve Enter behavior (exit list on empty item, checklist continuation)
-- [x] Add Tab/Shift+Tab for indent/outdent in lists
-
-## Release follow-up
-
-- Validate Zen workspace identity across switch/restart/rename/reorder before broad promotion.
-- Submit stable `main` to `sineorg/store` and confirm ingestion from root `theme.json`.
-- Continue testing legacy v1/v2 note migration against real user data.
-
-## Post-2.0 pipeline
-
-- Keep `main` stable and marketplace-ready.
-- Create or refresh `beta` from `main` after each official release.
-- Start the next beta at the next target version, for example `2.1.0-beta.1`.
-- Promote `beta` back to `main` only after validation and migration checks pass.
-- For stable hotfixes, patch `main` first, tag a stable release, then merge or cherry-pick back to `beta`.
+## Release channels
+See [docs/release.md](docs/release.md).

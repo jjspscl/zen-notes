@@ -5,6 +5,65 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0-beta.9] — 2026-10-19
+
+### Fixed
+- Slash menu is a top-layer popover, so the widget or sidebar can no longer clip it; it opens at the caret, flips above when there is no room below, and stays inside the window (`placeMenu`).
+- Slash menu keyboard: Up/Down move the highlight (it was overridden by caret navigation and never matched the "active" style), Enter/Tab choose the highlighted item, Escape closes; focus stays in the editor so typing keeps filtering. ARIA `activedescendant` exposes the highlighted item.
+- Backspace at the start of a block: empty line after a heading returns the caret to the end of the heading; a paragraph merges into the block above (keeping its type); nested and typed blocks step down first; a divider above is removed. Delete at the end merges the next block.
+
+## [2.5.0-beta.8] — 2026-10-19
+
+### Changed
+- Theme is centralized: palettes are defined once in `PALETTES` (id, label, light/dark) and the colour scheme dropdown is the only theme control. The Appearance setting is removed (its pref is cleared at startup).
+- Sticky is always the light yellow note; a new "Sticky note (amber, dark)" palette replaces dark-mode Sticky.
+
+### Fixed
+- Enter at the end of a heading starts a plain paragraph instead of another heading.
+- The "Heading"/"To-do" hints no longer show while you are typing (hint rules now apply only when the editor is unfocused).
+- The caret line is scrolled into view (clear of the bottom fade) while typing, on Enter and after structural edits; the editor has extra bottom padding.
+
+## [2.5.0-beta.7] — 2026-10-19
+
+### Fixed
+- An empty one-block note always shows "Type / for commands…" (not "Heading"/"To-do"), and a lone empty heading or other typed block starts as plain text.
+- Focusing and leaving the editor no longer triggers a save or bumps "Edited", so "Saved" no longer flashes at launch.
+
+## [2.5.0-beta.6] — 2026-10-19
+
+### Added
+- **Sticky** palette (yellow paper; light and dark follow the Appearance setting) with a folded corner, now the default.
+- `docs/` (architecture, storage, editor, theming, release, ADRs), `llms.txt`, rewritten README/AGENTS/install guide.
+- Biome lint+format, `npm run check`, a single `scripts/validate.js`, JSDoc-free tests for the new behaviour.
+
+### Changed
+- Runtime moved to `src/` (Sine loads nested script paths). Release zip now contains only runtime files.
+- Stylesheet rewritten: native nesting, one set of `--zn-*` tokens, palettes as five variables, each icon defined once (~35% smaller).
+- Editor renders only the blocks that changed; the widget is built at browser idle.
+- CI/release run `npm run check` on Node 24 and verify the zip contents.
+
+### Removed
+- Workspace section and `zen.notes.showWorkspaceKey`, per-note colour, `defaultColor`, `debugKeyNav`, the Appearance "None" option, and dead workspace/colour code. Their prefs are cleared at startup.
+- Deprecated: the v4 preference mirror (`zen.notes.data`) stays for 2.4.x rollback and will be removed in 2.6.
+
+## [2.5.0-beta.5] — 2026-10-19
+
+### Changed
+- Empty-block hints ("Type / for commands…", "Heading", "To-do") hide while the editor is focused and return when it loses focus.
+
+## [2.5.0-beta.4] — 2026-10-19
+
+### Fixed
+- Sine now detects beta updates: `bump.js` refreshes `theme.json` `updatedAt`, and beta releases set `homepage` to the `beta` branch (stable keeps the plain repo URL). `validate-version.js` enforces both.
+
+## [2.5.0-beta.3] — 2026-10-19
+
+### Fixed
+- Select-all (Ctrl+A) followed by typing, Enter, or Backspace no longer lets the browser rewrite the editor DOM; selections that cover the editor or whole blocks are mapped to block offsets and replaced through the model.
+- Typing over any selection (including across blocks) is handled by the editor; stray DOM text is folded back into a block instead of desyncing from saved state.
+- Empty-block placeholders ("Type / for commands…", "Heading") now disappear as soon as you type.
+- Toolbar buttons no longer pick up Zen's default button chrome, so they fit on one row; the editor no longer shows a focus outline box.
+
 ## [2.5.0-beta.2] — 2026-10-19
 
 ### Changed

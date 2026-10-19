@@ -3,11 +3,11 @@
  * build-release.js — Assembles a GitHub release archive.
  */
 
-const fs = require("fs");
-const path = require("path");
-const { execSync } = require("child_process");
+const fs = require("node:fs");
+const path = require("node:path");
+const { execSync } = require("node:child_process");
 
-const ROOT = path.resolve(__dirname, "..");
+const { ROOT, exists, scriptFiles } = require("./lib/manifest");
 const DIST = path.join(ROOT, "dist");
 
 function read(file) {
@@ -32,22 +32,12 @@ function main() {
   const pkgDir = path.join(DIST, "zen-notes");
   fs.mkdirSync(pkgDir, { recursive: true });
 
-  const scripts = themeJson.scripts || {};
-  for (const filename of Object.keys(scripts)) {
-    if (fs.existsSync(path.join(ROOT, filename))) {
-      cp(filename, path.join(pkgDir, filename));
-    } else {
-      console.warn(`[build-release] script "${filename}" listed in theme.json not found, skipping`);
-    }
-  }
-
-  const supportFiles = ["style.css", "preferences.json", "theme.json", "mod.json", "README.md"];
-  for (const file of supportFiles) {
+  // Only runtime files ship: scripts + stylesheet listed in theme.json, plus Sine metadata and docs.
+  const runtime = [...scriptFiles(), themeJson.style.chrome];
+  const support = ["preferences.json", "theme.json", "mod.json", "README.md", "LICENSE", "install.md"];
+  for (const file of [...runtime, ...support]) {
+    if (!exists(file)) throw new Error(`[build-release] "${file}" not found`);
     cp(file, path.join(pkgDir, file));
-  }
-
-  if (fs.existsSync(path.join(ROOT, "install.md"))) {
-    cp("install.md", path.join(pkgDir, "install.md"));
   }
 
   const archivePath = path.join(ROOT, zipName);
