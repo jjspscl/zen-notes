@@ -13,8 +13,12 @@ test("local harness server serves XHTML and live reload client", async () => {
   try {
     let response;
     for (let attempt = 0; attempt < 40; attempt++) {
-      try { response = await fetch(`http://127.0.0.1:${port}/dev/harness.xhtml`); break; }
-      catch (_) { await new Promise((resolve) => setTimeout(resolve, 50)); }
+      try {
+        response = await fetch(`http://127.0.0.1:${port}/dev/harness.xhtml`);
+        break;
+      } catch (_) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
     }
     assert.ok(response, "server should become available");
     assert.equal(response.status, 200);

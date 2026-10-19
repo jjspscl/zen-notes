@@ -9,10 +9,9 @@
  *   node scripts/bump.js 2.0.0-beta
  */
 
-const fs = require("fs");
-const path = require("path");
-
-const ROOT = path.resolve(__dirname, "..");
+const fs = require("node:fs");
+const path = require("node:path");
+const { ROOT, scriptFiles } = require("./lib/manifest");
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 
 function read(file) {
@@ -66,20 +65,31 @@ function updateSineMetadata(newVersion) {
 }
 
 function updateUserScriptHeader(newVersion) {
-  const themeJson = JSON.parse(read("theme.json"));
-  const scripts = themeJson.scripts || {};
-  for (const filename of Object.keys(scripts)) {
+  for (const filename of scriptFiles()) {
     if (!filename.endsWith(".uc.js")) continue;
-    try {
-      const content = read(filename)
-        .replace(/\/\/ @version\s+.+/, `// @version         ${newVersion}`)
-        .replace(/const VERSION = "[^"]+";/, `const VERSION = "${newVersion}";`);
-      write(filename, content);
-      console.log(`  ${filename}: header + runtime version updated`);
-    } catch (err) {
-      console.warn(`  ${filename}: not found, skipping`);
-    }
+    const content = read(filename)
+      .replace(/\/\/ @version\s+.+/, `// @version         ${newVersion}`)
+      .replace(/const VERSION = "[^"]+";/, `const VERSION = "${newVersion}";`);
+    write(filename, content);
+    console.log(`  ${filename}: header + runtime version updated`);
   }
+}
+
+function updateStyleHeader(newVersion) {
+  const file = JSON.parse(read("theme.json")).style.chrome;
+  write(file, read(file).replace(/\/\* Zen Notes Widget — v[^\s*]+/, `/* Zen Notes Widget — v${newVersion}`));
+  console.log(`  ${file}: header updated`);
+}
+
+function updatePackageVersion(newVersion) {
+  const pkg = JSON.parse(read("package.json"));
+  pkg.version = newVersion;
+  write("package.json", `${JSON.stringify(pkg, null, 2)}\n`);
+  const lock = JSON.parse(read("package-lock.json"));
+  lock.version = newVersion;
+  if (lock.packages?.[""]) lock.packages[""].version = newVersion;
+  write("package-lock.json", `${JSON.stringify(lock, null, 2)}\n`);
+  console.log(`  package.json + package-lock.json: ${newVersion}`);
 }
 
 function updateReadmeBadge(newVersion) {
@@ -112,6 +122,8 @@ function main() {
   updateJsonVersion("mod.json", nextVersion);
   updateSineMetadata(nextVersion);
   updateUserScriptHeader(nextVersion);
+  updatePackageVersion(nextVersion);
+  updateStyleHeader(nextVersion);
   updateReadmeBadge(nextVersion);
   updateRoadmapVersion(nextVersion);
   console.log(`\nDone. Review changes before release.`);

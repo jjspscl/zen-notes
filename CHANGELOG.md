@@ -5,6 +5,23 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0-beta.6] — 2026-10-19
+
+### Added
+- **Sticky** palette (yellow paper; light and dark follow the Appearance setting) with a folded corner, now the default.
+- `docs/` (architecture, storage, editor, theming, release, ADRs), `llms.txt`, rewritten README/AGENTS/install guide.
+- Biome lint+format, `npm run check`, a single `scripts/validate.js`, JSDoc-free tests for the new behaviour.
+
+### Changed
+- Runtime moved to `src/` (Sine loads nested script paths). Release zip now contains only runtime files.
+- Stylesheet rewritten: native nesting, one set of `--zn-*` tokens, palettes as five variables, each icon defined once (~35% smaller).
+- Editor renders only the blocks that changed; the widget is built at browser idle.
+- CI/release run `npm run check` on Node 24 and verify the zip contents.
+
+### Removed
+- Workspace section and `zen.notes.showWorkspaceKey`, per-note colour, `defaultColor`, `debugKeyNav`, the Appearance "None" option, and dead workspace/colour code. Their prefs are cleared at startup.
+- Deprecated: the v4 preference mirror (`zen.notes.data`) stays for 2.4.x rollback and will be removed in 2.6.
+
 ## [2.5.0-beta.5] — 2026-10-19
 
 ### Changed

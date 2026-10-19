@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const vm = require("node:vm");
 const { parseHTML } = require("linkedom");
 
-const source = fs.readFileSync(new URL("../zen-notes-model.uc.js", `file://${__filename}`), "utf8");
+const source = fs.readFileSync(new URL("../src/zen-notes-model.uc.js", `file://${__filename}`), "utf8");
 function loadModel() {
   const { document } = parseHTML("<html><body></body></html>");
   const ns = {
@@ -18,7 +18,13 @@ function loadModel() {
 
 test("creates normalized blocks and rejects unknown types", () => {
   const model = loadModel();
-  const block = model.createBlock("nope", { indent: 99, text: [{ t: "hello", b: true }, { t: " world", b: true }] });
+  const block = model.createBlock("nope", {
+    indent: 99,
+    text: [
+      { t: "hello", b: true },
+      { t: " world", b: true },
+    ],
+  });
   assert.equal(block.type, "paragraph");
   assert.equal(block.indent, 5);
   assert.deepEqual(JSON.parse(JSON.stringify(block.text)), [{ t: "hello world", b: true }]);
@@ -50,7 +56,10 @@ test("moves blocks with their contiguous descendants", () => {
     model.createBlock("bullet", { id: "a-child", indent: 1, text: [{ t: "child" }] }),
     model.createBlock("bullet", { id: "b", text: [{ t: "B" }] }),
   ];
-  assert.deepEqual(model.moveBlock(blocks, "a", "down").map((block) => block.id), ["b", "a", "a-child"]);
+  assert.deepEqual(
+    model.moveBlock(blocks, "a", "down").map((block) => block.id),
+    ["b", "a", "a-child"],
+  );
 });
 
 test("marks and safe links affect only the requested range", () => {
@@ -66,7 +75,9 @@ test("marks and safe links affect only the requested range", () => {
 
 test("imports nested lists and inline formatting; exports safe v4 HTML", () => {
   const model = loadModel();
-  const blocks = model.htmlToBlocks('<div>Hi <strong>there</strong></div><ul data-checklist="true"><li data-checked="true">A<ul><li>B</li></ul></li></ul>');
+  const blocks = model.htmlToBlocks(
+    '<div>Hi <strong>there</strong></div><ul data-checklist="true"><li data-checked="true">A<ul><li>B</li></ul></li></ul>',
+  );
   assert.equal(blocks[0].type, "paragraph");
   assert.equal(blocks[0].text[1].b, true);
   assert.equal(blocks[1].type, "todo");
