@@ -11,8 +11,6 @@ A sticky-note style, block-based notes widget for [Zen Browser](https://zen-brow
 
 ![Zen Notes themes](docs/assets/store.png)
 
-![Zen Notes demo](docs/demo.gif)
-
 ## Features
 
 - **Sticky-note look** — yellow paper by default, plus an amber dark variant and 15 more palettes (Catppuccin, Nord, Gruvbox, Dracula, ...)
