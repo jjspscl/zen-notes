@@ -23,3 +23,7 @@ Custom snapshot stack (`history[]`, max 200 `JSON` snapshots); typing coalesces 
 ## Empty-block hints
 
 CSS only: `data-empty="true"` rows show "Type / for commands…", "Heading" or "To-do" via `::before`, hidden while the editor has focus.
+
+## Links
+
+Only `http`, `https` and `mailto` hrefs are kept or opened (`safeLinkUrl`). Opening uses `window.openWebLinkIn(url, where)` because `window.open` from chrome would try to open a window; it falls back to `window.open` in the test harness. `linkOpenTarget` maps clicks: plain click edits, Ctrl/Cmd+click `tab`, middle-click (`auxclick`) `tabshifted`, Shift+click `window`.

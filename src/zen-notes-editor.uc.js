@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Editor
-// @version         2.5.1
+// @version         2.6.0-beta.1
 // @description     Block editor, selection mapping, formatting, and undo for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -164,6 +164,7 @@
         if (attrs.href) {
           const link = createElement("a");
           link.setAttribute("href", attrs.href);
+          link.setAttribute("title", `${attrs.href}\nCtrl+click to open`);
           link.appendChild(leaf);
           leaf = link;
         }
@@ -817,14 +818,29 @@
         updateBlock(idx, next, getSelectionPoint());
       } else {
         const anchor = target.closest?.("a[href]");
-        if (anchor) {
-          event.preventDefault();
-          try {
-            const url = new URL(anchor.href);
-            if (["http:", "https:", "mailto:"].includes(url.protocol)) window.open(url.href, "_blank");
-          } catch (_) {}
-        }
+        if (anchor) openAnchor(event, anchor);
       }
+    }
+    /** Opens a link in a browser tab. `window.open` from chrome would try a new window, so use Firefox's helper. */
+    function openLink(url, where) {
+      try {
+        if (typeof window.openWebLinkIn === "function") window.openWebLinkIn(url, where);
+        else window.open(url, "_blank");
+      } catch (error) {
+        console.warn("[ZenNotes] Could not open link:", error);
+      }
+    }
+    function openAnchor(event, anchor) {
+      event.preventDefault();
+      const where = MODEL.linkOpenTarget(event);
+      const url = MODEL.safeLinkUrl(anchor.getAttribute("href"));
+      if (where && url) openLink(url, where);
+    }
+    /** Middle-click fires auxclick, not click. */
+    function onAuxClick(event) {
+      if (event.button !== 1) return;
+      const anchor = event.target.closest?.("a[href]");
+      if (anchor) openAnchor(event, anchor);
     }
     function onCompositionStart() {
       composition = true;
@@ -904,6 +920,7 @@
     editor.addEventListener("beforeinput", onBeforeInput);
     editor.addEventListener("input", onInput);
     editor.addEventListener("click", onClick);
+    editor.addEventListener("auxclick", onAuxClick);
     editor.addEventListener("paste", onPaste);
     editor.addEventListener("scroll", positionSlashMenu);
     doc.defaultView.addEventListener("resize", positionSlashMenu);
@@ -949,6 +966,7 @@
         editor.removeEventListener("beforeinput", onBeforeInput);
         editor.removeEventListener("input", onInput);
         editor.removeEventListener("click", onClick);
+        editor.removeEventListener("auxclick", onAuxClick);
         if (systemGroupAttached) {
           try {
             editor.removeEventListener("keydown", onSystemGroupKeydown, { mozSystemGroup: true });

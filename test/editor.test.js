@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const vm = require("node:vm");
 const { parseHTML } = require("linkedom");
 
-function makeEditor() {
+function makeEditor(extraWindow = {}) {
   const { document } = parseHTML("<html><body><div id='editor'></div></body></html>");
   const ns = {
     createId: (prefix) => `${prefix}-${Math.random().toString(36).slice(2)}`,
@@ -15,6 +15,7 @@ function makeEditor() {
     const source = fs.readFileSync(new URL(`../${file}`, `file://${__filename}`), "utf8");
     vm.runInNewContext(source, {
       window: {
+        ...extraWindow,
         ZenNotes: ns,
         prompt() {
           return "";
@@ -256,5 +257,54 @@ test("focusing and leaving the editor does not report a change", () => {
   });
   editor.dispatchEvent(new editor.ownerDocument.defaultView.Event("blur"));
   assert.equal(changes, 0);
+  editorApi.cleanup();
+});
+
+function clickLink(editor, init) {
+  const anchor = editor.querySelector("a");
+  const view = editor.ownerDocument.defaultView;
+  const event = new view.Event(init.type || "click", { bubbles: true, cancelable: true });
+  Object.assign(event, { button: 0, ctrlKey: false, metaKey: false, shiftKey: false }, init);
+  anchor.dispatchEvent(event);
+  return event;
+}
+
+test("links open in tabs via openWebLinkIn; a plain click only edits", () => {
+  const opened = [];
+  const { api, editor } = makeEditor({ openWebLinkIn: (...args) => opened.push(args) });
+  const block = api.createBlock("paragraph", {
+    id: "p",
+    text: [{ t: "see " }, { t: "site", href: "https://example.com/a" }],
+  });
+  const editorApi = api.createBlockEditor(editor, [block]);
+  assert.match(editor.querySelector("a").getAttribute("title"), /Ctrl\+click/);
+
+  const plain = clickLink(editor, {});
+  assert.equal(plain.defaultPrevented, true);
+  assert.equal(opened.length, 0);
+
+  clickLink(editor, { ctrlKey: true });
+  clickLink(editor, { metaKey: true });
+  clickLink(editor, { shiftKey: true });
+  clickLink(editor, { type: "auxclick", button: 1 });
+  assert.deepEqual(opened, [
+    ["https://example.com/a", "tab"],
+    ["https://example.com/a", "tab"],
+    ["https://example.com/a", "window"],
+    ["https://example.com/a", "tabshifted"],
+  ]);
+  editorApi.cleanup();
+});
+
+test("unsafe links are never opened", () => {
+  const opened = [];
+  const { api, editor } = makeEditor({ openWebLinkIn: (...args) => opened.push(args) });
+  const block = api.createBlock("paragraph", { id: "p", text: [{ t: "x", href: "javascript:alert(1)" }] });
+  const editorApi = api.createBlockEditor(editor, [block]);
+  if (editor.querySelector("a")) clickLink(editor, { ctrlKey: true });
+  editor.innerHTML =
+    '<div data-block-id="p"><div class="zen-notes-block-content"><a href="javascript:alert(1)">x</a></div></div>';
+  clickLink(editor, { ctrlKey: true });
+  assert.equal(opened.length, 0);
   editorApi.cleanup();
 });

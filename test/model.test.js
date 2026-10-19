@@ -188,3 +188,17 @@ test("placeMenu opens below, flips above near the bottom, and stays inside the v
   assert.ok(tight.maxHeight <= 320);
   assert.ok(tight.top >= 0);
 });
+
+test("link helpers: only http(s)/mailto open, and click modifiers pick the target", () => {
+  const api = loadModel();
+  assert.equal(api.safeLinkUrl("https://example.com/x"), "https://example.com/x");
+  assert.equal(api.safeLinkUrl("mailto:a@b.co"), "mailto:a@b.co");
+  assert.equal(api.safeLinkUrl("javascript:alert(1)"), null);
+  assert.equal(api.safeLinkUrl("not a url"), null);
+  assert.equal(api.linkOpenTarget({}), null);
+  assert.equal(api.linkOpenTarget({ ctrlKey: true }), "tab");
+  assert.equal(api.linkOpenTarget({ metaKey: true }), "tab");
+  assert.equal(api.linkOpenTarget({ shiftKey: true }), "window");
+  assert.equal(api.linkOpenTarget({ button: 1 }), "tabshifted");
+  assert.equal(api.linkOpenTarget({ button: 2 }), null);
+});

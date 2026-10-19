@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Model
-// @version         2.5.1
+// @version         2.6.0-beta.1
 // @description     Block document model and HTML migration helpers for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -493,7 +493,32 @@
     return { top, left, maxHeight: Math.min(room, maxHeight), placement };
   }
 
+  /** Returns the href only when it is a link scheme we are willing to open, else null. */
+  function safeLinkUrl(href) {
+    try {
+      const url = new URL(href);
+      return ["http:", "https:", "mailto:"].includes(url.protocol) ? url.href : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /**
+   * Where a click on a link should open, in `openWebLinkIn` terms, or null to just place the caret.
+   * Plain click edits the link text; Ctrl/Cmd+click opens a tab, middle-click a background tab,
+   * Shift+click a window.
+   */
+  function linkOpenTarget({ button = 0, ctrlKey = false, metaKey = false, shiftKey = false } = {}) {
+    if (button === 1) return "tabshifted";
+    if (button !== 0) return null;
+    if (ctrlKey || metaKey) return "tab";
+    if (shiftKey) return "window";
+    return null;
+  }
+
   Object.assign(window.ZenNotes, {
+    safeLinkUrl,
+    linkOpenTarget,
     backspaceAtStart,
     deleteForwardAtEnd,
     placeMenu,
