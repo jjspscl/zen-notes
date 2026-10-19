@@ -5,7 +5,7 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.0-beta.1] — 2026-10-19
+## [2.5.2] — 2026-10-19
 
 ### Fixed
 - Links now open in a browser tab. The editor used `window.open`, which from browser chrome tries a new window and silently fails; it now uses `openWebLinkIn`.

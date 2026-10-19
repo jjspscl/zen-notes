@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes UI
-// @version         2.6.0-beta.1
+// @version         2.5.2
 // @description     Sidebar widget shell, storage lifecycle, and focus-scoped controls for Zen Notes
 // @author          jjspscl
 // @include         main

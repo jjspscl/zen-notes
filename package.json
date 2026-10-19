@@ -1,6 +1,6 @@
 {
   "name": "zen-notes-mod",
-  "version": "2.6.0-beta.1",
+  "version": "2.5.2",
   "private": true,
   "description": "Zen Notes: a block-based sticky-notes widget for Zen Browser, distributed through Sine",
   "scripts": {

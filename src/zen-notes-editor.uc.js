@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Editor
-// @version         2.6.0-beta.1
+// @version         2.5.2
 // @description     Block editor, selection mapping, formatting, and undo for Zen Notes
 // @author          jjspscl
 // @include         main

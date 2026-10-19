@@ -1,6 +1,6 @@
 # Zen Notes — Roadmap
 
-Current: **v2.6.0-beta.1** — stable block editor with the sticky-note theme, atomic file storage, modernized tooling and layout.
+Current: **v2.5.2** — stable block editor with the sticky-note theme, atomic file storage, modernized tooling and layout.
 
 ## 2.5.0 stable
 - [x] Validated in Zen via Sine: persistence, select-all/replace, block types, slash menu, backspace behaviour
