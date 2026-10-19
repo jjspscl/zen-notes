@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Editor
-// @version         2.5.0-beta.8
+// @version         2.5.0-beta.9
 // @description     Block editor, selection mapping, formatting, and undo for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -333,27 +333,81 @@
       );
       return MODEL.createBlock(block.type, { ...block, text: nextText ? [{ t: nextText }] : [] });
     }
+    function getCaretRect() {
+      const selection = doc.defaultView.getSelection?.();
+      if (!selection?.rangeCount) return null;
+      const range = selection.getRangeAt(0).cloneRange();
+      range.collapse(false);
+      let rect = range.getClientRects?.()[0];
+      if (!rect || (rect.top === 0 && rect.bottom === 0)) {
+        const node = range.startContainer.nodeType === 3 ? range.startContainer.parentElement : range.startContainer;
+        rect = node?.closest?.("[data-block-id]")?.getBoundingClientRect?.();
+      }
+      return rect || null;
+    }
     function closeSlashMenu() {
-      if (slashMenu) slashMenu.remove();
+      if (slashMenu) {
+        try {
+          slashMenu.hidePopover?.();
+        } catch (_) {}
+        slashMenu.remove();
+      }
       slashMenu = null;
       slashBlockId = "";
+      editor.removeAttribute("aria-activedescendant");
+      editor.removeAttribute("aria-controls");
+      editor.removeAttribute("aria-expanded");
+    }
+    /** Places the open menu at the caret, flipping above when there is no room below. */
+    function positionSlashMenu() {
+      if (!slashMenu) return;
+      const anchor = getCaretRect();
+      if (!anchor) return;
+      const view = doc.defaultView;
+      slashMenu.style.maxHeight = "";
+      const natural = slashMenu.getBoundingClientRect();
+      const spot = MODEL.placeMenu(
+        anchor,
+        { width: natural.width, height: natural.height },
+        { width: view.innerWidth, height: view.innerHeight },
+      );
+      slashMenu.style.left = `${spot.left}px`;
+      slashMenu.style.top = `${spot.top}px`;
+      slashMenu.style.maxHeight = `${spot.maxHeight}px`;
+      slashMenu.dataset.placement = spot.placement;
+    }
+    function setSlashActive(index) {
+      if (!slashMenu) return;
+      const items = Array.from(slashMenu.children);
+      if (!items.length) return;
+      slashActive = (index + items.length) % items.length;
+      items.forEach((item, i) => {
+        if (i === slashActive) item.dataset.active = "true";
+        else delete item.dataset.active;
+      });
+      const active = items[slashActive];
+      editor.setAttribute("aria-activedescendant", active.id);
+      active.scrollIntoView?.({ block: "nearest" });
     }
     function openSlashMenu(block, query = "") {
       closeSlashMenu();
-      slashBlockId = block.id;
-      slashMenu = createElement("div");
-      slashMenu.className = "zen-notes-slash-menu";
-      slashMenu.setAttribute("role", "listbox");
       const filtered = TYPE_LABELS.filter(([type, label]) =>
         `${type} ${label}`.toLowerCase().includes(query.toLowerCase()),
       );
-      filtered.forEach(([type, label], index) => {
+      if (!filtered.length) return;
+      slashBlockId = block.id;
+      slashMenu = createElement("div");
+      slashMenu.className = "zen-notes-slash-menu";
+      slashMenu.id = "zen-notes-slash-menu";
+      slashMenu.setAttribute("role", "listbox");
+      slashMenu.setAttribute("popover", "manual");
+      filtered.forEach(([type, label]) => {
         const item = createElement("div");
         item.className = "zen-notes-slash-item";
+        item.id = `zen-notes-slash-${type}`;
         item.dataset.type = type;
         item.setAttribute("role", "option");
         item.textContent = label;
-        if (index === slashActive) item.dataset.active = "true";
         item.addEventListener("mousedown", (event) => {
           event.preventDefault();
           chooseSlashType(type, query);
@@ -361,6 +415,14 @@
         slashMenu.appendChild(item);
       });
       (editor.parentElement || editor).appendChild(slashMenu);
+      // Popovers render in the top layer, so no ancestor (sidebar, widget) can clip the menu.
+      try {
+        slashMenu.showPopover?.();
+      } catch (_) {}
+      editor.setAttribute("aria-controls", slashMenu.id);
+      editor.setAttribute("aria-expanded", "true");
+      setSlashActive(Math.min(slashActive, filtered.length - 1));
+      positionSlashMenu();
     }
     function maybeShowSlash(block, _point) {
       const text = MODEL.getPlainText(block);
@@ -371,12 +433,35 @@
       }
       slashActive = 0;
       openSlashMenu(block, match[1]);
-      const row = getBlockEl(block.id);
-      const rect = row?.getBoundingClientRect();
-      if (rect && slashMenu) {
-        slashMenu.style.top = `${rect.bottom}px`;
-        slashMenu.style.left = `${rect.left}px`;
+    }
+    /** Handles menu keys while it is open; focus stays in the editor so typing keeps filtering. */
+    function handleSlashKey(event) {
+      if (!slashMenu) return false;
+      const key = event.key;
+      const consume = () => {
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+      };
+      if (key === "ArrowDown") {
+        setSlashActive(slashActive + 1);
+        return consume();
       }
+      if (key === "ArrowUp") {
+        setSlashActive(slashActive - 1);
+        return consume();
+      }
+      if (key === "Enter" || key === "Tab") {
+        const active = slashMenu.querySelector('[data-active="true"]') || slashMenu.firstElementChild;
+        if (active) chooseSlashType(active.dataset.type);
+        return consume();
+      }
+      if (key === "Escape") {
+        closeSlashMenu();
+        return consume();
+      }
+      if (["ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"].includes(key)) closeSlashMenu();
+      return false;
     }
     function chooseSlashType(type, _query = "") {
       const index = blocksState.findIndex((block) => block.id === slashBlockId);
@@ -440,35 +525,10 @@
       if ((backwards && current.point.offset !== 0) || (!backwards && current.point.offset !== textLength)) return;
       event.preventDefault();
       closeSlashMenu();
-      const adjacent = current.index + (backwards ? -1 : 1);
-      if (adjacent < 0 || adjacent >= blocksState.length) {
-        if (current.block.indent > 0) updateBlock(current.index, MODEL.outdentBlock(current.block), current.point);
-        else if (backwards && ["bullet", "numbered", "todo"].includes(current.block.type))
-          updateBlock(current.index, MODEL.changeBlockType(current.block, "paragraph"), current.point);
-        return;
-      }
-      const other = blocksState[adjacent];
-      if (current.block.type === "divider") {
-        const next = blocksState.slice();
-        next.splice(current.index, 1);
-        mutate(next, { blockId: other.id, offset: backwards ? MODEL.getPlainText(other).length : 0 });
-        return;
-      }
-      const first = backwards ? other : current.block;
-      const second = backwards ? current.block : other;
-      const firstIndex = Math.min(current.index, adjacent);
-      if (first.indent !== second.indent || first.type !== second.type) {
-        if (backwards && current.block.indent > 0)
-          updateBlock(current.index, MODEL.outdentBlock(current.block), current.point);
-        else if (backwards && ["bullet", "numbered", "todo"].includes(current.block.type) && other.type === "paragraph")
-          updateBlock(current.index, MODEL.changeBlockType(current.block, "paragraph"), current.point);
-        return;
-      }
-      const merged = MODEL.mergeBlocks(first, second);
-      const next = blocksState.slice();
-      next.splice(firstIndex, 2, merged);
-      const offset = backwards ? MODEL.getPlainText(first).length : current.point.offset;
-      mutate(next, { blockId: merged.id, offset });
+      const result = backwards
+        ? MODEL.backspaceAtStart(blocksState, current.index)
+        : MODEL.deleteForwardAtEnd(blocksState, current.index);
+      if (result) mutate(result.blocks, result.caret);
     }
     function deleteSelection(event, insertedText = "") {
       const selected = getSelectedPoints();
@@ -605,30 +665,8 @@
     let systemGroupAttached = false;
     function onKeydown(event) {
       if (!editor.contains(doc.activeElement)) return;
+      if (handleSlashKey(event)) return;
       if (handleCaretNavigation(event)) return;
-      if (slashMenu) {
-        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-          event.preventDefault();
-          const items = Array.from(slashMenu.children);
-          if (!items.length) return;
-          slashActive = (slashActive + (event.key === "ArrowDown" ? 1 : items.length - 1)) % items.length;
-          items.forEach((item, index) => {
-            item.toggleAttribute("data-active", index === slashActive);
-          });
-          return;
-        }
-        if (event.key === "Enter") {
-          event.preventDefault();
-          const active = slashMenu.querySelector('[data-active="true"]') || slashMenu.firstElementChild;
-          if (active) chooseSlashType(active.dataset.type);
-          return;
-        }
-        if (event.key === "Escape") {
-          event.preventDefault();
-          closeSlashMenu();
-          return;
-        }
-      }
       if ((event.ctrlKey || event.metaKey) && !event.altKey) {
         const key = event.key.toLowerCase();
         if (key === "z") {
@@ -727,13 +765,7 @@
       try {
         const selection = doc.defaultView.getSelection?.();
         if (!selection?.rangeCount || !editor.contains(selection.anchorNode)) return;
-        const range = selection.getRangeAt(0).cloneRange();
-        range.collapse(false);
-        let rect = range.getClientRects?.()[0];
-        if (!rect || (rect.top === 0 && rect.bottom === 0)) {
-          const node = range.startContainer.nodeType === 3 ? range.startContainer.parentElement : range.startContainer;
-          rect = node?.closest?.("[data-block-id]")?.getBoundingClientRect?.();
-        }
+        const rect = getCaretRect();
         if (!rect) return;
         const delta = MODEL.scrollDeltaForCaret(rect, editor.getBoundingClientRect(), CARET_MARGIN);
         if (delta) editor.scrollTop += delta;
@@ -873,6 +905,8 @@
     editor.addEventListener("input", onInput);
     editor.addEventListener("click", onClick);
     editor.addEventListener("paste", onPaste);
+    editor.addEventListener("scroll", positionSlashMenu);
+    doc.defaultView.addEventListener("resize", positionSlashMenu);
     editor.addEventListener("compositionstart", onCompositionStart);
     editor.addEventListener("compositionend", onCompositionEnd);
     editor.addEventListener("blur", onBlur);
@@ -921,6 +955,8 @@
           } catch (_) {}
         }
         editor.removeEventListener("paste", onPaste);
+        editor.removeEventListener("scroll", positionSlashMenu);
+        doc.defaultView.removeEventListener("resize", positionSlashMenu);
         editor.removeEventListener("compositionstart", onCompositionStart);
         editor.removeEventListener("compositionend", onCompositionEnd);
         editor.removeEventListener("blur", onBlur);

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Model
-// @version         2.5.0-beta.8
+// @version         2.5.0-beta.9
 // @description     Block document model and HTML migration helpers for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -422,7 +422,81 @@
     return [left, atHeadingEnd ? changeBlockType(right, "paragraph") : right];
   }
 
+  const textLen = (block) => getPlainText(block).length;
+
+  /**
+   * Backspace with the caret at the start of blocks[index]. Returns `{ blocks, caret }` or null.
+   * Order: dividers vanish, nested blocks outdent, typed blocks become paragraphs, then a paragraph
+   * merges into the block above (which keeps its own type), or deletes a divider above it.
+   */
+  function backspaceAtStart(blocks, index) {
+    const block = blocks[index];
+    if (!block) return null;
+    const next = blocks.slice();
+    const prev = blocks[index - 1];
+    if (block.type === "divider") {
+      next.splice(index, 1);
+      const target = prev || next[0];
+      if (!target) return null;
+      return { blocks: next, caret: { blockId: target.id, offset: prev ? textLen(prev) : 0 } };
+    }
+    if (block.indent > 0) {
+      next[index] = outdentBlock(block);
+      return { blocks: next, caret: { blockId: block.id, offset: 0 } };
+    }
+    if (block.type !== "paragraph") {
+      next[index] = changeBlockType(block, "paragraph");
+      return { blocks: next, caret: { blockId: block.id, offset: 0 } };
+    }
+    if (!prev) return null;
+    if (prev.type === "divider") {
+      next.splice(index - 1, 1);
+      return { blocks: next, caret: { blockId: block.id, offset: 0 } };
+    }
+    const merged = mergeBlocks(prev, block);
+    next.splice(index - 1, 2, merged);
+    return { blocks: next, caret: { blockId: merged.id, offset: textLen(prev) } };
+  }
+
+  /** Delete with the caret at the end of blocks[index]: pulls the next block's text in, or removes a divider. */
+  function deleteForwardAtEnd(blocks, index) {
+    const block = blocks[index];
+    const following = blocks[index + 1];
+    if (!block || !following) return null;
+    const next = blocks.slice();
+    if (following.type === "divider") {
+      next.splice(index + 1, 1);
+      return { blocks: next, caret: { blockId: block.id, offset: textLen(block) } };
+    }
+    if (block.type === "divider") {
+      next.splice(index, 1);
+      return { blocks: next, caret: { blockId: following.id, offset: 0 } };
+    }
+    const merged = mergeBlocks(block, following);
+    next.splice(index, 2, merged);
+    return { blocks: next, caret: { blockId: merged.id, offset: textLen(block) } };
+  }
+
+  /**
+   * Places a floating menu of `size` {width,height} next to an `anchor` rect {left,top,bottom} inside
+   * `viewport` {width,height}. Prefers below the anchor, flips above when there is more room there,
+   * clamps horizontally and returns a max height so the menu never leaves the viewport.
+   */
+  function placeMenu(anchor, size, viewport, { gap = 4, margin = 8, maxHeight = 260 } = {}) {
+    const below = viewport.height - anchor.bottom - gap - margin;
+    const above = anchor.top - gap - margin;
+    const placement = size.height <= below || below >= above ? "below" : "above";
+    const room = Math.max(0, placement === "below" ? below : above);
+    const height = Math.min(size.height, room, maxHeight);
+    const top = placement === "below" ? anchor.bottom + gap : anchor.top - gap - height;
+    const left = Math.max(margin, Math.min(anchor.left, viewport.width - size.width - margin));
+    return { top, left, maxHeight: Math.min(room, maxHeight), placement };
+  }
+
   Object.assign(window.ZenNotes, {
+    backspaceAtStart,
+    deleteForwardAtEnd,
+    placeMenu,
     scrollDeltaForCaret,
     splitOnEnter,
     BLOCK_TYPES: TYPE_SET,

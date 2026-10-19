@@ -5,6 +5,13 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0-beta.9] — 2026-10-19
+
+### Fixed
+- Slash menu is a top-layer popover, so the widget or sidebar can no longer clip it; it opens at the caret, flips above when there is no room below, and stays inside the window (`placeMenu`).
+- Slash menu keyboard: Up/Down move the highlight (it was overridden by caret navigation and never matched the "active" style), Enter/Tab choose the highlighted item, Escape closes; focus stays in the editor so typing keeps filtering. ARIA `activedescendant` exposes the highlighted item.
+- Backspace at the start of a block: empty line after a heading returns the caret to the end of the heading; a paragraph merges into the block above (keeping its type); nested and typed blocks step down first; a divider above is removed. Delete at the end merges the next block.
+
 ## [2.5.0-beta.8] — 2026-10-19
 
 ### Changed

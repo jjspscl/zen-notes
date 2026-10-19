@@ -1,4 +1,4 @@
-/* Zen Notes Widget — v2.5.0-beta.8
+/* Zen Notes Widget — v2.5.0-beta.9
  *
  * Structure: tokens -> palettes -> shell -> header -> toolbar -> editor -> blocks -> footer -> menus.
  * Everything lives under #zen-notes-widget (native nesting) so it cannot leak into Zen chrome.
@@ -781,19 +781,25 @@
 
   /* ── Slash menu ──────────────────────────────────────────── */
   & .zen-notes-slash-menu {
+    /* A popover lives in the top layer: reset its UA centering and place it with left/top from the editor. */
     position: fixed;
-    z-index: 2147483647;
+    inset: auto;
+    margin: 0;
+    box-sizing: border-box;
     min-inline-size: 150px;
     max-inline-size: min(240px, 80vw);
-    max-block-size: 220px;
+    max-block-size: 260px;
     padding: var(--zn-space-1);
-    overflow: auto;
+    overflow: hidden auto;
     border: 1px solid color-mix(in srgb, var(--zn-border) 70%, transparent);
     border-radius: var(--zn-radius);
     color: var(--zn-text);
     background: var(--zn-bg);
     box-shadow: 0 8px 24px rgb(0 0 0 / 25%);
     font-size: 12.5px;
+    scrollbar-width: thin;
+    -moz-user-select: none;
+    user-select: none;
   }
   & .zen-notes-slash-item {
     padding: 6px var(--zn-space-2);
