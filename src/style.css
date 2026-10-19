@@ -1,4 +1,4 @@
-/* Zen Notes Widget — v2.5.0
+/* Zen Notes Widget — v2.5.1
  *
  * Structure: tokens -> palettes -> shell -> header -> toolbar -> editor -> blocks -> footer -> menus.
  * Everything lives under #zen-notes-widget (native nesting) so it cannot leak into Zen chrome.

@@ -6,3 +6,4 @@ Thumbs.db
 dist/
 *.zip
 coverage/
+*:Zone.Identifier

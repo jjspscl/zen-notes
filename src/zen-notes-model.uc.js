@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Model
-// @version         2.5.0
+// @version         2.5.1
 // @description     Block document model and HTML migration helpers for Zen Notes
 // @author          jjspscl
 // @include         main

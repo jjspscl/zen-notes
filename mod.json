@@ -1,8 +1,8 @@
 {
   "name": "zen-notes-widget",
   "displayName": "Zen Notes Widget",
-  "version": "2.5.0",
-  "description": "A block-based notes widget for the Zen Browser sidebar with nested lists and atomic local storage",
+  "version": "2.5.1",
+  "description": "Sticky notes in your Zen sidebar: blocks, lists, to-dos, / commands and 17 colour themes",
   "author": "jjspscl",
   "license": "MIT",
   "compatibility": {

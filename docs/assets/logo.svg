@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="262 231 725 790" role="img" aria-labelledby="title description">
+  <title id="title">Zen Notes — standalone icon</title>
+  <desc id="description">Cream note with a coral folded corner and a sweeping charcoal ink stroke, on a transparent background.</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFBF2"/>
+      <stop offset="1" stop-color="#F3ECDD"/>
+    </linearGradient>
+    <linearGradient id="coral" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F97862"/>
+      <stop offset="1" stop-color="#F26854"/>
+    </linearGradient>
+    <linearGradient id="fold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F87661"/>
+      <stop offset="1" stop-color="#EB654F"/>
+    </linearGradient>
+  </defs>
+  
+  <g id="zen-notes-mark">
+
+  <!-- Ivory note page -->
+  <path d="M 426 271
+           H 748
+           L 947 477
+           V 851
+           C 947 923 890 981 818 981
+           H 427
+           C 357 981 302 925 302 852
+           V 397
+           C 302 328 358 271 426 271 Z"
+        fill="url(#paper)"/>
+
+  <!-- Pale typesetting marks -->
+  <g fill="#DFC9B9">
+    <rect x="409" y="418" width="207" height="27" rx="13.5"/>
+    <rect x="409" y="500" width="207" height="27" rx="13.5"/>
+    <rect x="409" y="582" width="137" height="27" rx="13.5"/>
+  </g>
+
+  <!-- Flowing coral ink/leaf section -->
+  <path d="M 947 477
+           V 851
+           C 947 923 890 981 818 981
+           H 532
+           C 507 945 494 900 494 855
+           C 493 758 551 678 672 649
+           C 786 621 879 582 947 477 Z"
+        fill="url(#coral)"/>
+
+  <!-- Tiny page edge coming out from under folded top-right corner -->
+  <path d="M 947 476
+           C 939 501 926 522 907 540
+           C 925 519 938 499 947 476 Z" fill="#FFF9EB"/>
+
+  <!-- The page fold: curved flap, coral top-right -->
+  <path d="M 748 271
+           L 748 410
+           C 748 450 779 478 820 478
+           H 947
+           C 947 465 941 456 931 446
+           L 773 286
+           C 764 276 758 271 748 271 Z"
+        fill="url(#fold)"/>
+  <!-- Very subtle seam under fold -->
+  <path d="M 749 410 C 751 455 781 480 821 480 H 945"
+        fill="none" stroke="#A95745" stroke-opacity=".12" stroke-width="5"/>
+
+  <!-- Original hand-flowing ink stroke, widening at the pen tip -->
+  <path d="M 533 981
+           C 530 920 554 875 610 843
+           C 664 811 731 778 794 725
+           L 855 666
+           C 866 654 880 654 887 666
+           C 892 678 887 687 877 698
+           C 802 780 722 820 644 861
+           C 578 895 548 934 551 981 Z"
+        fill="#20252B"/>
+
+  </g>
+</svg>

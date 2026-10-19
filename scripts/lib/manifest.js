@@ -6,6 +6,7 @@ const path = require("node:path");
 const ROOT = path.resolve(__dirname, "..", "..");
 
 const read = (file) => fs.readFileSync(path.join(ROOT, file), "utf8");
+const readBytes = (file) => fs.readFileSync(path.join(ROOT, file));
 const readJson = (file) => JSON.parse(read(file));
 const exists = (file) => fs.existsSync(path.join(ROOT, file));
 
@@ -22,4 +23,4 @@ function scriptMap(scripts = readJson("theme.json").scripts, prefix = "") {
 
 const scriptFiles = () => Object.keys(scriptMap());
 
-module.exports = { ROOT, read, readJson, exists, scriptMap, scriptFiles };
+module.exports = { ROOT, read, readBytes, readJson, exists, scriptMap, scriptFiles };

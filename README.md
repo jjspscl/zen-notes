@@ -1,9 +1,15 @@
+<p align="center">
+  <img src="docs/assets/logo.svg" width="96" alt="Zen Notes logo">
+</p>
+
 # Zen Notes
 
 A sticky-note style, block-based notes widget for [Zen Browser](https://zen-browser.app/). It sits in the sidebar above the workspace buttons, holds one note, and saves it to your profile. Distributed as a [Sine](https://github.com/CosmoCreeper/Sine) mod.
 
-![Version](https://img.shields.io/badge/version-2.5.0-blue)
+![Version](https://img.shields.io/badge/version-2.5.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
+
+![Zen Notes themes](docs/assets/store.png)
 
 ![Zen Notes demo](docs/demo.gif)
 

@@ -5,6 +5,12 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] — 2026-10-19
+
+### Changed
+- Store listing: new description and tags, a 16:9 store image (`docs/assets/store.png`, loaded from `main`), and an SVG logo (`docs/assets/logo.svg`) in the README.
+- `scripts/validate.js` now checks the store image (path, size under 600 KB, 16:9), the description length (100 characters or fewer) and the logo.
+
 ## [2.5.0] — 2026-10-19
 
 First stable release of the block editor. Everything in the 2.5.0 betas below ships here; highlights:

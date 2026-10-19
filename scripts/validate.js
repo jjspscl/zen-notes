@@ -5,7 +5,7 @@
  * version sync, Sine theme.json shape, UserScript headers, CSS block balance.
  */
 
-const { read, readJson, exists, scriptFiles, scriptMap } = require("./lib/manifest");
+const { read, readBytes, readJson, exists, scriptFiles, scriptMap } = require("./lib/manifest");
 
 const REPO_URL = "https://github.com/jjspscl/zen-notes";
 const HEADER_FIELDS = ["name", "version", "description", "author", "include", "run-at"];
@@ -33,9 +33,33 @@ function checkTheme(theme) {
     if (!meta.include?.length) fail(`theme.json: script "${file}" needs a non-empty include list`);
     if (!exists(file)) fail(`theme.json: script "${file}" not found on disk`);
   }
+  checkStoreListing(theme);
   for (const file of [theme.style?.chrome, theme.preferences, "README.md"]) {
     if (file && !exists(file)) fail(`theme.json references missing file: ${file}`);
   }
+}
+
+/** The Sine store shows `image` (16:9, loaded from main) and a short description. */
+function checkStoreListing(theme) {
+  const IMAGE_PREFIX = `${REPO_URL.replace("github.com", "raw.githubusercontent.com")}/main/`;
+  if (!theme.image?.startsWith(IMAGE_PREFIX)) fail(`theme.json image must be a raw URL under ${IMAGE_PREFIX}`);
+  else {
+    const file = theme.image.slice(IMAGE_PREFIX.length);
+    if (!exists(file)) fail(`theme.json image file not found: ${file}`);
+    else {
+      const bytes = readBytes(file);
+      if (bytes.length > 600 * 1024)
+        fail(`${file} is ${(bytes.length / 1024).toFixed(0)} KB; keep store images under 600 KB`);
+      if (file.endsWith(".png")) {
+        const width = bytes.readUInt32BE(16);
+        const height = bytes.readUInt32BE(20);
+        if (Math.abs(width / height - 16 / 9) > 0.01) fail(`${file} is ${width}x${height}; the store expects 16:9`);
+      }
+    }
+  }
+  if ((theme.description || "").length > 100) fail("theme.json description must be 100 characters or fewer");
+  if (!exists("docs/assets/logo.svg")) fail("docs/assets/logo.svg is missing");
+  else if (!/viewBox=/.test(read("docs/assets/logo.svg"))) fail("docs/assets/logo.svg needs a viewBox");
 }
 
 function checkVersions(theme) {
