@@ -5,6 +5,11 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0-beta.5] — 2026-10-19
+
+### Changed
+- Empty-block hints ("Type / for commands…", "Heading", "To-do") hide while the editor is focused and return when it loses focus.
+
 ## [2.5.0-beta.4] — 2026-10-19
 
 ### Fixed

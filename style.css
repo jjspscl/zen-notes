@@ -592,6 +592,8 @@
 #zen-notes-widget .zen-notes-block[data-empty="true"]:only-child .zen-notes-block-content::before { content: "Type / for commands…"; }
 #zen-notes-widget .zen-notes-block[data-empty="true"][data-type^="heading"] .zen-notes-block-content::before { content: "Heading"; }
 #zen-notes-widget .zen-notes-block[data-empty="true"][data-type="todo"] .zen-notes-block-content::before { content: "To-do"; }
+/* Hints only show while the editor is unfocused */
+#zen-notes-widget .zen-notes-editor:focus-within .zen-notes-block[data-empty="true"] .zen-notes-block-content::before { content: none; }
 #zen-notes-widget .zen-notes-block[data-type="heading1"] { font-size: 16px; line-height: 1.3; font-weight: 700; margin-top: 0.55em; }
 #zen-notes-widget .zen-notes-block[data-type="heading2"] { font-size: 14px; line-height: 1.35; font-weight: 700; margin-top: 0.45em; }
 #zen-notes-widget .zen-notes-block[data-type="heading3"] { font-size: 13px; line-height: 1.4; font-weight: 650; margin-top: 0.35em; }
