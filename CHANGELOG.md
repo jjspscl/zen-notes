@@ -5,6 +5,23 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] — 2026-10-19
+
+First stable release of the block editor. Everything in the 2.5.0 betas below ships here; highlights:
+
+### Added
+- Block editor: paragraphs, headings, bullet/numbered/to-do lists (nested), toggles, quotes, callouts, dividers, code; inline bold/italic/underline/strike/code/links; `/` menu, markdown shortcuts, Tab indent, Alt+Shift+Up/Down.
+- Sticky-note default theme (yellow) plus an amber dark variant and 15 more palettes; one palette list drives the settings and styling.
+- Atomic `notes.json` storage with backups, cross-window sync and automatic migration of 2.4.x notes.
+- `docs/`, `llms.txt`, Biome tooling and `npm run check`.
+
+### Changed
+- Runtime moved to `src/`; the stylesheet was rewritten (nesting, tokens); the editor re-renders only changed blocks; the widget starts at browser idle.
+- The Appearance setting, workspace section and per-note colour were removed.
+
+### Notes
+- The v4 preference mirror (`zen.notes.data`) is kept so 2.4.x can still read notes, and is deprecated for removal in 2.6.
+
 ## [2.5.0-beta.9] — 2026-10-19
 
 ### Fixed

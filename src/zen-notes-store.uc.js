@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Store
-// @version         2.5.0-beta.9
+// @version         2.5.0
 // @description     Atomic file storage, migration, and window synchronization for Zen Notes
 // @author          jjspscl
 // @include         main

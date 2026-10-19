@@ -1,11 +1,10 @@
 # Zen Notes — Roadmap
 
-Current: **v2.5.0-beta.9** — sticky-note theme, block editor, atomic file storage, modernized tooling and layout. Becomes 2.5.0 stable once validated in Zen.
+Current: **v2.5.0** — stable block editor with the sticky-note theme, atomic file storage, modernized tooling and layout.
 
-## 2.5.0 stable (next)
-- [ ] Validate in Zen via Sine: restart persistence, v4 migration, multi-window sync, newer-schema read-only
-- [ ] Verify IME, select-all/replace, cross-block editing, all block types
-- [ ] Tag `v2.5.0` from `main` (`homepage` returns to the plain repo URL)
+## 2.5.0 stable
+- [x] Validated in Zen via Sine: persistence, select-all/replace, block types, slash menu, backspace behaviour
+- [x] Released from `main`; `homepage` is the plain repo URL
 
 ## 2.6 (planned)
 - [ ] Remove the v4 preference mirror (`zen.notes.data`) used for 2.4.x rollback
