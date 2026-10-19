@@ -1,4 +1,4 @@
-/* Zen Notes Widget — v2.5.0-beta.7
+/* Zen Notes Widget — v2.5.0-beta.8
  *
  * Structure: tokens -> palettes -> shell -> header -> toolbar -> editor -> blocks -> footer -> menus.
  * Everything lives under #zen-notes-widget (native nesting) so it cannot leak into Zen chrome.
@@ -21,12 +21,12 @@
   --zn-warning: #df8e1d;
   --zn-mono: ui-monospace, sfmono-regular, consolas, monospace;
 
-  /* Default palette: sticky note (light / dark follow color-scheme) */
-  --zn-bg: light-dark(#fff3a3, #3b3318);
-  --zn-text: light-dark(#4a3f00, #f6e7a1);
-  --zn-border: light-dark(#e3d067, #5c4f22);
-  --zn-surface: light-dark(#fbe984, #4a3f1d);
-  --zn-surface-strong: light-dark(#f1d85a, #5e5026);
+  /* Default palette: sticky note (light). Palettes override only these five tokens. */
+  --zn-bg: #fff3a3;
+  --zn-text: #4a3f00;
+  --zn-border: #e3d067;
+  --zn-surface: #fbe984;
+  --zn-surface-strong: #f1d85a;
 
   position: relative;
   display: flex;
@@ -42,7 +42,7 @@
   color: var(--zn-text);
   background: var(--zn-bg);
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
-  color-scheme: light dark;
+  color-scheme: light;
   font:
     12.5px "Inter",
     -apple-system,
@@ -57,10 +57,11 @@
   -moz-user-select: none;
   user-select: none;
 
-  &[data-appearance="light"] {
+  /* data-scheme comes from PALETTES in core; it keeps links, scrollbars and focus rings in tune with the palette */
+  &[data-scheme="light"] {
     color-scheme: light;
   }
-  &[data-appearance="dark"] {
+  &[data-scheme="dark"] {
     color-scheme: dark;
   }
   &:focus-within {
@@ -94,7 +95,7 @@
   }
 
   /* Sticky: warm shadow and a folded corner */
-  &[data-preset="sticky"] {
+  &[data-preset^="sticky"] {
     box-shadow:
       0 1px 1px rgb(120 90 0 / 18%),
       0 3px 8px rgb(120 90 0 / 14%);
@@ -119,6 +120,13 @@
   }
 
   /* ── Palettes ────────────────────────────────────────────── */
+  &[data-preset="sticky-dark"] {
+    --zn-bg: #3b3318;
+    --zn-text: #f6e7a1;
+    --zn-border: #5c4f22;
+    --zn-surface: #4a3f1d;
+    --zn-surface-strong: #5e5026;
+  }
   &[data-preset="catppuccin-latte"] {
     --zn-bg: #eff1f5;
     --zn-text: #4c4f69;
@@ -491,7 +499,8 @@
     min-inline-size: 0;
     min-block-size: 40px;
     max-block-size: 100%;
-    padding: var(--zn-space-1) var(--zn-space-1) var(--zn-space-1) 0;
+    padding: var(--zn-space-1) var(--zn-space-1) var(--zn-space-3) 0;
+    scroll-padding-block-end: 32px;
     overflow: hidden auto;
     border: 0;
     color: var(--zn-text);
@@ -509,10 +518,6 @@
 
     &[data-scroll-bottom="false"] {
       mask-image: linear-gradient(to bottom, black 0, black calc(100% - 24px), transparent 100%);
-    }
-    /* Hints show only while the editor is unfocused */
-    &:focus-within .zen-notes-block[data-empty="true"] .zen-notes-block-content::before {
-      content: none;
     }
     & a {
       color: light-dark(#1e66f5, #89b4fa);
@@ -548,21 +553,6 @@
     }
     &[data-indent="5"] {
       margin-inline-start: 80px;
-    }
-
-    /* Empty-block hints: shown only while the editor is unfocused */
-    &[data-empty="true"] .zen-notes-block-content::before {
-      opacity: 0.38;
-      pointer-events: none;
-    }
-    &[data-empty="true"]:only-child .zen-notes-block-content::before {
-      content: "Type / for commands…";
-    }
-    &[data-empty="true"][data-type^="heading"]:not(:only-child) .zen-notes-block-content::before {
-      content: "Heading";
-    }
-    &[data-empty="true"][data-type="todo"]:not(:only-child) .zen-notes-block-content::before {
-      content: "To-do";
     }
 
     &[data-type="heading1"] {
@@ -668,6 +658,22 @@
       border-radius: 3px;
       background: var(--zn-surface);
       font-family: var(--zn-mono);
+    }
+  }
+  /* Empty-block hints, shown only while the editor is unfocused */
+  & .zen-notes-editor:not(:focus-within) .zen-notes-block[data-empty="true"] {
+    & .zen-notes-block-content::before {
+      opacity: 0.38;
+      pointer-events: none;
+    }
+    &:only-child .zen-notes-block-content::before {
+      content: "Type / for commands…";
+    }
+    &[data-type^="heading"]:not(:only-child) .zen-notes-block-content::before {
+      content: "Heading";
+    }
+    &[data-type="todo"]:not(:only-child) .zen-notes-block-content::before {
+      content: "To-do";
     }
   }
   & .zen-notes-control {

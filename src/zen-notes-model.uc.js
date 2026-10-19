@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Model
-// @version         2.5.0-beta.7
+// @version         2.5.0-beta.8
 // @description     Block document model and HTML migration helpers for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -404,7 +404,27 @@
     return html.join("");
   }
 
+  /**
+   * How far (px) a scroll container must scroll so a caret rect sits inside `box` with `margin`
+   * clear of the bottom edge (room for the fade mask). Rects are `{ top, bottom }`.
+   */
+  function scrollDeltaForCaret(caret, box, margin = 32) {
+    const bottomLimit = box.bottom - margin;
+    if (caret.bottom > bottomLimit) return caret.bottom - bottomLimit;
+    if (caret.top < box.top) return caret.top - box.top;
+    return 0;
+  }
+
+  /** Splits a block for the Enter key. Enter at the end of a heading continues with plain text. */
+  function splitOnEnter(block, offset) {
+    const [left, right] = splitBlock(block, offset);
+    const atHeadingEnd = block.type.startsWith("heading") && offset >= getPlainText(block).length;
+    return [left, atHeadingEnd ? changeBlockType(right, "paragraph") : right];
+  }
+
   Object.assign(window.ZenNotes, {
+    scrollDeltaForCaret,
+    splitOnEnter,
     BLOCK_TYPES: TYPE_SET,
     MAX_BLOCK_INDENT: MAX_INDENT,
     createBlock,

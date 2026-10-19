@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Editor
-// @version         2.5.0-beta.7
+// @version         2.5.0-beta.8
 // @description     Block editor, selection mapping, formatting, and undo for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -236,7 +236,10 @@
       for (const [id, entry] of next) rendered.set(id, entry);
       updateCollapsedChildren();
       rendering = false;
-      if (point) restorePoint(point);
+      if (point) {
+        restorePoint(point);
+        ensureCaretVisible();
+      }
     }
     function updateCollapsedChildren() {
       const indexById = new Map(blocksState.map((block, index) => [block.id, index]));
@@ -425,7 +428,7 @@
         mutate(next, { blockId: paragraph.id, offset: 0 });
         return;
       }
-      const [left, right] = MODEL.splitBlock(block, point.offset);
+      const [left, right] = MODEL.splitOnEnter(block, point.offset);
       const next = blocksState.slice();
       next.splice(index, 1, left, right);
       mutate(next, { blockId: right.id, offset: 0 });
@@ -718,7 +721,31 @@
       } else render(null);
       return true;
     }
+    const CARET_MARGIN = 32; // keeps the caret clear of the bottom fade
+    /** Scrolls the editor just enough that the caret line is visible and not under the fade mask. */
+    function ensureCaretVisible() {
+      try {
+        const selection = doc.defaultView.getSelection?.();
+        if (!selection?.rangeCount || !editor.contains(selection.anchorNode)) return;
+        const range = selection.getRangeAt(0).cloneRange();
+        range.collapse(false);
+        let rect = range.getClientRects?.()[0];
+        if (!rect || (rect.top === 0 && rect.bottom === 0)) {
+          const node = range.startContainer.nodeType === 3 ? range.startContainer.parentElement : range.startContainer;
+          rect = node?.closest?.("[data-block-id]")?.getBoundingClientRect?.();
+        }
+        if (!rect) return;
+        const delta = MODEL.scrollDeltaForCaret(rect, editor.getBoundingClientRect(), CARET_MARGIN);
+        if (delta) editor.scrollTop += delta;
+      } catch (_) {
+        // Scrolling is best effort; never let it break editing.
+      }
+    }
     function onInput(event) {
+      handleInput(event);
+      ensureCaretVisible();
+    }
+    function handleInput(event) {
       if (rendering || composition) return;
       if (repairStrayDOM()) return;
       const point = getSelectionPoint();

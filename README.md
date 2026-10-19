@@ -2,14 +2,14 @@
 
 A sticky-note style, block-based notes widget for [Zen Browser](https://zen-browser.app/). It sits in the sidebar above the workspace buttons, holds one note, and saves it to your profile. Distributed as a [Sine](https://github.com/CosmoCreeper/Sine) mod.
 
-![Version](https://img.shields.io/badge/version-2.5.0--beta.7-blue)
+![Version](https://img.shields.io/badge/version-2.5.0--beta.8-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ![Zen Notes demo](docs/demo.gif)
 
 ## Features
 
-- **Sticky-note look** — yellow by default, with light and dark variants that follow the browser; 15 more palettes (Catppuccin, Nord, Gruvbox, Dracula, ...)
+- **Sticky-note look** — yellow paper by default, plus an amber dark variant and 15 more palettes (Catppuccin, Nord, Gruvbox, Dracula, ...)
 - **Block editor** — paragraphs, headings, bullet/numbered/to-do lists (nested), toggles, quotes, callouts, dividers, code
 - **Inline formatting** — bold, italic, underline, strikethrough, inline code, links
 - **Keyboard first** — `/` block menu, markdown shortcuts (`- `, `1. `, `[] `), Tab indent, Alt+Shift+Up/Down to move blocks
@@ -41,7 +41,7 @@ In Sine: **Settings → Sine Mods → add a mod from GitHub**, paste the source,
 | Change block type | `/` in an empty block |
 | Leave the editor | `Esc` |
 
-Click the header to collapse or expand. Drag the top edge to resize. Colour scheme, appearance (system/light/dark), start-collapsed and default height are in the mod's Sine settings.
+Click the header to collapse or expand. Drag the top edge to resize. Colour scheme, start-collapsed and default height are in the mod's Sine settings.
 
 ## Documentation
 

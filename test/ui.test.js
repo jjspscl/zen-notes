@@ -27,8 +27,8 @@ test("sticky is the default preset and unknown presets fall back to it", () => {
   assert.equal(resolvePreset("nord"), "nord");
 });
 
-test("every preset in the stylesheet exists in the preset list and preferences", () => {
-  const { PRESETS } = loadCore();
+test("palette list, preferences and stylesheet agree", () => {
+  const { PALETTES, PRESETS, schemeOf } = loadCore();
   const css = fs.readFileSync(new URL("../src/style.css", `file://${__filename}`), "utf8");
   const prefs = JSON.parse(fs.readFileSync(new URL("../preferences.json", `file://${__filename}`), "utf8"));
   const dropdown = prefs.find((item) => item.property === "zen.notes.preset");
@@ -37,9 +37,18 @@ test("every preset in the stylesheet exists in the preset list and preferences",
     dropdown.options.map((option) => option.value),
     [...PRESETS],
   );
-  for (const preset of PRESETS.filter((name) => name !== "sticky")) {
-    assert.ok(css.includes(`[data-preset="${preset}"]`), `missing palette for ${preset}`);
+  assert.equal(
+    prefs.some((item) => item.property === "zen.notes.appearance"),
+    false,
+  );
+  for (const [id, , scheme] of PALETTES) {
+    assert.ok(["light", "dark"].includes(scheme), `${id} needs a scheme`);
+    if (id !== "sticky") assert.ok(css.includes(`[data-preset="${id}"]`), `missing palette for ${id}`);
   }
+  assert.equal(schemeOf("sticky"), "light");
+  assert.equal(schemeOf("sticky-dark"), "dark");
+  assert.equal(schemeOf("unknown"), "light");
+  assert.doesNotMatch(css, /data-appearance/);
 });
 
 test("deprecated preferences are cleared once and others are kept", () => {
@@ -52,6 +61,7 @@ test("deprecated preferences are cleared once and others are kept", () => {
   vm.runInNewContext(source, { window, Date, Math, JSON, console, Services: services });
   window.ZenNotes.cleanupDeprecatedPrefs();
   assert.deepEqual(cleared.sort(), [
+    "zen.notes.appearance",
     "zen.notes.debugKeyNav",
     "zen.notes.defaultColor",
     "zen.notes.lastEdited",
@@ -59,8 +69,9 @@ test("deprecated preferences are cleared once and others are kept", () => {
   ]);
 });
 
-test("empty-block hints: the general hint wins on a one-block note", () => {
+test("empty-block hints: only while unfocused; the general hint wins on a one-block note", () => {
   const css = fs.readFileSync(new URL("../src/style.css", `file://${__filename}`), "utf8");
+  assert.match(css, /\.zen-notes-editor:not\(:focus-within\) \.zen-notes-block\[data-empty="true"\]/);
   assert.match(css, /data-type\^="heading"\]:not\(:only-child\)/);
   assert.match(css, /data-type="todo"\]:not\(:only-child\)/);
 });

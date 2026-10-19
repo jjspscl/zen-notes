@@ -95,3 +95,22 @@ test("validates ids, types, indentation and required todo state", () => {
   const invalid = { id: "todo", type: "unknown", indent: 8, text: [], checked: "yes" };
   assert.equal(model.validateBlocks([valid, invalid]).valid, false);
 });
+
+test("Enter at the end of a heading continues with a paragraph; mid-heading keeps headings", () => {
+  const api = loadModel();
+  const heading = api.createBlock("heading2", { id: "h", text: [{ t: "Title" }] });
+  const [left, right] = api.splitOnEnter(heading, 5);
+  assert.equal(left.type, "heading2");
+  assert.equal(right.type, "paragraph");
+  const [a, b] = api.splitOnEnter(heading, 2);
+  assert.equal(a.type, "heading2");
+  assert.equal(b.type, "heading2");
+});
+
+test("scrollDeltaForCaret keeps the caret clear of the bottom fade", () => {
+  const api = loadModel();
+  const box = { top: 100, bottom: 300 };
+  assert.equal(api.scrollDeltaForCaret({ top: 150, bottom: 170 }, box, 32), 0);
+  assert.equal(api.scrollDeltaForCaret({ top: 260, bottom: 280 }, box, 32), 12);
+  assert.equal(api.scrollDeltaForCaret({ top: 80, bottom: 98 }, box, 32), -20);
+});

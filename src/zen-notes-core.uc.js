@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Core
-// @version         2.5.0-beta.7
+// @version         2.5.0-beta.8
 // @description     Storage, prefs, state model, migration, and shared utilities for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -14,7 +14,6 @@
   const PREF_COLLAPSED = "zen.notes.collapsed";
   const PREF_HEIGHT = "zen.notes.height";
   const PREF_PRESET = "zen.notes.preset";
-  const PREF_APPEARANCE = "zen.notes.appearance";
   const PREF_DATA_BACKUP = "zen.notes.dataBackup";
   /** Preferences from removed features; cleared once at startup. */
   const DEPRECATED_PREFS = [
@@ -23,34 +22,38 @@
     "zen.notes.debugKeyNav",
     "zen.notes.color",
     "zen.notes.lastEdited",
+    "zen.notes.appearance",
   ];
 
   /* ── Constants ─────────────────────────────────────────────── */
   const SCHEMA_VERSION = 5;
-  const VERSION = "2.5.0-beta.7";
+  const VERSION = "2.5.0-beta.8";
 
   const DEFAULT_HEIGHT = 220;
   const MIN_HEIGHT = 190;
   const MAX_HEIGHT = 460;
+  /** Single source of truth for palettes: [id, label, color scheme]. CSS blocks and preferences.json must match (tested). */
+  const PALETTES = Object.freeze([
+    Object.freeze(["sticky", "Sticky note (yellow)", "light"]),
+    Object.freeze(["sticky-dark", "Sticky note (amber, dark)", "dark"]),
+    Object.freeze(["catppuccin-latte", "Catppuccin Latte", "light"]),
+    Object.freeze(["catppuccin-frappe", "Catppuccin Frappé", "dark"]),
+    Object.freeze(["catppuccin-macchiato", "Catppuccin Macchiato", "dark"]),
+    Object.freeze(["catppuccin-mocha", "Catppuccin Mocha", "dark"]),
+    Object.freeze(["dracula", "Dracula", "dark"]),
+    Object.freeze(["nord", "Nord", "dark"]),
+    Object.freeze(["gruvbox-dark", "Gruvbox Dark", "dark"]),
+    Object.freeze(["gruvbox-light", "Gruvbox Light", "light"]),
+    Object.freeze(["tokyo-night", "Tokyo Night", "dark"]),
+    Object.freeze(["rose-pine", "Rosé Pine", "dark"]),
+    Object.freeze(["rose-pine-dawn", "Rosé Pine Dawn", "light"]),
+    Object.freeze(["solarized-dark", "Solarized Dark", "dark"]),
+    Object.freeze(["solarized-light", "Solarized Light", "light"]),
+    Object.freeze(["everforest-dark", "Everforest Dark", "dark"]),
+    Object.freeze(["everforest-light", "Everforest Light", "light"]),
+  ]);
   const DEFAULT_PRESET = "sticky";
-  const PRESETS = [
-    "sticky",
-    "catppuccin-latte",
-    "catppuccin-frappe",
-    "catppuccin-macchiato",
-    "catppuccin-mocha",
-    "dracula",
-    "nord",
-    "gruvbox-dark",
-    "gruvbox-light",
-    "tokyo-night",
-    "rose-pine",
-    "rose-pine-dawn",
-    "solarized-dark",
-    "solarized-light",
-    "everforest-dark",
-    "everforest-light",
-  ];
+  const PRESETS = PALETTES.map(([id]) => id);
   const SCROLL_BOTTOM_TOLERANCE = 2;
 
   const XHTML_NS = "http://www.w3.org/1999/xhtml";
@@ -135,6 +138,10 @@
   function resolvePreset(value) {
     return PRESETS.includes(value) ? value : DEFAULT_PRESET;
   }
+  /** "light" or "dark": the colour scheme of a palette (drives color-scheme in CSS). */
+  function schemeOf(preset) {
+    return PALETTES.find(([id]) => id === resolvePreset(preset))[2];
+  }
 
   /* ── General helpers ───────────────────────────────────────── */
   const createXHTMLElement = (tag) => document.createElementNS(XHTML_NS, tag);
@@ -201,7 +208,6 @@
     PREF_COLLAPSED,
     PREF_HEIGHT,
     PREF_PRESET,
-    PREF_APPEARANCE,
     PREF_DATA_BACKUP,
     SCHEMA_VERSION,
     VERSION,
@@ -209,6 +215,7 @@
     MIN_HEIGHT,
     MAX_HEIGHT,
     DEFAULT_PRESET,
+    PALETTES,
     PRESETS,
     SCROLL_BOTTOM_TOLERANCE,
     XHTML_NS,
@@ -228,6 +235,7 @@
     setNumericPref,
     cleanupDeprecatedPrefs,
     resolvePreset,
+    schemeOf,
     createXHTMLElement,
     createXULElement,
     createScratchElement,

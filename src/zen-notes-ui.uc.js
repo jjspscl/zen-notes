@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes UI
-// @version         2.5.0-beta.7
+// @version         2.5.0-beta.8
 // @description     Sidebar widget shell, storage lifecycle, and focus-scoped controls for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -13,13 +13,13 @@
     PREF_COLLAPSED,
     PREF_HEIGHT,
     PREF_PRESET,
-    PREF_APPEARANCE,
     DEFAULT_HEIGHT,
     MIN_HEIGHT,
     MAX_HEIGHT,
     DEFAULT_PRESET,
     cleanupDeprecatedPrefs,
     resolvePreset,
+    schemeOf,
     getPrefBool,
     setPrefBool,
     getPrefString,
@@ -198,11 +198,10 @@
           header.title = "";
         }, 1700);
     }
-    function applyAppearance() {
-      widget.setAttribute("data-preset", resolvePreset(getPrefString(PREF_PRESET, DEFAULT_PRESET)));
-      const appearance = getPrefString(PREF_APPEARANCE, "system");
-      if (["light", "dark"].includes(appearance)) widget.setAttribute("data-appearance", appearance);
-      else widget.removeAttribute("data-appearance");
+    function applyPreset() {
+      const preset = resolvePreset(getPrefString(PREF_PRESET, DEFAULT_PRESET));
+      widget.setAttribute("data-preset", preset);
+      widget.setAttribute("data-scheme", schemeOf(preset));
     }
     function updateFooter() {
       const text = state?.note?.blocks?.map((block) => N.getPlainText(block)).join("\n") || "";
@@ -341,15 +340,13 @@
     const prefObserver = {
       observe(_subject, topic, data) {
         if (topic !== "nsPref:changed") return;
-        if (data === PREF_PRESET || data === PREF_APPEARANCE) applyAppearance();
+        if (data === PREF_PRESET) applyPreset();
       },
     };
-    for (const key of [PREF_PRESET, PREF_APPEARANCE]) {
-      try {
-        Services.prefs.addObserver(key, prefObserver);
-      } catch (_) {}
-    }
-    applyAppearance();
+    try {
+      Services.prefs.addObserver(PREF_PRESET, prefObserver);
+    } catch (_) {}
+    applyPreset();
 
     const unsubscribe = N.storeSubscribe(async () => {
       if (pendingSave) {
@@ -409,11 +406,9 @@
       if (statusTimer) clearTimeout(statusTimer);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
-      for (const key of [PREF_PRESET, PREF_APPEARANCE]) {
-        try {
-          Services.prefs.removeObserver(key, prefObserver);
-        } catch (_) {}
-      }
+      try {
+        Services.prefs.removeObserver(PREF_PRESET, prefObserver);
+      } catch (_) {}
       widget.remove();
     }
     widget._zenNotesCleanup = cleanup;

@@ -5,6 +5,17 @@ All notable changes to Zen Notes Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0-beta.8] — 2026-10-19
+
+### Changed
+- Theme is centralized: palettes are defined once in `PALETTES` (id, label, light/dark) and the colour scheme dropdown is the only theme control. The Appearance setting is removed (its pref is cleared at startup).
+- Sticky is always the light yellow note; a new "Sticky note (amber, dark)" palette replaces dark-mode Sticky.
+
+### Fixed
+- Enter at the end of a heading starts a plain paragraph instead of another heading.
+- The "Heading"/"To-do" hints no longer show while you are typing (hint rules now apply only when the editor is unfocused).
+- The caret line is scrolled into view (clear of the bottom fade) while typing, on Enter and after structural edits; the editor has extra bottom padding.
+
 ## [2.5.0-beta.7] — 2026-10-19
 
 ### Fixed
