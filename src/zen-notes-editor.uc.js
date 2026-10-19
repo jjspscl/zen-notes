@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes Editor
-// @version         2.5.0-beta.6
+// @version         2.5.0-beta.7
 // @description     Block editor, selection mapping, formatting, and undo for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -36,6 +36,10 @@
     const blocks = (
       Array.isArray(initialBlocks) && initialBlocks.length ? initialBlocks : [MODEL.createBlock("paragraph")]
     ).map((block) => MODEL.createBlock(block.type, block));
+    // A lone empty heading/quote/etc. is almost always a leftover; start such a note as plain text.
+    if (blocks.length === 1 && !MODEL.getPlainText(blocks[0]) && blocks[0].type !== "paragraph") {
+      blocks[0] = MODEL.createBlock("paragraph", { id: blocks[0].id });
+    }
     const onChange = options.onChange || (() => {});
     let blocksState = blocks;
     let composition = false;
@@ -829,7 +833,6 @@
       }
       commitHistory(true);
       closeSlashMenu();
-      onChange(blocksState);
     }
 
     editor.addEventListener("keydown", onKeydown);

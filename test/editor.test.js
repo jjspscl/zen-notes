@@ -228,3 +228,33 @@ test("render reuses DOM rows for blocks that did not change", () => {
   );
   editorApi.cleanup();
 });
+
+test("a lone empty heading starts as a plain paragraph", () => {
+  const { api, editor } = makeEditor();
+  const editorApi = api.createBlockEditor(editor, [api.createBlock("heading1", { id: "h" })]);
+  assert.equal(editorApi.getBlocks()[0].type, "paragraph");
+  assert.equal(editor.firstElementChild.dataset.type, "paragraph");
+  editorApi.cleanup();
+});
+
+test("a lone empty heading keeps its type when the note has other content", () => {
+  const { api, editor } = makeEditor();
+  const blocks = [
+    api.createBlock("paragraph", { id: "p", text: [{ t: "x" }] }),
+    api.createBlock("heading1", { id: "h" }),
+  ];
+  const editorApi = api.createBlockEditor(editor, blocks);
+  assert.equal(editorApi.getBlocks()[1].type, "heading1");
+  editorApi.cleanup();
+});
+
+test("focusing and leaving the editor does not report a change", () => {
+  const { api, editor } = makeEditor();
+  let changes = 0;
+  const editorApi = api.createBlockEditor(editor, [api.createBlock("paragraph", { id: "p", text: [{ t: "x" }] })], {
+    onChange: () => changes++,
+  });
+  editor.dispatchEvent(new editor.ownerDocument.defaultView.Event("blur"));
+  assert.equal(changes, 0);
+  editorApi.cleanup();
+});

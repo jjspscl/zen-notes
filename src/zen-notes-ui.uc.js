@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Zen Notes UI
-// @version         2.5.0-beta.6
+// @version         2.5.0-beta.7
 // @description     Sidebar widget shell, storage lifecycle, and focus-scoped controls for Zen Notes
 // @author          jjspscl
 // @include         main
@@ -374,7 +374,7 @@
         state = loaded;
         editorApi = N.createBlockEditor(editor, state.note.blocks, {
           onChange(blocks) {
-            if (!state) return;
+            if (!state || state.note.blocks === blocks) return;
             state.note.blocks = blocks;
             state.note.updatedAt = nowISOString();
             scheduleSave();

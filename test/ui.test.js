@@ -58,3 +58,9 @@ test("deprecated preferences are cleared once and others are kept", () => {
     "zen.notes.showWorkspaceKey",
   ]);
 });
+
+test("empty-block hints: the general hint wins on a one-block note", () => {
+  const css = fs.readFileSync(new URL("../src/style.css", `file://${__filename}`), "utf8");
+  assert.match(css, /data-type\^="heading"\]:not\(:only-child\)/);
+  assert.match(css, /data-type="todo"\]:not\(:only-child\)/);
+});
